@@ -2,10 +2,11 @@ import React, { Component } from "react";
 import "./App.css";
 import firebase from "./firebase";
 
+
 class App extends Component {
     constructor(props) {
         super(props);
-        this.items = firebase.database().ref("items");
+        this.itemsRef = firebase.database().ref("items");
         this.state = {
             items: [],
             currentItem: null
@@ -17,19 +18,8 @@ class App extends Component {
 
     handleClick() {
         const name = prompt("Item:");
-        const desc = prompt("Desciption:");
-        this.items.push({name: name, desc: desc});
-    }
-
-    changeFocusedItem(item) {
-        this.setState({
-            currentItem: item
-        });
-    }
-
-    componentDidMount() {
-        this.items.on("value", this.handleListChange);
-        this.items.on("child_removed", this.handleListChange);
+        const desc = name && prompt("Desciption:");
+        desc && this.itemsRef.push({name: name, desc: desc});
     }
 
     handleListChange(snapshot) {
@@ -43,20 +33,54 @@ class App extends Component {
         });
     }
 
+    changeFocusedItem(item) {
+        this.setState({
+            currentItem: item
+        });
+    }
+
+    componentDidMount() {
+        this.itemsRef.on("value", this.handleListChange);
+        this.itemsRef.on("child_removed", this.handleListChange);
+    }
+
     render() {
         return (
-            <div className="App">
-                <div className="left">
-                    <button id="add-button" onClick={this.handleClick}>+</button>
-                    <ItemList items={this.state.items} changeFocusedItem={this.changeFocusedItem}/>
+            <div id="App">
+                <div id="left">
+                    <TopLeft handleClick={this.handleClick}/>
+                    <BottomLeft>
+                        <ItemList items={this.state.items} changeFocusedItem={this.changeFocusedItem}/>
+                    </BottomLeft>
                 </div>
-                <div className="right">
+                <div id="right">
                     <Details desc={this.state.currentItem && this.state.currentItem.desc}/>
                 </div>
             </div>
         );
     }
 }
+
+class TopLeft extends Component {
+    render() {
+        return (
+            <div id="top-left">
+                <button id="add-button" onClick={this.props.handleClick}>+</button>
+            </div>
+        );
+    }
+}
+
+class BottomLeft extends Component {
+    render() {
+        return (
+            <div id="bottom-left">
+                {this.props.children}
+            </div>
+        );
+    }
+}
+
 
 class ItemList extends Component {
     render() {
