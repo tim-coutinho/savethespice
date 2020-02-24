@@ -1,0 +1,19 @@
+.App {
+    display: flex;
+    text-align: center;
+}
+
+.left {
+    border-right: 2px solid black;
+    height: 100vh;
+    width: 20vw;
+}
+
+.right {
+    height: 100vh;
+    width: 80vw;
+}
+
+#add-button {
+    float: right;
+}
