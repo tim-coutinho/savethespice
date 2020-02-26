@@ -43,7 +43,7 @@ class Details extends Component {
                 {this.props.item && (
                     <div>
                         {this.props.item.desc}
-                        <img className="recipe-img" src={this.props.item.imgSrc}/>
+                        <img className="recipe-img" src={this.props.item.imgSrc} alt="Recipe image"/>
                     </div>
                 )}
             </div>

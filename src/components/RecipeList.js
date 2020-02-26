@@ -43,9 +43,9 @@ class RecipeList extends Component {
             <ul id="recipe-list">
                 {this.props.recipes.map(recipe => <Recipe
                                                       key={recipe.id}
-                                                      name={recipe.name}
-                                                      desc={recipe.description}
-                                                      onClick={() => this.props.changeFocusedItem(recipe)}
+                                                      recipe={recipe}
+                                                      onClick={() => this.props.changeSelectedItem(recipe)}
+                                                      selected={this.props.selectedItem && this.props.selectedItem.id === recipe.id}
                                                   />
                 )}
             </ul>

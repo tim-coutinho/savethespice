@@ -40,7 +40,7 @@ class Header extends Component {
     render() {
         return (
             <div id="header">
-                <button id="add-button" onClick={this.props.handleClick}>+</button>
+                <i id="add-button" onClick={this.props.handleClick} className="material-icons">add_box</i>
             </div>
         );
     }

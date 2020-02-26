@@ -39,9 +39,12 @@ class Recipe extends Component {
 
     render() {
         return (
-            <li className="recipe" onClick={this.props.onClick}>
-                {this.props.name}
-            </li>
+            <div className={`${this.props.selected ? "selected-recipe" : ""} recipe-wrapper`} onClick={this.props.onClick}>
+                <li className="recipe">
+                    <div className="recipe-text">{this.props.recipe.name}</div>
+                    <img className="recipe-img" src={this.props.recipe.imgSrc} alt="Recipe image"/>
+                </li>
+            </div>
         );
     }
 }

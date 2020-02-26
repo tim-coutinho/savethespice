@@ -14,11 +14,11 @@ class App extends Component {
         this.itemsRef = firebase.database().ref("items");
         this.state = {
             items: [],
-            currentItem: null
+            selectedItem: null
         };
         this.handleAddItem = this.handleAddItem.bind(this);
         this.handleListChange = this.handleListChange.bind(this);
-        this.changeFocusedItem = this.changeFocusedItem.bind(this);
+        this.changeSelectedItem = this.changeSelectedItem.bind(this);
     }
 
     handleAddItem() {
@@ -41,9 +41,9 @@ class App extends Component {
         });
     }
 
-    changeFocusedItem(item) {
+    changeSelectedItem(item) {
         this.setState({
-            currentItem: item
+            selectedItem: item
         });
     }
 
@@ -57,10 +57,10 @@ class App extends Component {
             <div id="App">
                 <div id="left">
                     <Header handleClick={this.handleAddItem}/>
-                    <RecipeList recipes={this.state.items} changeFocusedItem={this.changeFocusedItem}/>
+                    <RecipeList recipes={this.state.items} changeSelectedItem={this.changeSelectedItem} selectedItem={this.state.selectedItem}/>
                 </div>
                 <div id="right">
-                    <Details item={this.state.currentItem}/>
+                    <Details item={this.state.selectedItem}/>
                 </div>
             </div>
         );
