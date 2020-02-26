@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import "./App.css";
-import firebase from "./firebase";
+import firebase from "../utils/firebase"
 
 import RecipeList from "./RecipeList"
 import Details from "./Details";
