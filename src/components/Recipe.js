@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Loader from "./Loader";
 
 
 class Recipe extends Component {
@@ -9,7 +10,7 @@ class Recipe extends Component {
         // };
     }
 
-    // componentWillMount() {
+    // static getDerivedStateFromProps(props, state) {
     //
     // }
 
@@ -17,15 +18,7 @@ class Recipe extends Component {
     //
     // }
 
-    // componentWillReceiveProps(nextProps) {
-    //
-    // }
-
     // shouldComponentUpdate(nextProps, nextState) {
-    //
-    // }
-
-    // componentWillUpdate(nextProps, nextState) {
     //
     // }
 
@@ -38,11 +31,19 @@ class Recipe extends Component {
     // }
 
     render() {
+        const imgWidth = 120;
+        const imgHeight = 80;
         return (
             <div className={`${this.props.selected ? "selected-recipe" : ""} recipe-wrapper`} onClick={this.props.onClick}>
                 <li className="recipe">
+                    {/*<Loader imgWidth={imgWidth} imgHeight={imgHeight}/>*/}
                     <div className="recipe-text">{this.props.recipe.name}</div>
-                    <img className="recipe-img" src={this.props.recipe.imgSrc} alt="Recipe image"/>
+                    <img
+                        className="recipe-img"
+                        src={this.props.recipe.imgSrc}
+                        style={{height: `${imgHeight}px`, width: `${imgWidth}px`}}
+                        alt={this.props.recipe.name}
+                    />
                 </li>
             </div>
         );

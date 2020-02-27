@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Recipe from "./Recipe";
+import Loader from "./Loader";
 
 
 class RecipeList extends Component {
@@ -10,7 +11,7 @@ class RecipeList extends Component {
         // };
     }
 
-    // componentWillMount() {
+    // static getDerivedStateFromProps(props, state) {
     //
     // }
 
@@ -18,15 +19,7 @@ class RecipeList extends Component {
     //
     // }
 
-    // componentWillReceiveProps(nextProps) {
-    //
-    // }
-
     // shouldComponentUpdate(nextProps, nextState) {
-    //
-    // }
-
-    // componentWillUpdate(nextProps, nextState) {
     //
     // }
 
@@ -48,6 +41,11 @@ class RecipeList extends Component {
                                                       selected={this.props.selectedItem && this.props.selectedItem.id === recipe.id}
                                                   />
                 )}
+                <div className={`${this.props.selected ? "selected-recipe" : ""} recipe-wrapper`} onClick={this.props.onClick}>
+                    <li className="recipe">
+                        <Loader/>
+                    </li>
+                </div>
             </ul>
         );
     }

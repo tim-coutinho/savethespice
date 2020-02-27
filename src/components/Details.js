@@ -9,7 +9,7 @@ class Details extends Component {
         // };
     }
 
-    // componentWillMount() {
+    // static getDerivedStateFromProps(props, state) {
     //
     // }
 
@@ -17,15 +17,7 @@ class Details extends Component {
     //
     // }
 
-    // componentWillReceiveProps(nextProps) {
-    //
-    // }
-
     // shouldComponentUpdate(nextProps, nextState) {
-    //
-    // }
-
-    // componentWillUpdate(nextProps, nextState) {
     //
     // }
 

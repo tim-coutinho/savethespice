@@ -6,12 +6,12 @@ import firebase from "../utils/firebase"
 import RecipeList from "./RecipeList"
 import Details from "./Details";
 import Header from "./Header";
+import Loader from "./Loader";
 
 
 class App extends Component {
     constructor(props) {
         super(props);
-        this.itemsRef = firebase.database().ref("items");
         this.state = {
             items: [],
             selectedItem: null
@@ -22,12 +22,13 @@ class App extends Component {
     }
 
     handleAddItem() {
+        const itemsRef = firebase.database().ref("items");
         const name = prompt("Item:");
         if (!name)
             return;
         const desc = prompt("Desciption:") || "";
         const imgSrc = prompt("Image url:") || "";
-        this.itemsRef.push({name, desc, imgSrc});
+        itemsRef.push({name, desc, imgSrc});
     }
 
     handleListChange(snapshot) {
@@ -36,9 +37,7 @@ class App extends Component {
         for (const item in itemsRef) {
             items.push({id: item, ...itemsRef[item]});
         }
-        this.setState({
-            items: items
-        });
+        this.setState({items});
     }
 
     changeSelectedItem(item) {
@@ -48,8 +47,9 @@ class App extends Component {
     }
 
     componentDidMount() {
-        this.itemsRef.on("value", this.handleListChange);
-        this.itemsRef.on("child_removed", this.handleListChange);
+        const itemsRef = firebase.database().ref("items");
+        itemsRef.on("value", this.handleListChange);
+        itemsRef.on("child_removed", this.handleListChange);
     }
 
     render() {
@@ -57,7 +57,11 @@ class App extends Component {
             <div id="App">
                 <div id="left">
                     <Header handleClick={this.handleAddItem}/>
-                    <RecipeList recipes={this.state.items} changeSelectedItem={this.changeSelectedItem} selectedItem={this.state.selectedItem}/>
+                    <RecipeList
+                        recipes={this.state.items}
+                        changeSelectedItem={this.changeSelectedItem}
+                        selectedItem={this.state.selectedItem}
+                    />
                 </div>
                 <div id="right">
                     <Details item={this.state.selectedItem}/>

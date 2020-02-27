@@ -37,22 +37,23 @@
 .recipe {
     align-items: center;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     margin: 20px;
 }
 
 .recipe-img {
-    /*height: 50%;*/
-    width: 50%;
+    object-fit: cover;
 }
 
 .recipe-text {
+    text-align: start;
     width: 50%;
 }
 
 .recipe-wrapper {
     cursor: pointer;
     transition: background-color 0.1s;
+    width: 100%;
 }
 
 .recipe-wrapper:hover {
@@ -64,7 +65,7 @@
 }
 
 .recipe-wrapper:not(:last-child)::after {
-    border-bottom: 1px solid #e1e0e0;
+    border-bottom: 1px solid #e0e0e0;
     content: "";
     display: block;
     margin: 0 auto;
