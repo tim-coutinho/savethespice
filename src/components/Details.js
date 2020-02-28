@@ -1,42 +1,13 @@
-import React, { Component } from "react";
+import React from "react";
 
 
-class Details extends Component {
-    // constructor(props) {
-    //     super(props);
-    //     this.state = {
-    //
-    //     };
-    // }
-
-    // static getDerivedStateFromProps(props, state) {
-    //
-    // }
-
-    // componentDidMount() {
-    //
-    // }
-
-    // shouldComponentUpdate(nextProps, nextState) {
-    //
-    // }
-
-    // componentDidUpdate(prevProps, prevState) {
-    //
-    // }
-
-    // componentWillUnmount() {
-    //
-    // }
-
-    render() {
-        return (
-            <div>
-                {this.props.item.desc}
-                <img className="recipe-img" src={this.props.item.imgSrc} alt={this.props.item.name}/>
-            </div>
-        );
-    }
+function Details(props) {
+    return (
+        <div>
+            {props.item.desc}
+            <img className="recipe-img" src={props.item.imgSrc} alt={props.item.name}/>
+        </div>
+    );
 }
 
 export default Details;

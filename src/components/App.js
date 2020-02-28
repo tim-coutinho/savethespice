@@ -1,5 +1,5 @@
-import { hot } from "react-hot-loader/root";
-import React, { Component } from "react";
+import { hot } from "react-hot-loader/root";  // Enable live component reloading
+import React, { useEffect, useState } from "react";
 
 import "./App.css";
 import firebase from "../utils/firebase"
@@ -9,19 +9,11 @@ import Details from "./Details";
 import Header from "./Header";
 
 
-class App extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            items: [],
-            selectedItem: null
-        };
-        this.handleAddItem = this.handleAddItem.bind(this);
-        this.handleListChange = this.handleListChange.bind(this);
-        this.changeSelectedItem = this.changeSelectedItem.bind(this);
-    }
+function App() {
+    const [items, setItems] = useState([]);
+    const [selectedItem, setSelectedItem] = useState(null);
 
-    handleAddItem() {
+    const handleAddItem = () => {
         const itemsRef = firebase.ref("items");
         const name = prompt("Item:");
         if (!name)
@@ -29,46 +21,38 @@ class App extends Component {
         const desc = prompt("Desciption:") || "";
         const imgSrc = prompt("Image url:") || "";
         itemsRef.push({name, desc, imgSrc});
-    }
+    };
 
-    handleListChange(snapshot) {
+    const handleListChange = snapshot => {
         const itemsRef = snapshot.val();
         const items = [];
         for (const item in itemsRef) {
             items.push({id: item, ...itemsRef[item]});
         }
-        this.setState({items});
-    }
+        setItems(items);
+    };
 
-    changeSelectedItem(item) {
-        this.setState({
-            selectedItem: item
-        });
-    }
-
-    componentDidMount() {
+    useEffect(() => {
         const itemsRef = firebase.ref("items");
-        itemsRef.on("value", this.handleListChange);
-        itemsRef.on("child_removed", this.handleListChange);
-    }
+        itemsRef.on("value", handleListChange);
+        itemsRef.on("child_removed", handleListChange);
+    }, []);
 
-    render() {
-        return (
-            <div id="App">
-                <div id="left">
-                    <Header handleClick={this.handleAddItem}/>
-                    <RecipeList
-                        items={this.state.items}
-                        changeSelectedItem={this.changeSelectedItem}
-                        selectedItem={this.state.selectedItem}
-                    />
-                </div>
-                <div id="right">
-                    {this.state.selectedItem && <Details item={this.state.selectedItem}/>}
-                </div>
+    return (
+        <div id="App">
+            <div id="left">
+                <Header handleClick={handleAddItem}/>
+                <RecipeList
+                    items={items}
+                    changeSelectedItem={(item) => setSelectedItem(item)}
+                    selectedItem={selectedItem}
+                />
             </div>
-        );
-    }
+            <div id="right">
+                {selectedItem && <Details item={selectedItem}/>}
+            </div>
+        </div>
+    );
 }
 
 export default hot(App);
