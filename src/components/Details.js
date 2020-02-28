@@ -2,12 +2,12 @@ import React, { Component } from "react";
 
 
 class Details extends Component {
-    constructor(props) {
-        super(props);
-        // this.state = {
-        //
-        // };
-    }
+    // constructor(props) {
+    //     super(props);
+    //     this.state = {
+    //
+    //     };
+    // }
 
     // static getDerivedStateFromProps(props, state) {
     //
@@ -32,12 +32,8 @@ class Details extends Component {
     render() {
         return (
             <div>
-                {this.props.item && (
-                    <div>
-                        {this.props.item.desc}
-                        <img className="recipe-img" src={this.props.item.imgSrc} alt="Recipe image"/>
-                    </div>
-                )}
+                {this.props.item.desc}
+                <img className="recipe-img" src={this.props.item.imgSrc} alt={this.props.item.name}/>
             </div>
         );
     }

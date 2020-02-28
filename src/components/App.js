@@ -1,3 +1,4 @@
+import { hot } from "react-hot-loader/root";
 import React, { Component } from "react";
 
 import "./App.css";
@@ -6,7 +7,6 @@ import firebase from "../utils/firebase"
 import RecipeList from "./RecipeList"
 import Details from "./Details";
 import Header from "./Header";
-import Loader from "./Loader";
 
 
 class App extends Component {
@@ -22,7 +22,7 @@ class App extends Component {
     }
 
     handleAddItem() {
-        const itemsRef = firebase.database().ref("items");
+        const itemsRef = firebase.ref("items");
         const name = prompt("Item:");
         if (!name)
             return;
@@ -47,7 +47,7 @@ class App extends Component {
     }
 
     componentDidMount() {
-        const itemsRef = firebase.database().ref("items");
+        const itemsRef = firebase.ref("items");
         itemsRef.on("value", this.handleListChange);
         itemsRef.on("child_removed", this.handleListChange);
     }
@@ -58,17 +58,17 @@ class App extends Component {
                 <div id="left">
                     <Header handleClick={this.handleAddItem}/>
                     <RecipeList
-                        recipes={this.state.items}
+                        items={this.state.items}
                         changeSelectedItem={this.changeSelectedItem}
                         selectedItem={this.state.selectedItem}
                     />
                 </div>
                 <div id="right">
-                    <Details item={this.state.selectedItem}/>
+                    {this.state.selectedItem && <Details item={this.state.selectedItem}/>}
                 </div>
             </div>
         );
     }
 }
 
-export default App;
+export default hot(App);
