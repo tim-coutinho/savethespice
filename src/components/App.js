@@ -27,6 +27,7 @@ function App() {
     };
 
     const handleListChange = snapshot => {
+        setIsLoading(true);
         const itemsRef = snapshot.val();
         const items = [];
         for (const item in itemsRef) {
@@ -34,10 +35,10 @@ function App() {
         }
         setItems(items);
         setFilteredItems(items);
+        setIsLoading(false);
     };
 
     const handleFilterChange = (e) => {
-        e.preventDefault();
         setFilter(e.target.value);
     };
 
@@ -49,7 +50,6 @@ function App() {
         const itemsRef = firebase.ref("items");
         itemsRef.on("value", handleListChange);
         itemsRef.on("child_removed", handleListChange);
-        setIsLoading(false);
     }, []);
 
     return (
@@ -61,7 +61,7 @@ function App() {
                     handleClick={handleAddItem}
                 />
                 <RecipeList
-                    items={isLoading ? null : (filteredItems.length !== 0 ? filteredItems : null)}
+                    items={isLoading ? null : filteredItems}
                     changeSelectedItem={(item) => setSelectedItem(item)}
                     selectedItem={selectedItem}
                 />

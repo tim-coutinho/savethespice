@@ -16,72 +16,60 @@
     width: 100%;
 }
 
-#add-button {
+#header {
+    border-bottom: 1px solid #e1e0e0;
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: auto 40px 40px;
+    justify-content: flex-end;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+#header.filter-focused {
+    grid-template-columns: 0 calc(100% - 40px - 10px) 40px;
+}
+
+#header *:not(:first-child) {
     background-color: rgb(150, 150, 255);
     border: 2px solid rgb(150, 150, 255);
     border-radius: 4px;
     box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
-    color: white;
+    box-sizing: border-box;
     cursor: pointer;
     font-family: inherit;
-    font-size: 2em;
     font-weight: inherit;
-    height: 40px;
-    margin-right: 10px;
+    height: 100%;
     outline: none;
-    transition: background-color, box-shadow, color;
-    transition-duration: 0.2s;
-    min-width: 40px;
+    padding: 0 10px;
+    transition: 0.2s;
+    width: 100%;
 }
 
-#add-button:hover {
+#header #add-button {
+    color: white;
+    font-size: 2em;
+}
+
+#header #add-button:hover, #header #filter:hover:not(:focus):not(.expanded) {
     background-color: white;
     box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
     color: rgb(150, 150, 255);
 }
 
-#add-button:active {
+#header #add-button:active {
     box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
     transform: scale(0.99);
 }
 
-#filter {
-    background-color: rgb(150, 150, 255);
-    border: 2px solid rgb(150, 150, 255);
-    border-radius: 4px;
-    box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
-    color: rgb(150, 150, 255);
-    cursor: pointer;
-    height: 36px;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    margin: 10px;
-    padding: 0 10px;
-    transition: 0.4s;
-    width: 16px;
-}
-
-#filter:focus {
-    width: 80%;
-    color: rgb(150, 150, 255);
+#header #filter:focus, #header #filter.expanded {
+    color: initial;
     cursor: initial;
 }
 
-#filter:not(:focus):hover {
-    color: white;
-}
-
-#filter:focus, #filter:hover {
+#header #filter:focus, #header #filter:hover, #header #filter.expanded {
     background-color: white;
     box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
-}
-
-#header {
-    align-items: center;
-    border-bottom: 1px solid #e1e0e0;
-    display: flex;
-    justify-content: flex-end;
 }
 
 #recipe-list {
