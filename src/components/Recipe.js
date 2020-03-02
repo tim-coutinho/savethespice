@@ -3,17 +3,17 @@ import React from "react";
 
 function Recipe(props) {
     return (
-        <div className={`${props.selected ? "selected-recipe" : ""} recipe-wrapper`} onClick={props.onClick}>
-            <li className="recipe">
-                <div className="recipe-text">{props.recipe.name}</div>
+        <li className={`recipe-wrapper ${props.selected ? "selected-recipe" : ""}`}>
+            <div className="recipe" onClick={props.handleClick}>
+                <div className="recipe-text">{props.item.name}</div>
                 <img
                     className="recipe-img"
-                    src={props.recipe.imgSrc}
+                    src={props.item.imgSrc}
                     // style={{height: `${imgHeight}px`, width: `${imgWidth}px`}}
-                    alt={props.recipe.name}
+                    alt={props.item.name}
                 />
-            </li>
-        </div>
+            </div>
+        </li>
     );
 }
 
