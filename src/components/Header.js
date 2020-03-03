@@ -21,7 +21,6 @@ export default function Header(props) {
             <div id="menu-button" className="header-button" onClick={props.handleShiftRight}>
                 <i className={`fa fa-fw fa-${props.shiftedRight ? "arrow-left" : "bars"}`}/>
             </div>
-            {/*<div className="spacer"/>*/}
             <div id="filter-wrapper" onClick={() => !focused && toggleFocus()} className={`header-button ${focused ? "filter-focused" : ""}`}>
                 <input
                     id="filter"
