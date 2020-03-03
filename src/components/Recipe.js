@@ -1,7 +1,7 @@
 import React from "react";
 
 
-function Recipe(props) {
+export default function Recipe(props) {
     return (
         <li className={`recipe-wrapper ${props.selected ? "selected-recipe" : ""}`}>
             <div className="recipe" onClick={props.handleClick}>
@@ -16,5 +16,3 @@ function Recipe(props) {
         </li>
     );
 }
-
-export default Recipe;

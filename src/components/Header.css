@@ -1,0 +1,102 @@
+#header {
+    border-bottom: 1px solid #e1e0e0;
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: 1fr 40px 40px;
+    justify-content: flex-end;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+#header.filter-focused {
+    /* Curse you CSS for not animating fr values */
+    /* 100px = 40px + 40px + 10px + 10px (other icon widths and paddings) */
+    grid-template-columns: 1fr calc(100% - 100px) 40px;
+}
+
+#header #filter-wrapper #filter {
+    background-color: inherit;
+    border: none;
+    border-radius: inherit;
+    box-sizing: inherit;
+    cursor: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    height: 100%;
+    outline: none;
+    padding-left: 30px;
+    transition: 0.3s;
+    width: 100%;
+}
+
+#filter-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    width: auto;
+}
+
+#filter-wrapper::after {
+    content: "\f002";
+    font-family: FontAwesome;
+    font-size: 1.5em;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: 0.3s;
+}
+
+#filter-wrapper:hover::after {
+    color: #9696ff;
+}
+
+#filter-wrapper.filter-focused::after {
+    color: #9696ff;
+    left: 15px;
+}
+
+#header #add-button, #header #menu-button {
+    align-items: center;
+    display: flex;
+    font-size: 1.5em;
+    justify-content: center;
+    position: relative;
+}
+
+#header #add-button:hover,
+#header #filter-wrapper:hover,
+#header #filter-wrapper.filter-focused,
+#header #menu-button:hover {
+    background-color: white;
+    box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
+    color: #9696ff;
+}
+
+#header #filter-wrapper:focus, #header #filter-wrapper.filter-focused {
+    color: initial;
+    cursor: initial;
+}
+
+#header #menu-button {
+    justify-self: flex-start;
+}
+
+#sidebar {
+    min-width: 250px;
+}
+
+.header-button {
+    background-color: #9696ff;
+    border: 2px solid #9696ff;
+    border-radius: 4px;
+    box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    color: white;
+    cursor: pointer;
+    height: 40px;
+    user-select: none;
+    width: 40px;
+    transition: 0.3s;
+}

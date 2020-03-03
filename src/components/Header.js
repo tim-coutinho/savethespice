@@ -1,38 +1,38 @@
 import React, { useEffect, useState } from "react";
 
+import { getById } from "../utils/common.js";
 
-function Header(props) {
+import "./Header.css";
+
+
+export default function Header(props) {
     const [focused, setFocused] = useState(false);
-    const escapeListener = (e) => {
-        if (e.key === "Escape") {
-            document.getElementById("filter").blur();
-            props.handleFilterChange({target: {value: ""}});
-        }
-    };
 
     const toggleFocus = () => {
-        if (!focused) {
-            setFocused(true);
-        } else if (props.filter === "") {
-            setFocused(false);
-        }
-    }
+        props.filter === "" && setFocused(!focused);
+    };
 
     useEffect(() => {
-        focused ? document.removeEventListener("keydown", escapeListener) : document.addEventListener("keydown", escapeListener);
-    }, [focused]);
+        focused ? getById("filter").focus() : (props.filter === "" && getById("filter").blur());
+    });
 
     return (
         <div id="header" className={focused ? "filter-focused" : ""}>
-            <div className="spacer"></div>
-            <div id="filter-wrapper" className={focused && "expanded"}>
-                <input id="filter" onChange={props.handleFilterChange} value={props.filter} onBlur={toggleFocus} onFocus={toggleFocus}/>
+            <div id="menu-button" className="header-button" onClick={props.handleShiftRight}>
+                <i className={`fa fa-fw fa-${props.shiftedRight ? "arrow-left" : "bars"}`}/>
             </div>
-            <button id="add-button" onClick={props.handleClick}>
-                <i class="fa fa-plus"></i>
-            </button>
+            {/*<div className="spacer"/>*/}
+            <div id="filter-wrapper" onClick={() => !focused && toggleFocus()} className={`header-button ${focused ? "filter-focused" : ""}`}>
+                <input
+                    id="filter"
+                    onChange={props.handleFilterChange}
+                    value={props.filter}
+                    onBlur={toggleFocus}
+                />
+            </div>
+            <div id="add-button" className="header-button" onClick={props.handleAdd}>
+                <i className="fa fa-plus"/>
+            </div>
         </div>
     );
 }
-
-export default Header;

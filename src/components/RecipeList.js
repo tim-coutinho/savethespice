@@ -2,8 +2,10 @@ import React from "react";
 import Recipe from "./Recipe";
 import RecipeLoader from "./RecipeLoader";
 
+import "./RecipeList.css";
 
-function RecipeList(props) {
+
+export default function RecipeList(props) {
     return props.items !== null ? (
         <ul id="recipe-list">
             {props.items.length !== 0 ? props.items.map(item => (
@@ -18,5 +20,3 @@ function RecipeList(props) {
         </ul>
     ) : Array(8).fill(0).map((_, i) => <RecipeLoader key={i}/>);
 }
-
-export default RecipeList;

@@ -1,12 +1,14 @@
 import { hot } from "react-hot-loader/root";  // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
-import "./App.css";
-import firebase from "../utils/firebase";
+import firebase from "../utils/firebase.js";
 
-import RecipeList from "./RecipeList";
-import Details from "./Details";
-import Header from "./Header";
+import Details from "./Details.js";
+import Header from "./Header.js";
+import RecipeList from "./RecipeList.js";
+import Sidebar from "./Sidebar.js";
+
+import "./App.css";
 
 
 function App() {
@@ -15,6 +17,7 @@ function App() {
     const [selectedItem, setSelectedItem] = useState(null);
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [shiftedRight, setShiftedRight] = useState(false);
 
     const handleAddItem = () => {
         const itemsRef = firebase.ref("items");
@@ -53,12 +56,15 @@ function App() {
     }, []);
 
     return (
-        <div id="App">
+        <div id="app" className={shiftedRight ? "shifted" : ""}>
+            <Sidebar/>
             <div id="left">
                 <Header
                     filter={filter}
+                    shiftedRight={shiftedRight}
+                    handleAdd={handleAddItem}
                     handleFilterChange={handleFilterChange}
-                    handleClick={handleAddItem}
+                    handleShiftRight={() => setShiftedRight(!shiftedRight)}
                 />
                 <RecipeList
                     items={isLoading ? null : filteredItems}

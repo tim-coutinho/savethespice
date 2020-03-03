@@ -1,7 +1,9 @@
 import React from "react";
+import {getById} from "../utils/common.js";
 
 
-function Details(props) {
+export default function Details(props) {
+
     return (
         <div>
             {props.item.desc}
@@ -9,5 +11,3 @@ function Details(props) {
         </div>
     );
 }
-
-export default Details;
