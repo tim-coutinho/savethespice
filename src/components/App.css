@@ -21,6 +21,7 @@
     display: grid;
     grid-column-gap: 10px;
     grid-template-columns: auto 40px 40px;
+    min-height: 40px;
     justify-content: flex-end;
     padding: 10px;
     transition: 0.3s;
@@ -30,7 +31,7 @@
     grid-template-columns: 0 calc(100% - 40px - 10px) 40px;
 }
 
-#header *:not(:first-child) {
+#header #filter-wrapper, #header #add-button {
     background-color: rgb(150, 150, 255);
     border: 2px solid rgb(150, 150, 255);
     border-radius: 4px;
@@ -41,17 +42,63 @@
     font-weight: inherit;
     height: 100%;
     outline: none;
-    padding: 0 10px;
     transition: 0.2s;
     width: 100%;
 }
 
-#header #add-button {
-    color: white;
-    font-size: 2em;
+#header #filter-wrapper input {
+    background-color: inherit;
+    border: none;
+    border-radius: inherit;
+    box-sizing: inherit;
+    cursor: inherit;
+    height: 100%;
+    outline: none;
+    width: 100%;
 }
 
-#header #add-button:hover, #header #filter:hover:not(:focus):not(.expanded) {
+#header #filter-wrapper.expanded input {
+    width: 85%;
+}
+
+#filter-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+}
+
+#filter-wrapper::after {
+    color: white;
+    content: "\f002";
+    font-family: FontAwesome;
+    font-size: 1.5em;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: 0.2s;
+}
+
+#filter-wrapper:hover::after {
+    color: rgb(150, 150, 255);
+}
+
+#filter-wrapper.expanded::after {
+    color: rgb(150, 150, 255);
+    left: 7%;
+}
+
+#header #add-button {
+    align-items: center;
+    color: white;
+    display: flex;
+    font-size: 1.5em;
+    justify-content: center;
+    position: relative;
+}
+
+#header #add-button:hover, #header #filter-wrapper:hover:not(:focus):not(.expanded) {
     background-color: white;
     box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
     color: rgb(150, 150, 255);
@@ -62,12 +109,12 @@
     transform: scale(0.99);
 }
 
-#header #filter:focus, #header #filter.expanded {
+#header #filter-wrapper:focus, #header #filter-wrapper.expanded {
     color: initial;
     cursor: initial;
 }
 
-#header #filter:focus, #header #filter:hover, #header #filter.expanded {
+#header #filter-wrapper:focus, #header #filter-wrapper:hover, #header #filter-wrapper.expanded {
     background-color: white;
     box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
 }

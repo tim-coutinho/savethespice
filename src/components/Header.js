@@ -12,7 +12,7 @@ function Header(props) {
 
     const toggleFocus = () => {
         if (!focused) {
-            setFocused(true)
+            setFocused(true);
         } else if (props.filter === "") {
             setFocused(false);
         }
@@ -25,8 +25,12 @@ function Header(props) {
     return (
         <div id="header" className={focused ? "filter-focused" : ""}>
             <div className="spacer"></div>
-                <input id="filter" className={focused && "expanded"} onChange={props.handleFilterChange} value={props.filter} onBlur={toggleFocus} onFocus={toggleFocus}/>
-            <button id="add-button" onClick={props.handleClick}>+</button>
+            <div id="filter-wrapper" className={focused && "expanded"}>
+                <input id="filter" onChange={props.handleFilterChange} value={props.filter} onBlur={toggleFocus} onFocus={toggleFocus}/>
+            </div>
+            <button id="add-button" onClick={props.handleClick}>
+                <i class="fa fa-plus"></i>
+            </button>
         </div>
     );
 }
