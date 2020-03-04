@@ -18,7 +18,7 @@
 }
 
 .sidebar-item:hover::before {
-    opacity: 25%;
+    opacity: 0.25;
 }
 
 .sidebar-item.selected-item {
@@ -37,5 +37,5 @@
 }
 
 .sidebar-item.selected-item::before {
-    opacity: 100%;
+    opacity: 1;
 }
