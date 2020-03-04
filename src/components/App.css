@@ -1,7 +1,7 @@
 #app {
     display: flex;
     transform: translateX(-250px);
-    transition: 0.3s;
+    transition: var(--header-transition-duration);
 }
 
 #app.shifted {

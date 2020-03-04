@@ -1,13 +1,11 @@
 import React from "react";
-import {getById} from "../utils/common.js";
 
 
-export default function Details(props) {
-
+export default function Details({item}) {
     return (
         <div>
-            {props.item.desc}
-            <img className="recipe-img" src={props.item.imgSrc} alt={props.item.name}/>
+            {item.desc}
+            <img className="recipe-img" src={item.imgSrc} alt={item.name}/>
         </div>
     );
 }

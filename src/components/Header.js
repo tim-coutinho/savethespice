@@ -18,10 +18,10 @@ export default function Header(props) {
 
     return (
         <div id="header" className={focused ? "filter-focused" : ""}>
-            <div id="menu-button" className="header-button" onClick={props.handleShiftRight}>
+            <div id="sidebar-button" className="header-button" onClick={props.handleShiftRight}>
                 <i className={`fa fa-fw fa-${props.shiftedRight ? "arrow-left" : "bars"}`}/>
             </div>
-            <div id="filter-wrapper" onClick={() => !focused && toggleFocus()} className={`header-button ${focused ? "filter-focused" : ""}`}>
+            <div id="filter-wrapper" onClick={() => !focused && toggleFocus()} className={`${focused ? "filter-focused" : ""} header-button`}>
                 <input
                     id="filter"
                     onChange={props.handleFilterChange}

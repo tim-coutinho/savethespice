@@ -29,7 +29,7 @@
 
 .recipe-wrapper {
     margin: -1px 0;
-    transition: background-color 0.1s;
+    transition: background-color 100ms;
 }
 
 .recipe-wrapper:not(:first-child) .recipe {
@@ -57,5 +57,4 @@ ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    text-align: center;
 }

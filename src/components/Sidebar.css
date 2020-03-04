@@ -1,3 +1,41 @@
 #sidebar {
     background-color: #1f252d;
+    min-width: 250px;
+}
+
+.sidebar-item {
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-start;
+    padding: 10px 20px;
+    transition: 50ms;
+}
+
+.sidebar-item:hover {
+    background-color: rgba(45, 54, 65, 0.5);
+}
+
+.sidebar-item:hover::before {
+    opacity: 25%;
+}
+
+.sidebar-item.selected-item {
+    background-color: var(--sidebar-item-active-background-color);
+}
+
+.sidebar-item::before {
+    color: var(--dark-purple);
+    content: "\f0da";
+    font-family: FontAwesome;
+    font-size: 30px;
+    left: 0;
+    opacity: 0;
+    position: fixed;
+    transition: 50ms;
+}
+
+.sidebar-item.selected-item::before {
+    opacity: 100%;
 }

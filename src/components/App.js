@@ -14,10 +14,12 @@ import "./App.css";
 function App() {
     const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("");
-    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedRecipe, setSelectedRecipe] = useState(null);
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [shiftedRight, setShiftedRight] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
 
     const handleAddItem = () => {
         const itemsRef = firebase.ref("items");
@@ -33,11 +35,23 @@ function App() {
         setIsLoading(true);
         const itemsRef = snapshot.val();
         const items = [];
-        for (const item in itemsRef) {
-            items.push({id: item, ...itemsRef[item]});
+        const categoryNames = new Set();
+        for (const itemId in itemsRef) {
+            const item = itemsRef[itemId];
+            items.push({id: itemId, ...item});
+            if (item.categories) {
+                for (const categoryId in item.categories) {
+                    categoryNames.add(item.categories[categoryId]);
+                }
+            }
+        }
+        const categories = [{name: "All Recipes", selected: true}];
+        for (const category of categoryNames) {
+            categories.push({name: category, selected: false});
         }
         setItems(items);
         setFilteredItems(items);
+        setCategories(categories);
         setIsLoading(false);
     };
 
@@ -57,7 +71,11 @@ function App() {
 
     return (
         <div id="app" className={shiftedRight ? "shifted" : ""}>
-            <Sidebar/>
+            <Sidebar
+                categories={categories}
+                changeSelectedItem={setSelectedSidebarItem}
+                selectedItem={selectedSidebarItem}
+            />
             <div id="left">
                 <Header
                     filter={filter}
@@ -68,12 +86,13 @@ function App() {
                 />
                 <RecipeList
                     items={isLoading ? null : filteredItems}
-                    changeSelectedItem={(item) => setSelectedItem(item)}
-                    selectedItem={selectedItem}
+                    changeSelectedRecipe={(item) => setSelectedRecipe(item)}
+                    selectedCategory={selectedSidebarItem}
+                    selectedRecipe={selectedRecipe}
                 />
             </div>
             <div id="right">
-                {selectedItem && <Details item={selectedItem}/>}
+                {selectedRecipe && <Details item={selectedRecipe}/>}
             </div>
         </div>
     );

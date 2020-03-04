@@ -5,17 +5,18 @@ import RecipeLoader from "./RecipeLoader";
 import "./RecipeList.css";
 
 
-export default function RecipeList(props) {
-    return props.items !== null ? (
+export default function RecipeList({items, selectedCategory, selectedRecipe, changeSelectedRecipe}) {
+    return items !== null ? (
         <ul id="recipe-list">
-            {props.items.length !== 0 ? props.items.map(item => (
-                <Recipe
+            {items.length !== 0 ? items.map(item => {
+                const categories = Object.values(item.categories || {});
+                return (selectedCategory === "All Recipes" || categories.includes(selectedCategory)) ? <Recipe
                     key={item.id}
                     item={item}
-                    handleClick={() => props.changeSelectedItem(item)}
-                    selected={props.selectedItem && props.selectedItem.id === item.id}
-                />)
-            ) : <h2>No results found.</h2>
+                    handleClick={() => changeSelectedRecipe(item)}
+                    selected={selectedRecipe && selectedRecipe.id === item.id}
+                /> : null;
+            }) : <h2>No results found.</h2>
             }
         </ul>
     ) : Array(8).fill(0).map((_, i) => <RecipeLoader key={i}/>);
