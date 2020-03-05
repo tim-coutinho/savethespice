@@ -13,12 +13,14 @@
     transition: 50ms;
 }
 
-.sidebar-item:hover {
-    background-color: rgba(45, 54, 65, 0.5);
-}
+@media(hover: hover) and (pointer: fine) { /* Desktop */
+    .sidebar-item:hover {
+        background-color: rgba(45, 54, 65, 0.5);
+    }
 
-.sidebar-item:hover::before {
-    opacity: 0.25;
+    .sidebar-item:hover::before {
+        opacity: 0.25;
+    }
 }
 
 .sidebar-item.selected-item {
