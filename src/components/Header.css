@@ -5,7 +5,7 @@
     grid-template-columns: 1fr 40px 40px;
     justify-content: flex-end;
     padding: 10px;
-    transition: var(--header-transition-duration);
+    transition: var(--standard-transition-duration);
 }
 
 #header.filter-focused {
@@ -25,7 +25,7 @@
     height: 100%;
     outline: none;
     padding-left: 35px;
-    transition: var(--header-transition-duration);
+    transition: var(--standard-transition-duration);
     width: 100%;
 }
 
@@ -45,7 +45,7 @@
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-    transition: var(--header-transition-duration);
+    transition: var(--standard-transition-duration);
 }
 
 #filter-wrapper.filter-focused::before {
@@ -56,7 +56,7 @@
     pointer-events: none;
 }
 
-#header #add-button, #header #sidebar-button {
+#header #add-btn, #header #sidebar-btn {
     align-items: center;
     display: flex;
     font-size: 1.5em;
@@ -65,10 +65,9 @@
 }
 
 @media(hover: hover) and (pointer: fine) { /* Desktop */
-    #header #add-button:hover,
     #header #filter-wrapper:hover,
     #header #filter-wrapper.filter-focused,
-    #header #sidebar-button:hover {
+    .purple-btn:hover {
         background-color: white;
         box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
         color: var(--dark-purple);
@@ -80,9 +79,9 @@
 }
 
 
-#header #add-button:active,
+#header #add-btn:active,
 #header #filter-wrapper:active,
-#header #sidebar-button:active,
+#header #sidebar-btn:active,
 #header #filter-wrapper.filter-focused {
     background-color: white;
     box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
@@ -93,20 +92,11 @@
     cursor: initial;
 }
 
-#header #sidebar-button {
+#header #sidebar-btn {
     justify-self: flex-start;
 }
 
-.header-button {
-    background-color: var(--dark-purple);
-    border: 2px solid var(--dark-purple);
-    border-radius: 4px;
-    box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
-    box-sizing: border-box;
-    color: white;
-    cursor: pointer;
+.header-btn {
     height: 40px;
-    user-select: none;
     width: 40px;
-    transition: var(--header-transition-duration);
 }

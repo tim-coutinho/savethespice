@@ -1,11 +1,30 @@
-#app {
+#main-content {
     display: flex;
     transform: translateX(-250px);
-    transition: var(--header-transition-duration);
+    transition: var(--standard-transition-duration);
 }
 
-#app.shifted {
+#main-content.shifted-right {
     transform: initial;
+}
+
+#main-content::after {
+    content: "";
+    background-color: black;
+    height: 100vh;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transform: translateX(250px);
+    transition: var(--standard-transition-duration);
+    width: 100vw;
+}
+
+#main-content.disabled::after {
+    opacity: 0.5;
+    pointer-events: initial;
 }
 
 #left {
@@ -20,4 +39,22 @@
 #right {
     height: 100vh;
     width: 100%;
+}
+
+.purple-btn {
+    background-color: var(--dark-purple);
+    border: 2px solid var(--dark-purple);
+    border-radius: 4px;
+    box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    transition: var(--standard-transition-duration);
+}
+
+.standard-text {
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: inherit;
 }

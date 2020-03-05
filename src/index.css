@@ -4,11 +4,13 @@ body {
     font-weight: 500;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
     overflow-y: hidden;
 }
 
 :root {
     --dark-purple: #9696ff;
-    --header-transition-duration: 300ms;
+    --standard-transition-duration: 300ms;
     --sidebar-item-active-background-color: #2d3641;
+    --sidebar-width: 250px;
 }

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import firebase from "../utils/firebase.js";
 
+import AddForm from "./AddForm.js";
 import Details from "./Details.js";
 import Header from "./Header.js";
 import RecipeList from "./RecipeList.js";
@@ -17,18 +18,21 @@ function App() {
     const [selectedRecipe, setSelectedRecipe] = useState(null);
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [shiftedRight, setShiftedRight] = useState(false);
+    const [currentView, setCurrentView] = useState("Home");
     const [categories, setCategories] = useState([]);
     const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
 
-    const handleAddItem = () => {
-        const itemsRef = firebase.ref("items");
-        const name = prompt("Item:");
-        if (!name)
-            return;
-        const desc = prompt("Desciption:") || "";
-        const imgSrc = prompt("Image url:") || "";
-        itemsRef.push({name, desc, imgSrc});
+    const handleViewChange = (source) => {
+        setCurrentView(() => {
+            switch (source) {
+            case "Sidebar":
+                return currentView === "Home" ? "Sidebar" : "Home";
+            case "Add":
+                return currentView === "Add" ? "Home" : "Add";
+            default:
+                return "Home";
+            }
+        });
     };
 
     const handleListChange = snapshot => {
@@ -70,30 +74,38 @@ function App() {
     }, []);
 
     return (
-        <div id="app" className={shiftedRight ? "shifted" : ""}>
-            <Sidebar
-                categories={categories}
-                changeSelectedItem={setSelectedSidebarItem}
-                selectedItem={selectedSidebarItem}
+        <div id="app">
+            <div
+                id="main-content"
+                className={`${currentView === "Sidebar" ? "shifted-right" : currentView === "Add" ? "disabled" : ""}`}
+            >
+                <Sidebar
+                    categories={categories}
+                    changeSelectedItem={setSelectedSidebarItem}
+                    selectedItem={selectedSidebarItem}
+                />
+                <div id="left">
+                    <Header
+                        filter={filter}
+                        shiftedRight={currentView === "Sidebar"}
+                        handleFilterChange={handleFilterChange}
+                        handleViewChange={handleViewChange}
+                    />
+                    <RecipeList
+                        items={isLoading ? null : filteredItems}
+                        changeSelectedRecipe={(item) => setSelectedRecipe(item)}
+                        selectedCategory={selectedSidebarItem}
+                        selectedRecipe={selectedRecipe}
+                    />
+                </div>
+                <div id="right">
+                    {selectedRecipe && <Details item={selectedRecipe}/>}
+                </div>
+            </div>
+            <AddForm
+                handleClose={() => handleViewChange("Add")}
+                visible={currentView === "Add"}
             />
-            <div id="left">
-                <Header
-                    filter={filter}
-                    shiftedRight={shiftedRight}
-                    handleAdd={handleAddItem}
-                    handleFilterChange={handleFilterChange}
-                    handleShiftRight={() => setShiftedRight(!shiftedRight)}
-                />
-                <RecipeList
-                    items={isLoading ? null : filteredItems}
-                    changeSelectedRecipe={(item) => setSelectedRecipe(item)}
-                    selectedCategory={selectedSidebarItem}
-                    selectedRecipe={selectedRecipe}
-                />
-            </div>
-            <div id="right">
-                {selectedRecipe && <Details item={selectedRecipe}/>}
-            </div>
         </div>
     );
 }
