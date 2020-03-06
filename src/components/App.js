@@ -22,28 +22,22 @@ function App() {
     const [currentView, setCurrentView] = useState("Home");
     const [categories, setCategories] = useState([]);
     const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
-    var editItem = {};
+    const [editMode, setEditMode] = useState(false);
 
-    const handleViewChange = (source, args = {}) => {
+    const handleViewChange = (source) => {
         setCurrentView(() => {
             switch (source) {
-            case "Add":
-                if (currentView === "Home") {
-                    if ("item" in args) {
-                        editItem = args["item"];
-                    } else {
-                        editItem = {};
-                    }
-                }
-                return currentView === "Add" ? "Home" : "Add";
             case "Edit":
-                return "";
+                setEditMode(true);
+            case "Add":
+                return currentView === "Add" ? "Home" : "Add";
             case "Sidebar":
                 return currentView === "Home" ? "Sidebar" : "Home";
             default:
                 return "Home";
             }
         });
+        setEditMode(false);
     };
 
     const handleAddRecipe = values => {
@@ -57,16 +51,18 @@ function App() {
             }
             const itemsRef = firebase.ref(`users/${user.uid}/recipes`);
             if ("id" in values) {
-                itemsRef.child(user.uid).set({
+                itemsRef.child(values.id).set({
                     ...values,
                     ingredients,
-                    instructions
+                    instructions,
+                    id: null
                 });
             } else {
                 itemsRef.push({
                     ...values,
                     ingredients,
-                    instructions
+                    instructions,
+                    id: null
                 });
             }
         }
@@ -103,7 +99,7 @@ function App() {
 
     useEffect(() => {
         setFilteredItems(items.filter(item => item.name.toLowerCase().includes(filter.toLowerCase())))
-    }, [filter]);
+    }, [filter, items]);
 
     useEffect(() => {
         if (!user) {
@@ -154,13 +150,13 @@ function App() {
                     />
                 </div>
                 <div id="right">
-                    {selectedRecipe && <Details item={selectedRecipe}/>}
+                    {selectedRecipe && <Details item={selectedRecipe} edit={() => handleViewChange("Edit")}/>}
                 </div>
             </div>
             <AddForm
                 handleAddRecipe={handleAddRecipe}
                 visible={currentView === "Add"}
-                initialValues={editItem}
+                initialValues={editMode ? selectedRecipe : {}}
             />
         </div>
     );

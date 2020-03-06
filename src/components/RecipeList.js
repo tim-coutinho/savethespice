@@ -13,7 +13,6 @@ export default function RecipeList({items, selectedCategory, selectedRecipe, cha
                 return (selectedCategory === "All Recipes" || categories.includes(selectedCategory)) ? (
                     <Recipe
                         key={item.id}
-                        edit={() => handleViewChange("Add", {item})}
                         item={item}
                         handleClick={() => changeSelectedRecipe(item)}
                         selected={selectedRecipe && selectedRecipe.id === item.id}

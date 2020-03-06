@@ -1,11 +1,15 @@
 import React from "react";
 
+import "./Details.css"
 
-export default function Details({item}) {
+
+export default function Details({item, edit}) {
     return (
-        <div>
-            {item.desc}
+        <>
             <img className="recipe-img" src={item.imgSrc} alt={item.name}/>
-        </div>
+            <div id="edit-btn" className="purple-btn" onClick={edit}>
+                <i className="fa fa-pencil"/>
+            </div>
+        </>
     );
 }

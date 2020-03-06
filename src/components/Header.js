@@ -19,11 +19,12 @@ export default function Header(props) {
     return (
         <div id="header" className={focused ? "filter-focused" : ""}>
             <div id="sidebar-btn" className="header-btn purple-btn" onClick={() => props.handleViewChange("Sidebar")}>
-                <i className={`fa fa-fw fa-${props.shiftedRight ? "arrow-left" : "bars"}`}/>
+                <i className={`fa fa-${props.shiftedRight ? "arrow-left" : "bars"}`}/>
             </div>
             <div id="filter-wrapper" onClick={() => !focused && toggleFocus()} className={`${focused ? "filter-focused" : ""} header-btn purple-btn`}>
                 <input
                     id="filter"
+                    className="standard-text"
                     onChange={props.handleFilterChange}
                     value={props.filter}
                     onBlur={toggleFocus}

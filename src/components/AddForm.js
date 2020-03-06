@@ -1,23 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "./AddForm.css";
 
 
+const initialForm = {
+    "categories": [],
+    "cookTime": "",
+    "imgSrc": "",
+    "ingredients": [],
+    "instructions": [],
+    "name": "",
+    "notes": ""
+};
+
 export default function AddForm({visible, handleAddRecipe, initialValues}) {
-    const initialForm = {
-        "categories": [],
-        "cookTime": "",
-        "imgSrc": "",
-        "ingredients": [],
-        "instructions": [],
-        "name": "",
-        "notes": "",
-        ...initialValues
-    };
     const [form, setForm] = useState(initialForm);
+
+    useEffect(() => {
+        visible && setForm({...initialForm, ...initialValues});
+    }, [visible, initialValues]);
 
     const handleFormChange = e => {
         e.preventDefault();
+        console.log(e.target);
         const {name, value} = e.target;
         setForm({
             ...form,
@@ -27,22 +32,22 @@ export default function AddForm({visible, handleAddRecipe, initialValues}) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const submitTime = new Date().getTime();
+        const lastEditedTime = new Date().getTime();
         handleAddRecipe({
             ...form,
-            submitTime
+            originalSubmitTime: form.lastEditedTime ? form.lastEditedTime : lastEditedTime,
+            lastEditedTime
         });
-        setForm(initialForm);
     };
 
     return (
         <div id="add-form-card" className={visible ? "visible" : ""}>
-            <form id="add-form" onSubmit={handleSubmit} noValidate>
+            <form id="add-form" onSubmit={handleSubmit}>
                 <input
                     className="standard-text"
                     onChange={handleFormChange}
                     name="name"
-                    value={form["name"]}
+                    value={form.name}
                     placeholder="Recipe Name"
                     required
                 />
@@ -51,18 +56,16 @@ export default function AddForm({visible, handleAddRecipe, initialValues}) {
                     className="standard-text"
                     onChange={handleFormChange}
                     name="notes"
-                    value={form["notes"]}
+                    value={form.notes}
                     placeholder="Notes"
-                    required
                 />
                 <br/>
                 <input
                     className="standard-text"
                     onChange={handleFormChange}
                     name="imgSrc"
-                    value={form["imgSrc"]}
+                    value={form.imgSrc}
                     placeholder="Image URL"
-                    required
                 />
                 <div
                     id="add-form-cancel"
