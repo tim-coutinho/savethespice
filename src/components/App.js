@@ -1,7 +1,7 @@
 import { hot } from "react-hot-loader/root";  // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
-import firebase from "../utils/firebase.js";
+import firebase, { auth, provider } from "../utils/firebase.js";
 
 import AddForm from "./AddForm.js";
 import Details from "./Details.js";
@@ -13,6 +13,7 @@ import "./App.css";
 
 
 function App() {
+    const [user, setUser] = useState(auth.currentUser);
     const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("");
     const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -21,27 +22,64 @@ function App() {
     const [currentView, setCurrentView] = useState("Home");
     const [categories, setCategories] = useState([]);
     const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
+    var editItem = {};
 
-    const handleViewChange = (source) => {
+    const handleViewChange = (source, args = {}) => {
         setCurrentView(() => {
             switch (source) {
+            case "Add":
+                if (currentView === "Home") {
+                    if ("item" in args) {
+                        editItem = args["item"];
+                    } else {
+                        editItem = {};
+                    }
+                }
+                return currentView === "Add" ? "Home" : "Add";
+            case "Edit":
+                return "";
             case "Sidebar":
                 return currentView === "Home" ? "Sidebar" : "Home";
-            case "Add":
-                return currentView === "Add" ? "Home" : "Add";
             default:
                 return "Home";
             }
         });
     };
 
+    const handleAddRecipe = values => {
+        if (values) {
+            const [ingredients, instructions] = [{}, {}];
+            for (const [i, element] of values.ingredients.entries()) {
+                ingredients[i] = element;
+            }
+            for (const [i, element] of values.instructions.entries()) {
+                instructions[i] = element;
+            }
+            const itemsRef = firebase.ref(`users/${user.uid}/recipes`);
+            if ("id" in values) {
+                itemsRef.child(user.uid).set({
+                    ...values,
+                    ingredients,
+                    instructions
+                });
+            } else {
+                itemsRef.push({
+                    ...values,
+                    ingredients,
+                    instructions
+                });
+            }
+        }
+        handleViewChange("Add");
+    };
+
     const handleListChange = snapshot => {
         setIsLoading(true);
-        const itemsRef = snapshot.val();
+        const itemList = snapshot.val();
         const items = [];
         const categoryNames = new Set();
-        for (const itemId in itemsRef) {
-            const item = itemsRef[itemId];
+        for (const itemId in itemList) {
+            const item = itemList[itemId];
             items.push({id: itemId, ...item});
             if (item.categories) {
                 for (const categoryId in item.categories) {
@@ -68,9 +106,25 @@ function App() {
     }, [filter]);
 
     useEffect(() => {
-        const itemsRef = firebase.ref("items");
+        if (!user) {
+            return;
+        }
+        const itemsRef = firebase.ref(`users/${user.uid}/recipes`);
         itemsRef.on("value", handleListChange);
         itemsRef.on("child_removed", handleListChange);
+    }, [user]);
+
+    useEffect(() => {
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                setUser(user);
+            } else {
+                auth.signInWithRedirect(provider);
+                auth.getRedirectResult().then(result => {
+                    setUser(result.user);
+                });
+            }
+        });
     }, []);
 
     return (
@@ -96,6 +150,7 @@ function App() {
                         changeSelectedRecipe={(item) => setSelectedRecipe(item)}
                         selectedCategory={selectedSidebarItem}
                         selectedRecipe={selectedRecipe}
+                        handleViewChange={handleViewChange}
                     />
                 </div>
                 <div id="right">
@@ -103,8 +158,9 @@ function App() {
                 </div>
             </div>
             <AddForm
-                handleClose={() => handleViewChange("Add")}
+                handleAddRecipe={handleAddRecipe}
                 visible={currentView === "Add"}
+                initialValues={editItem}
             />
         </div>
     );

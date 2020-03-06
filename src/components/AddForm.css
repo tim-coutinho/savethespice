@@ -40,3 +40,7 @@
     width: min-content;
     font-size: 18px;
 }
+
+input:required::before {
+    content: "*";
+}

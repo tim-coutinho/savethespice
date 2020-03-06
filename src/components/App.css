@@ -18,7 +18,7 @@
     position: absolute;
     top: 0;
     transform: translateX(250px);
-    transition: var(--standard-transition-duration);
+    transition: opacity var(--standard-transition-duration);
     width: 100vw;
 }
 

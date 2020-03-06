@@ -1,4 +1,4 @@
-import { initializeApp, database } from "firebase";
+import firebase from "firebase";
 
 import {
     apiKey,
@@ -20,5 +20,8 @@ const firebaseConfig = {
     messagingSenderId: messagingSenderId,
     appId: appId
 };
-initializeApp(firebaseConfig);
-export default database();
+
+firebase.initializeApp(firebaseConfig);
+export const provider = new firebase.auth.GoogleAuthProvider();
+export const auth = firebase.auth();
+export default firebase.database();
