@@ -1,0 +1,89 @@
+@use "vars";
+
+#header {
+    border-bottom: 1px solid #e1e0e0;
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: 1fr vars.$standard-btn-length vars.$standard-btn-length;
+    justify-content: flex-end;
+    padding: 10px;
+    transition: vars.$standard-transition-duration;
+
+    &.filter-focused {
+        /* Curse you CSS for not animating fr values */
+        /* 100px = 40px + 40px + 10px + 10px (other icon widths and paddings) */
+        grid-template-columns: 1fr calc(100% - 100px) vars.$standard-btn-length;
+    }
+
+    #filter-wrapper #filter {
+        background-color: inherit;
+        border: none;
+        border-radius: inherit;
+        cursor: inherit;
+        font-size: 15px;
+        height: 100%;
+        outline: none;
+        padding-left: 35px;
+        transition: vars.$standard-transition-duration;
+        width: 100%;
+    }
+
+    #filter-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        position: relative;
+        width: auto;
+    }
+
+    #filter-wrapper::before {
+        content: "\f002";
+        font-family: FontAwesome;
+        left: 18px;
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        transition: vars.$standard-transition-duration;
+    }
+
+    #filter-wrapper.filter-focused::before {
+        color: vars.$btn-primary-color;
+    }
+
+    #filter-wrapper:not(.filter-focused) #filter {
+        pointer-events: none;
+    }
+
+    @media(hover: hover) and (pointer: fine) { /* Desktop */
+        #filter-wrapper:hover,
+        #filter-wrapper.filter-focused {
+            @include vars.btn-primary-hover;
+        }
+
+        #filter-wrapper:hover::before {
+            color: vars.$btn-primary-color;
+        }
+    }
+
+    #add-btn:active,
+    #filter-wrapper:active,
+    #sidebar-btn:active,
+    #filter-wrapper.filter-focused {
+        background-color: vars.$btn-secondary-color;
+        box-shadow: vars.$standard-box-shadow;
+        color: vars.$btn-primary-color;
+    }
+
+    #filter-wrapper.filter-focused {
+        cursor: initial;
+    }
+
+    #sidebar-btn {
+        justify-self: flex-start;
+    }
+
+    .header-btn {
+        height: vars.$standard-btn-length;
+        width: vars.$standard-btn-length;
+    }
+}

@@ -1,0 +1,55 @@
+@use "vars";
+
+#main-content {
+    background-color: white;
+    display: flex;
+    position: relative;
+    float: right;
+    opacity: 1;
+    transition: vars.$standard-transition-duration;
+    width: 100%;
+
+    &.shifted-right {
+        width: calc(100vw - #{vars.$sidebar-width});
+    }
+
+    &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    #left {
+        border-right: 1px solid #e1e0e0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        max-width: vars.$left-max-length;
+        min-width: vars.$left-min-length;
+    }
+
+    #right {
+        display: flex;
+        flex-grow: 1;
+    }
+}
+
+.purple-btn {
+    align-items: center;
+    background-color: vars.$btn-primary-color;
+    border: 2px solid vars.$btn-primary-color;
+    border-radius: 4px;
+    box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
+    color: vars.$btn-secondary-color;
+    cursor: pointer;
+    display: flex;
+    font-size: 1.5em;
+    justify-content: center;
+    user-select: none;
+    transition: vars.$standard-transition-duration;
+}
+
+@media(hover: hover) and (pointer: fine) {
+    .purple-btn:hover {
+        @include vars.btn-primary-hover;
+    }
+}

@@ -1,0 +1,53 @@
+@use "vars";
+
+#add-form-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 1pt 5pt 0 rgba(0, 0, 0, .3);
+    height: 95vh;
+    left: 50%;
+    opacity: 0;
+    padding: 10px;
+    position: absolute;
+    top: 50%;
+    transform: translate(calc(100vw - 50%), -50%);
+    transition: transform, opacity;
+    transition-duration: vars.$standard-transition-duration;
+    width: 95vw;
+
+    &.visible {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+
+    #add-form {
+        height: 100%;
+        width: 100%;
+    }
+
+    #add-form-cancel {
+        background-color: vars.$btn-secondary-color;
+        color: vars.$btn-primary-color;
+    }
+
+    @media(hover: hover) and (pointer: fine) {
+        #add-form-cancel:hover {
+            background-color: vars.$btn-primary-color;
+            color: vars.$btn-secondary-color;
+        }
+    }
+
+    #add-form .form-btn {
+        padding: 5px;
+        width: min-content;
+        font-size: 18px;
+    }
+
+    input[type="text"] {
+        border: 1px solid gray;
+    }
+
+    input:required::before {
+        content: "*";
+    }
+}

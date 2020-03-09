@@ -1,0 +1,27 @@
+@use "vars";
+
+#details {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 1pt 5pt 0 rgba(0, 0, 0, .3);
+    flex-grow: inherit;
+    margin: 10px;
+    padding: 10px;
+    position: relative;
+    width: inherit;
+
+    .recipe-img {
+        height: 80px;
+        width: 120px;
+    }
+
+    #edit-btn {
+        height: vars.$standard-btn-length;
+        width: vars.$standard-btn-length;
+        margin-right: inherit;
+        margin-top: inherit;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+}

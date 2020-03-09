@@ -4,6 +4,11 @@
     overflow-y: scroll;
 }
 
+#recipe-list .recipe-img {
+    height: 80px;
+    width: 120px;
+}
+
 .recipe {
     margin: 0 20px;
     padding: 20px 0;
@@ -16,9 +21,7 @@
 }
 
 .recipe-img {
-    height: 80px;
     object-fit: cover;
-    width: 120px;
 }
 
 .recipe-text {

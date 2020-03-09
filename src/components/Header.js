@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { getById } from "../utils/common.js";
 
-import "./Header.css";
+import "./Header.scss";
 
 
 export default function Header(props) {
@@ -24,7 +24,6 @@ export default function Header(props) {
             <div id="filter-wrapper" onClick={() => !focused && toggleFocus()} className={`${focused ? "filter-focused" : ""} header-btn purple-btn`}>
                 <input
                     id="filter"
-                    className="standard-text"
                     onChange={props.handleFilterChange}
                     value={props.filter}
                     onBlur={toggleFocus}

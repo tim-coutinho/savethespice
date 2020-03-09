@@ -1,7 +1,7 @@
-import { hot } from "react-hot-loader/root";  // Enable live component reloading
+import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
-import firebase, { auth, provider } from "../utils/firebase.js";
+import firebase, {auth, provider} from "../utils/firebase.js";
 
 import AddForm from "./AddForm.js";
 import Details from "./Details.js";
@@ -9,14 +9,14 @@ import Header from "./Header.js";
 import RecipeList from "./RecipeList.js";
 import Sidebar from "./Sidebar.js";
 
-import "./App.css";
+import "./App.scss";
 
 
 function App() {
     const [user, setUser] = useState(auth.currentUser);
     const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("");
-    const [selectedRecipe, setSelectedRecipe] = useState(null);
+    const [selectedRecipe, setSelectedRecipe] = useState("");
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentView, setCurrentView] = useState("Home");
@@ -29,7 +29,9 @@ function App() {
             switch (source) {
             case "Edit":
                 setEditMode(true);
+                return currentView === "Add" ? "Home" : "Add";
             case "Add":
+                setEditMode(false);
                 return currentView === "Add" ? "Home" : "Add";
             case "Sidebar":
                 return currentView === "Home" ? "Sidebar" : "Home";
@@ -37,7 +39,6 @@ function App() {
                 return "Home";
             }
         });
-        setEditMode(false);
     };
 
     const handleAddRecipe = values => {
@@ -71,35 +72,28 @@ function App() {
 
     const handleListChange = snapshot => {
         setIsLoading(true);
-        const itemList = snapshot.val();
-        const items = [];
-        const categoryNames = new Set();
-        for (const itemId in itemList) {
-            const item = itemList[itemId];
-            items.push({id: itemId, ...item});
-            if (item.categories) {
-                for (const categoryId in item.categories) {
-                    categoryNames.add(item.categories[categoryId]);
-                }
-            }
-        }
-        const categories = [{name: "All Recipes", selected: true}];
-        for (const category of categoryNames) {
-            categories.push({name: category, selected: false});
-        }
-        setItems(items);
-        setFilteredItems(items);
-        setCategories(categories);
-        setIsLoading(false);
+        setItems(snapshot.val());
     };
 
-    const handleFilterChange = (e) => {
-        setFilter(e.target.value);
+    const handleFilterChange = ({target}) => {
+        setFilter(target.value);
     };
 
     useEffect(() => {
-        setFilteredItems(items.filter(item => item.name.toLowerCase().includes(filter.toLowerCase())))
+        const categories = [{name: "All Recipes", selected: true}];
+        for (const [, item] of Object.entries(items)) {
+            if (item.categories) {
+                Object.values(item.categories)
+                    .forEach(category => categories.push({name: category, selected: false}));
+            }
+        }
+        setCategories(categories);
+        setFilteredItems(Object.entries(items).filter(([, item]) => item.name.toLowerCase().includes(filter.toLowerCase())));
     }, [filter, items]);
+
+    useEffect(() => {
+        setIsLoading(false);
+    }, [filteredItems, items]);
 
     useEffect(() => {
         if (!user) {
@@ -125,15 +119,16 @@ function App() {
 
     return (
         <div id="app">
+            <Sidebar
+                categories={categories}
+                changeSelectedItem={setSelectedSidebarItem}
+                selectedItem={selectedSidebarItem}
+                classes={currentView === "Add" ? "disabled" : ""}
+            />
             <div
                 id="main-content"
                 className={`${currentView === "Sidebar" ? "shifted-right" : currentView === "Add" ? "disabled" : ""}`}
             >
-                <Sidebar
-                    categories={categories}
-                    changeSelectedItem={setSelectedSidebarItem}
-                    selectedItem={selectedSidebarItem}
-                />
                 <div id="left">
                     <Header
                         filter={filter}
@@ -143,20 +138,23 @@ function App() {
                     />
                     <RecipeList
                         items={isLoading ? null : filteredItems}
-                        changeSelectedRecipe={(item) => setSelectedRecipe(item)}
+                        changeSelectedRecipe={(id) => setSelectedRecipe(id)}
                         selectedCategory={selectedSidebarItem}
                         selectedRecipe={selectedRecipe}
                         handleViewChange={handleViewChange}
                     />
                 </div>
                 <div id="right">
-                    {selectedRecipe && <Details item={selectedRecipe} edit={() => handleViewChange("Edit")}/>}
+                    <Details
+                        item={items[selectedRecipe]}
+                        edit={() => handleViewChange("Edit")}
+                    />
                 </div>
             </div>
             <AddForm
                 handleAddRecipe={handleAddRecipe}
                 visible={currentView === "Add"}
-                initialValues={editMode ? selectedRecipe : {}}
+                initialValues={editMode ? {id: selectedRecipe, ...items[selectedRecipe]} : {}}
             />
         </div>
     );
