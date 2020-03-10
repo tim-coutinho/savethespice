@@ -1,12 +1,13 @@
 import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
-import firebase, {auth, provider} from "../utils/firebase.js";
+import firebase, { auth, provider } from "../utils/firebase.js";
 
 import AddForm from "./AddForm.js";
 import Details from "./Details.js";
 import Header from "./Header.js";
 import RecipeList from "./RecipeList.js";
+import ShoppingList from "./ShoppingList.js";
 import Sidebar from "./Sidebar.js";
 
 import "./App.scss";
@@ -23,6 +24,7 @@ function App() {
     const [categories, setCategories] = useState([]);
     const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
     const [editMode, setEditMode] = useState(false);
+    const [shoppingList, setShoppingList] = useState([]);
 
     const handleViewChange = (source) => {
         setCurrentView(() => {
@@ -68,6 +70,14 @@ function App() {
             }
         }
         handleViewChange("Add");
+    };
+
+    const handleAddToShoppingList = ingredient => {
+        setShoppingList(Array.from(new Set(shoppingList).add(ingredient)));
+    };
+
+    const handleRemoveFromShoppingList = ingredient => {
+        setShoppingList(shoppingList.filter(other => other !== ingredient));
     };
 
     const handleListChange = snapshot => {
@@ -145,9 +155,13 @@ function App() {
                     />
                 </div>
                 <div id="right">
+                    {/*<ShoppingList shoppingList={shoppingList}/>*/}
                     <Details
                         item={items[selectedRecipe]}
                         edit={() => handleViewChange("Edit")}
+                        shoppingList={shoppingList}
+                        handleAddToShoppingList={handleAddToShoppingList}
+                        handleRemoveFromShoppingList={handleRemoveFromShoppingList}
                     />
                 </div>
             </div>

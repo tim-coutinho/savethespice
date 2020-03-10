@@ -10,11 +10,6 @@
     position: relative;
     width: inherit;
 
-    .recipe-img {
-        height: 80px;
-        width: 120px;
-    }
-
     #edit-btn {
         height: vars.$standard-btn-length;
         width: vars.$standard-btn-length;
@@ -23,5 +18,27 @@
         position: absolute;
         right: 0;
         top: 0;
+    }
+
+    #ingredient-list {
+        padding-left: 5px;
+        padding-top: 20px;
+    }
+
+    .ingredient {
+
+        &:hover .ingredient-span {
+            visibility: visible;
+        }
+
+        .ingredient-span {
+            cursor: pointer;
+            visibility: hidden;
+        }
+    }
+
+    .recipe-img {
+        height: 80px;
+        width: 120px;
     }
 }
