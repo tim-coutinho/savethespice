@@ -8,7 +8,7 @@ import {
     storageBucket,
     messagingSenderId,
     appId
-} from "./secrets.js";
+} from "./secrets";
 
 
 const firebaseConfig = {

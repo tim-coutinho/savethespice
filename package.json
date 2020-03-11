@@ -12,12 +12,14 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.0",
     "redux": "^4.0.5",
+    "redux-thunk": "^2.3.0",
     "sass": "^1.26.2"
   },
   "devDependencies": {
     "husky": "^4.2.3",
     "prettier": "1.19.1",
-    "pretty-quick": "^2.0.1"
+    "pretty-quick": "^2.0.1",
+    "redux-devtools-extension": "^2.13.8"
   },
   "scripts": {
     "start": "PORT=5001 react-scripts start",

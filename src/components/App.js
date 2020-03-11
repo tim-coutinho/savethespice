@@ -1,14 +1,14 @@
 import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
-import firebase, { auth, provider } from "../utils/firebase.js";
+import firebase, { auth, provider } from "../utils/firebase";
 
-import AddForm from "./AddForm.js";
-import Details from "./Details.js";
-import Header from "./Header.js";
-import RecipeList from "./RecipeList.js";
-import ShoppingList from "./ShoppingList.js";
-import Sidebar from "./Sidebar.js";
+import AddForm from "./AddForm";
+import Details from "./Details";
+import Header from "./Header";
+import RecipeList from "./RecipeList";
+import ShoppingList from "./ShoppingList";
+import Sidebar from "./Sidebar";
 
 import "./App.scss";
 

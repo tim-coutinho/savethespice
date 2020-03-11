@@ -1,6 +1,6 @@
 import React from "react";
 
-import SidebarItem from "./SidebarItem.js";
+import SidebarItem from "./SidebarItem";
 
 import "./Sidebar.scss";
 
