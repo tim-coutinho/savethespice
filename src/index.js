@@ -1,9 +1,10 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { render } from "react-dom";
+import { Provider } from "react-redux";
+import { createStore } from "redux";
+
+import { getById } from "./utils/common";
 import App from "./components/App";
 import "./components/index.scss";
 
-ReactDOM.render(
-    <App/>,
-    document.getElementById("root")
-);
+render(<App />, getById("root"));
