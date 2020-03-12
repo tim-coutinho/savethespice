@@ -1,28 +1,45 @@
 @use "vars";
 
 #details {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 1pt 5pt 0 rgba(0, 0, 0, .3);
     flex-grow: inherit;
     margin: 10px;
-    padding: 10px;
     position: relative;
-    width: inherit;
 
-    #edit-btn {
-        height: vars.$standard-btn-length;
-        width: vars.$standard-btn-length;
+    #detail-btns {
+        display: grid;
+        grid-column-gap: 10px;
+        grid-template-columns: repeat(2, 40px);
         margin-right: inherit;
         margin-top: inherit;
         position: absolute;
         right: 0;
         top: 0;
+
+        #delete-btn {
+            background-color: #e72f17;
+            border-color: #e72f17;
+
+            &:hover {
+                background-color: vars.$background-color;
+                border-color: #e72f17;
+                color: #e72f17;
+            }
+        }
+
+        .primary-btn {
+            height: vars.$standard-btn-length;
+            width: vars.$standard-btn-length;
+        }
     }
 
     #ingredient-list {
+        @include vars.default-ul;
         padding-left: 5px;
         padding-top: 20px;
+    }
+
+    #recipe-name {
+        word-break: break-word;
     }
 
     .ingredient {
@@ -39,6 +56,7 @@
 
     .recipe-img {
         height: 80px;
+        object-fit: cover;
         width: 120px;
     }
 }

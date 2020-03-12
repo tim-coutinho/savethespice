@@ -2,14 +2,19 @@ import React from "react";
 
 import "./Details.scss";
 
-export default function Details({ item, edit, shoppingList, handleAddToShoppingList, handleRemoveFromShoppingList }) {
-    return item ? (
-        <div id="details">
-            <img className="recipe-img" src={item.imgSrc} alt={item.name}/>
-            <div>{item.name}</div>
-            <div id="edit-btn" className="purple-btn" onClick={edit}>
-                <i className="fa fa-pencil"/>
+export default function Details({ recipe, handleDeleteRecipe, editRecipe, shoppingList, handleAddToShoppingList, handleRemoveFromShoppingList }) {
+    return recipe ? (
+        <div id="details" className="card">
+            <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name}/>
+            <div id="detail-btns">
+                <div id="edit-btn" className="primary-btn" onClick={editRecipe}>
+                    <i className="fa fa-pencil"/>
+                </div>
+                <div id="delete-btn" className="primary-btn" onClick={handleDeleteRecipe}>
+                    <i className="fa fa-trash"/>
+                </div>
             </div>
+            <div id="recipe-name">{recipe.name}</div>
             <ul id="ingredient-list">
                 {["Hey", "You"].map(ingredient => {
                     const ingredientInList = shoppingList.includes(ingredient);

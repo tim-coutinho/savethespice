@@ -2,7 +2,6 @@ import React, { Component } from "react";
 
 import "./AddForm.scss";
 
-
 const initialForm = {
     "categories": [],
     "cookTime": "",
@@ -18,7 +17,7 @@ export default class AddForm extends Component {
         super(props);
         this.state = {
             form: {...initialForm, ...this.props.initialValues},
-            valid: true
+            submitHover: false
         };
     }
 
@@ -35,54 +34,55 @@ export default class AddForm extends Component {
         this.setState({form: {...this.state.form, [name]: value}});
     };
 
-    handleSubmit = (e) => {
+    handleSubmit = e => {
         e.preventDefault();
-        this.validate();
-    };
-
-    validate = () => {
-        this.setState({
-            valid: this.state.form !== ""
-        }, () => {
-            if (!this.state.valid) {
-                return;
-            }
-            const {form} = this.state;
-            const lastEditedTime = new Date().getTime();
-            this.props.handleAddRecipe({
-                ...form,
-                originalSubmitTime: form.lastEditedTime ? form.lastEditedTime : lastEditedTime,
-                lastEditedTime
-            });
+        if (this.valid()[0]) {
+            return;
+        }
+        const {form} = this.state;
+        const lastEditedTime = new Date().getTime();
+        this.props.handleAddRecipe({
+            ...form,
+            originalSubmitTime: form.lastEditedTime ? form.lastEditedTime : lastEditedTime,
+            lastEditedTime
         });
     };
 
+    valid = () => {
+        const errors = {
+            name: this.state.form.name.length === 0
+        };
+        return [Object.keys(errors).some(x => errors[x]), errors];
+    };
+
     render() {
-        const { form } = this.state;
+        const {form} = this.state;
+        const [invalid, errors] = this.valid();
 
         return (
-            <div id="add-form-card" className={this.props.visible ? "visible" : ""}>
-                <form id="add-form" onSubmit={this.handleSubmit} noValidate>
+            <div id="add-form-card" className={`${this.props.visible ? "visible" : ""} card`}>
+                <form id="add-form" onSubmit={this.handleSubmit}>
                     <input
                         type="text"
+                        className={this.state.submitHover && errors["name"] ? "error" : ""}
                         onChange={this.handleFormChange}
                         name="name"
                         value={form.name}
                         placeholder="Recipe Name"
-                        style={{borderColor: this.state.valid ? "gray" : "red"}}
-                        required
                     />
                     <br/>
                     <input
                         type="text"
+                        className={this.state.submitHover && errors["desc"] ? "error" : ""}
                         onChange={this.handleFormChange}
                         name="desc"
                         value={form.desc}
-                        placeholder="Notes"
+                        placeholder="Description"
                     />
                     <br/>
                     <input
                         type="text"
+                        className={this.state.submitHover && errors["imgSrc"] ? "error" : ""}
                         onChange={this.handleFormChange}
                         name="imgSrc"
                         value={form.imgSrc}
@@ -90,7 +90,7 @@ export default class AddForm extends Component {
                     />
                     <div
                         id="add-form-cancel"
-                        className="form-btn purple-btn"
+                        className="form-btn primary-btn"
                         onClick={() => this.props.handleAddRecipe()}
                     >
                         Cancel
@@ -98,8 +98,10 @@ export default class AddForm extends Component {
                     <input
                         type="submit"
                         id="add-form-submit"
-                        className="form-btn purple-btn"
+                        className={`${invalid ? "error" : ""} form-btn primary-btn`}
                         value="Save Recipe"
+                        onMouseEnter={() => this.setState({submitHover: true})}
+                        onMouseLeave={() => this.setState({submitHover: false})}
                     />
                 </form>
             </div>

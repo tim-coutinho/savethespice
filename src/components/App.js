@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import firebase, { auth, provider } from "../utils/firebase";
 
 import AddForm from "./AddForm";
+import DeleteForm from "./DeleteForm";
 import Details from "./Details";
 import Header from "./Header";
 import RecipeList from "./RecipeList";
@@ -11,7 +12,6 @@ import ShoppingList from "./ShoppingList";
 import Sidebar from "./Sidebar";
 
 import "./App.scss";
-
 
 function App() {
     const [user, setUser] = useState(auth.currentUser);
@@ -26,9 +26,11 @@ function App() {
     const [editMode, setEditMode] = useState(false);
     const [shoppingList, setShoppingList] = useState([]);
 
-    const handleViewChange = (source) => {
+    const handleViewChange = source => {
         setCurrentView(() => {
             switch (source) {
+            case "Delete":
+                return currentView === "Delete" ? "Home" : "Delete";
             case "Edit":
                 setEditMode(true);
                 return currentView === "Add" ? "Home" : "Add";
@@ -70,6 +72,10 @@ function App() {
             }
         }
         handleViewChange("Add");
+    };
+
+    const handleDeleteRecipe = confirm => {
+        handleViewChange("Delete");
     };
 
     const handleAddToShoppingList = ingredient => {
@@ -119,10 +125,14 @@ function App() {
             if (user) {
                 setUser(user);
             } else {
-                auth.signInWithRedirect(provider);
-                auth.getRedirectResult().then(result => {
-                    setUser(result.user);
-                });
+                auth.signInWithPopup(provider)
+                    .then(result => {
+                        setUser(result.user);
+                    })
+                    .catch(error => {
+                        const { code, message, email, credential } = error;
+                        console.log("Error:", {code, message, email, credential});
+                    });
             }
         });
     }, []);
@@ -133,32 +143,32 @@ function App() {
                 categories={categories}
                 changeSelectedItem={setSelectedSidebarItem}
                 selectedItem={selectedSidebarItem}
-                classes={currentView === "Add" ? "disabled" : ""}
+                classes={currentView === "Add" || currentView === "Delete" ? "disabled" : ""}
             />
             <div
                 id="main-content"
-                className={`${currentView === "Sidebar" ? "shifted-right" : currentView === "Add" ? "disabled" : ""}`}
+                className={`${currentView === "Sidebar" ? "shifted-right" : currentView === "Add" || currentView === "Delete" ? "disabled" : ""}`}
             >
                 <div id="left">
                     <Header
                         filter={filter}
                         shiftedRight={currentView === "Sidebar"}
                         handleFilterChange={handleFilterChange}
-                        handleViewChange={handleViewChange}
+                        handleViewChange={source => () => handleViewChange(source)}
                     />
                     <RecipeList
                         items={isLoading ? null : filteredItems}
                         changeSelectedRecipe={(id) => setSelectedRecipe(id)}
                         selectedCategory={selectedSidebarItem}
                         selectedRecipe={selectedRecipe}
-                        handleViewChange={handleViewChange}
                     />
                 </div>
                 <div id="right">
                     {/*<ShoppingList shoppingList={shoppingList}/>*/}
                     <Details
-                        item={items[selectedRecipe]}
-                        edit={() => handleViewChange("Edit")}
+                        recipe={items[selectedRecipe]}
+                        handleDeleteRecipe={() => handleViewChange("Delete")}
+                        editRecipe={() => handleViewChange("Edit")}
                         shoppingList={shoppingList}
                         handleAddToShoppingList={handleAddToShoppingList}
                         handleRemoveFromShoppingList={handleRemoveFromShoppingList}
@@ -169,6 +179,10 @@ function App() {
                 handleAddRecipe={handleAddRecipe}
                 visible={currentView === "Add"}
                 initialValues={editMode ? {id: selectedRecipe, ...items[selectedRecipe]} : {}}
+            />
+            <DeleteForm
+                handleDeleteRecipe={handleDeleteRecipe}
+                visible={currentView === "Delete"}
             />
         </div>
     );

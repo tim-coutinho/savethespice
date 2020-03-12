@@ -1,0 +1,45 @@
+@use "vars";
+
+#delete-form {
+    left: 50%;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, calc(50vh + 50%));
+    transition: transform, opacity, width;
+    transition-duration: vars.$standard-transition-duration;
+    width: 0;
+
+    &.visible {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+        width: 300px;
+    }
+
+    #buttons {
+        align-items: center;
+        display: flex;
+        justify-content: flex-end;
+        margin: 40px 10px 10px auto;
+    }
+
+    #delete-form-cancel {
+        background-color: vars.$btn-secondary-color;
+        color: vars.$btn-primary-color;
+        margin-right: 10px;
+
+        @media(hover: hover) and (pointer: fine) {
+            &:hover {
+                background-color: vars.$btn-primary-color;
+                color: vars.$btn-secondary-color;
+            }
+        }
+    }
+
+    .primary-btn {
+        display: inline-flex;
+        font-size: 18px;
+        padding: 5px;
+        width: min-content;
+    }
+}

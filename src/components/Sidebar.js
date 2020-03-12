@@ -7,7 +7,7 @@ import "./Sidebar.scss";
 export default function Sidebar({categories, changeSelectedItem, selectedItem, classes}) {
     return (
         <div id="sidebar" className={classes}>
-            <ul>
+            <ul id="sidebar-list">
                 <li className={"sidebar-item sidebar-section"}>
                     Categories
                 </li>

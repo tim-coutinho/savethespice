@@ -1,13 +1,9 @@
 @use "vars";
 
 #add-form-card {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 1pt 5pt 0 rgba(0, 0, 0, .3);
     height: 95vh;
     left: 50%;
     opacity: 0;
-    padding: 10px;
     position: absolute;
     top: 50%;
     transform: translate(calc(100vw - 50%), -50%);
@@ -28,12 +24,12 @@
     #add-form-cancel {
         background-color: vars.$btn-secondary-color;
         color: vars.$btn-primary-color;
-    }
 
-    @media(hover: hover) and (pointer: fine) {
-        #add-form-cancel:hover {
-            background-color: vars.$btn-primary-color;
-            color: vars.$btn-secondary-color;
+        @media(hover: hover) and (pointer: fine) {
+            &:hover {
+                background-color: vars.$btn-primary-color;
+                color: vars.$btn-secondary-color;
+            }
         }
     }
 
@@ -45,9 +41,20 @@
 
     input[type="text"] {
         border: 1px solid gray;
+        transition: vars.$standard-transition-duration;
+
+        &.error {
+            border-color: red;
+            transition: none;
+        }
     }
 
-    input:required::before {
-        content: "*";
+    input[type="submit"].error {
+        @include vars.btn-primary-nohover;
+        opacity: 0.5;
+
+        &:hover {
+            cursor: default;
+        }
     }
 }

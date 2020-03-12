@@ -20,15 +20,15 @@ export default function Header(props) {
     <div id="header" className={focused ? "filter-focused" : ""}>
       <div
         id="sidebar-btn"
-        className="header-btn purple-btn"
-        onClick={() => props.handleViewChange("Sidebar")}
+        className="header-btn primary-btn"
+        onClick={props.handleViewChange("Sidebar")}
       >
         <i className={`fa fa-${props.shiftedRight ? "arrow-left" : "bars"}`} />
       </div>
       <div
         id="filter-wrapper"
         onClick={() => !focused && toggleFocus()}
-        className={`${focused ? "filter-focused" : ""} header-btn purple-btn`}
+        className={`${focused ? "filter-focused" : ""} header-btn primary-btn`}
       >
         <input
           id="filter"
@@ -40,8 +40,8 @@ export default function Header(props) {
       </div>
       <div
         id="add-btn"
-        className="header-btn purple-btn"
-        onClick={() => props.handleViewChange("Add")}
+        className="header-btn primary-btn"
+        onClick={props.handleViewChange("Add")}
       >
         <i className="fa fa-plus" />
       </div>
