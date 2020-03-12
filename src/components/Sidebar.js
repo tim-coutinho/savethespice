@@ -4,7 +4,6 @@ import SidebarItem from "./SidebarItem";
 
 import "./Sidebar.scss";
 
-
 export default function Sidebar({categories, changeSelectedItem, selectedItem, classes}) {
     return (
         <div id="sidebar" className={classes}>

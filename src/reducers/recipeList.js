@@ -6,12 +6,12 @@ const recipeList = (state = [], action) => {
             {
 
             }
-        ]
-    case "REMOVE_RECIPE":
+        ];
+    case "DELETE_RECIPE":
         return null;
     default:
         return state;
     }
-}
+};
 
 export default recipeList;

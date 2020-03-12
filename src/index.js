@@ -3,12 +3,11 @@ import { render } from "react-dom";
 import { Provider } from "react-redux";
 
 import { getById } from "./utils/common";
-import rootReducer from "./reducers";
 import App from "./components/App";
 import configureStore from "./configureStore";
 import "./components/index.scss";
 
-const store = configureStore(rootReducer);
+const store = configureStore();
 
 const renderApp = () =>
     render(

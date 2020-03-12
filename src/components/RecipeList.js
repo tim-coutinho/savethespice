@@ -4,7 +4,6 @@ import RecipeLoader from "./RecipeLoader";
 
 import "./RecipeList.scss";
 
-
 export default function RecipeList({items, selectedCategory, selectedRecipe, changeSelectedRecipe}) {
     return items !== null ? (
         <ul id="recipe-list">
