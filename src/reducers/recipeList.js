@@ -1,17 +1,12 @@
 const recipeList = (state = [], action) => {
-    switch (action.type) {
+  switch (action.type) {
     case "ADD_RECIPE":
-        return [
-            ...state,
-            {
-
-            }
-        ];
+      return [...state, {}];
     case "DELETE_RECIPE":
-        return null;
+      return null;
     default:
-        return state;
-    }
+      return state;
+  }
 };
 
 export default recipeList;

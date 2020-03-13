@@ -1,54 +1,54 @@
 @use "vars";
 
 #main-content {
-    background-color: vars.$background-color;
+  background-color: vars.$background-color;
+  display: flex;
+  position: relative;
+  float: right;
+  opacity: 1;
+  transition: vars.$standard-transition-duration;
+  width: 100%;
+
+  &.shifted-right {
+    width: calc(100vw - #{vars.$sidebar-width});
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  #left {
+    border-right: 1px solid #e1e0e0;
     display: flex;
-    position: relative;
-    float: right;
-    opacity: 1;
-    transition: vars.$standard-transition-duration;
-    width: 100%;
+    flex-direction: column;
+    height: 100vh;
+    max-width: vars.$left-max-length;
+    min-width: vars.$left-min-length;
+  }
 
-    &.shifted-right {
-        width: calc(100vw - #{vars.$sidebar-width});
-    }
-
-    &.disabled {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-
-    #left {
-        border-right: 1px solid #e1e0e0;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        max-width: vars.$left-max-length;
-        min-width: vars.$left-min-length;
-    }
-
-    #right {
-        display: flex;
-        flex-grow: 1;
-        max-width: calc(100vw - #{vars.$left-max-length});
-    }
+  #right {
+    display: flex;
+    flex-grow: 1;
+    max-width: calc(100vw - #{vars.$left-max-length});
+  }
 }
 
 .primary-btn {
-    @include vars.btn-primary-nohover;
-    align-items: center;
-    border: 2px solid vars.$btn-primary-color;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    font-size: 1.5em;
-    justify-content: center;
-    user-select: none;
-    transition: vars.$standard-transition-duration;
+  @include vars.btn-primary-nohover;
+  align-items: center;
+  border: 2px solid vars.$btn-primary-color;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  font-size: 1.5em;
+  justify-content: center;
+  user-select: none;
+  transition: vars.$standard-transition-duration;
 
-    @media(hover: hover) and (pointer: fine) {
-        &:hover {
-            @include vars.btn-primary-hover;
-        }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @include vars.btn-primary-hover;
     }
+  }
 }

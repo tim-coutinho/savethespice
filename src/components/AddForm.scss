@@ -1,60 +1,60 @@
 @use "vars";
 
 #add-form-card {
-    height: 95vh;
-    left: 50%;
-    opacity: 0;
-    position: absolute;
-    top: 50%;
-    transform: translate(calc(100vw - 50%), -50%);
-    transition: transform, opacity;
-    transition-duration: vars.$standard-transition-duration;
-    width: 95vw;
+  height: 95vh;
+  left: 50%;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  transform: translate(calc(100vw - 50%), -50%);
+  transition: transform, opacity;
+  transition-duration: vars.$standard-transition-duration;
+  width: 95vw;
 
-    &.visible {
-        opacity: 1;
-        transform: translate(-50%, -50%);
+  &.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  #add-form {
+    height: 100%;
+    width: 100%;
+  }
+
+  #add-form-cancel {
+    background-color: vars.$btn-secondary-color;
+    color: vars.$btn-primary-color;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background-color: vars.$btn-primary-color;
+        color: vars.$btn-secondary-color;
+      }
     }
+  }
 
-    #add-form {
-        height: 100%;
-        width: 100%;
+  #add-form .form-btn {
+    padding: 5px;
+    width: min-content;
+    font-size: 18px;
+  }
+
+  input[type="text"] {
+    border: 1px solid gray;
+    transition: vars.$standard-transition-duration;
+
+    &.error {
+      border-color: red;
+      transition: none;
     }
+  }
 
-    #add-form-cancel {
-        background-color: vars.$btn-secondary-color;
-        color: vars.$btn-primary-color;
+  input[type="submit"].error {
+    @include vars.btn-primary-nohover;
+    opacity: 0.5;
 
-        @media(hover: hover) and (pointer: fine) {
-            &:hover {
-                background-color: vars.$btn-primary-color;
-                color: vars.$btn-secondary-color;
-            }
-        }
+    &:hover {
+      cursor: default;
     }
-
-    #add-form .form-btn {
-        padding: 5px;
-        width: min-content;
-        font-size: 18px;
-    }
-
-    input[type="text"] {
-        border: 1px solid gray;
-        transition: vars.$standard-transition-duration;
-
-        &.error {
-            border-color: red;
-            transition: none;
-        }
-    }
-
-    input[type="submit"].error {
-        @include vars.btn-primary-nohover;
-        opacity: 0.5;
-
-        &:hover {
-            cursor: default;
-        }
-    }
+  }
 }

@@ -10,13 +10,15 @@ import "./components/index.scss";
 const store = configureStore();
 
 const renderApp = () =>
-    render(
-        <Provider store={store}><App/></Provider>,
-        getById("root")
-    );
+  render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+    getById("root")
+  );
 
 if (process.env.NODE_ENV !== "production" && module.hot) {
-    module.hot.accept("./components/App", renderApp)
+  module.hot.accept("./components/App", renderApp);
 }
 
 renderApp();

@@ -3,8 +3,8 @@ import { combineReducers } from "redux";
 import recipeList from "./recipeList.js";
 
 const reducers = {
-    // todos,
-    recipeList,
+  // todos,
+  recipeList
 };
 
 export default combineReducers(reducers);

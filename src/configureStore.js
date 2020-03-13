@@ -6,17 +6,17 @@ import loggerMiddleware from "./middleware/logger";
 import rootReducer from "./reducers";
 
 export default function configureStore(preloadedState) {
-    const middlewares = [loggerMiddleware, thunkMiddleware];
-    const middlewareEnhancer = applyMiddleware(...middlewares);
+  const middlewares = [loggerMiddleware, thunkMiddleware];
+  const middlewareEnhancer = applyMiddleware(...middlewares);
 
-    const enhancers = [middlewareEnhancer];
-    const composedEnhancers = composeWithDevTools(...enhancers);
+  const enhancers = [middlewareEnhancer];
+  const composedEnhancers = composeWithDevTools(...enhancers);
 
-    const store = createStore(rootReducer, preloadedState, composedEnhancers);
+  const store = createStore(rootReducer, preloadedState, composedEnhancers);
 
-    if (process.env.NODE_ENV !== "production" && module.hot) {
-        module.hot.accept("./reducers", () => store.replaceReducer(rootReducer))
-    }
+  if (process.env.NODE_ENV !== "production" && module.hot) {
+    module.hot.accept("./reducers", () => store.replaceReducer(rootReducer));
+  }
 
-    return store;
+  return store;
 }
