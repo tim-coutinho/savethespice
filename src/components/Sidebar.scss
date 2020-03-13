@@ -20,37 +20,14 @@
 
   .sidebar-item {
     align-items: center;
+    color: white;
+    cursor: pointer;
     display: flex;
     justify-content: flex-start;
     padding: 10px 20px;
     transition: 50ms;
 
-    &.sidebar-category {
-      color: white;
-      cursor: pointer;
-    }
-
-    &.sidebar-section {
-      color: #aaaaaa;
-      cursor: default;
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-      /* Desktop */
-      &:not(.sidebar-section):hover {
-        background-color: rgba(45, 54, 65, 0.5);
-      }
-
-      &:not(.sidebar-section):hover::before {
-        opacity: 0.25;
-      }
-    }
-
-    &.selected-item {
-      background-color: vars.$sidebar-item-active-background-color;
-    }
-
-    &::before {
+    &.sidebar-category::before {
       color: vars.$btn-primary-color;
       content: "\f0da";
       font-family: FontAwesome;
@@ -61,8 +38,28 @@
       transition: 50ms;
     }
 
-    &.selected-item::before {
-      opacity: 1;
+    &.sidebar-section {
+      color: #aaaaaa;
+      cursor: default;
+    }
+
+    &.selected-item {
+      background-color: vars.$sidebar-item-active-background-color;
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      /* Desktop */
+      &:not(.sidebar-section):not(.selected-item):hover {
+        background-color: rgba(45, 54, 65, 0.5);
+
+        &::before {
+          opacity: 0.25;
+        }
+      }
     }
   }
 }

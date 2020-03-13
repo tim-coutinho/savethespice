@@ -1,11 +1,14 @@
 import React from "react";
 
-export default function SidebarItem({ category, handleClick, selected }) {
+export default function SidebarItem({
+  category,
+  handleClick,
+  selected,
+  classes
+}) {
   return (
     <li
-      className={`${
-        selected ? "selected-item" : ""
-      } sidebar-item sidebar-category`}
+      className={`${selected ? "selected-item" : ""} ${classes}`}
       onClick={handleClick}
     >
       {category}
