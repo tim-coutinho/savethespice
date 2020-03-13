@@ -2,7 +2,7 @@ $btn-primary-color: #9696ff;
 $btn-secondary-color: #ffffff;
 $left-max-length: 15vw;
 $left-min-length: 320px;
-$background-color: #f5f5ff;
+$background-color: #fafafa;
 $standard-transition-duration: 300ms;
 $standard-btn-length: 40px;
 $sidebar-item-active-background-color: #2d3641;
@@ -10,26 +10,26 @@ $sidebar-width: 250px;
 $standard-box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
 
 @mixin btn-primary-nohover {
-    background-color: $btn-primary-color;
-    box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
-    color: $btn-secondary-color;
+  background-color: $btn-primary-color;
+  box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
+  color: $btn-secondary-color;
 }
 
 @mixin btn-primary-hover {
-    background-color: $btn-secondary-color;
-    box-shadow: $standard-box-shadow;
-    color: $btn-primary-color;
+  background-color: $btn-secondary-color;
+  box-shadow: $standard-box-shadow;
+  color: $btn-primary-color;
 }
 
 @mixin default-ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 .card {
-    background-color: $background-color;
-    border-radius: 10px;
-    box-shadow: 0 1pt 5pt 0 rgba(0, 0, 0, .3);
-    padding: 10px;
+  background-color: $background-color;
+  border-radius: 10px;
+  box-shadow: 0 1pt 5pt 0 rgba(0, 0, 0, 0.3);
+  padding: 10px;
 }
