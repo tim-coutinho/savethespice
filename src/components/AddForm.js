@@ -82,21 +82,24 @@ export default function AddForm(props) {
           value={form.imgSrc}
           placeholder="Image URL"
         />
-        <div
-          id="add-form-cancel"
-          className="form-btn primary-btn"
-          onClick={() => props.handleAddRecipe()}
-        >
-          Cancel
-        </div>
-        <input
-          type="submit"
-          id="add-form-submit"
-          className={`${invalid ? "error" : ""} form-btn primary-btn`}
-          value="Save Recipe"
-          onMouseEnter={() => setSubmitHover(true)}
-          onMouseLeave={() => setSubmitHover(false)}
-        />
+        <span style={{ display: "flex" }}>
+          <div
+            id="add-form-cancel"
+            className="form-btn primary-btn"
+            onClick={() => props.handleAddRecipe()}
+            style={{ marginRight: "10px" }}
+          >
+            Cancel
+          </div>
+          <input
+            type="submit"
+            id="add-form-submit"
+            className={`${invalid ? "error" : ""} form-btn primary-btn`}
+            value="Save Recipe"
+            onMouseEnter={() => setSubmitHover(true)}
+            onMouseLeave={() => setSubmitHover(false)}
+          />
+        </span>
       </form>
     </div>
   );

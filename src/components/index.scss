@@ -1,3 +1,5 @@
+@use "vars";
+
 body {
   margin: 0;
   padding: 0;
@@ -10,6 +12,7 @@ html {
   font-family: "Roboto", sans-serif;
   font-size: 15px;
   font-weight: 500;
+  color: vars.$od-white;
 }
 
 *,
@@ -19,4 +22,5 @@ html {
   font-family: inherit;
   font-size: inherit;
   font-weight: inherit;
+  color: inherit;
 }

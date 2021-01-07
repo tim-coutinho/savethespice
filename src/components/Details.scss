@@ -16,13 +16,13 @@
     top: 0;
 
     #delete-btn {
-      background-color: #e72f17;
-      border-color: #e72f17;
+      background-color: vars.$od-dark-red;
+      border-color: vars.$od-dark-red;
 
       &:hover {
-        background-color: vars.$background-color;
-        border-color: #e72f17;
-        color: #e72f17;
+        background-color: vars.$btn-secondary-color;
+        border-color: vars.$od-dark-red;
+        color: vars.$od-dark-red;
       }
     }
 

@@ -19,7 +19,7 @@
   }
 
   #left {
-    border-right: 1px solid #e1e0e0;
+    border-right: 1px solid vars.$od-comment-grey;
     display: flex;
     flex-direction: column;
     height: 100vh;

@@ -1,7 +1,7 @@
 @use "vars";
 
 #header {
-  border-bottom: 1px solid #e1e0e0;
+  border-bottom: 1px solid vars.$od-comment-grey;
   display: grid;
   grid-column-gap: 10px;
   grid-template-columns: 1fr vars.$standard-btn-length vars.$standard-btn-length;

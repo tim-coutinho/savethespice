@@ -40,12 +40,12 @@
   }
 
   input[type="text"] {
-    border: 1px solid gray;
+    border: 2px solid vars.$od-blue;
+    margin-bottom: 5px;
     transition: vars.$standard-transition-duration;
 
     &.error {
-      border-color: red;
-      transition: none;
+      border-color: vars.$od-red;
     }
   }
 

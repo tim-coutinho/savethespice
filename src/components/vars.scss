@@ -1,11 +1,30 @@
-$btn-primary-color: #9696ff;
+$od-red: #e06c75;
+$od-dark-red: #be5046;
+$od-green: #98c379;
+$od-yellow: #e5c07b;
+$od-dark-yellow: #d19a66;
+$od-blue: #61afef;
+$od-purple: #c678dd;
+$od-cyan: #56b6c2;
+$od-white: #abb2bf;
+$od-black: #282c34;
+
+$od-comment-grey: #5c6370;
+$od-gutter-fg-grey: #4b5263;
+$od-cursor-grey: #2c323c;
+$od-visual-grey: #3e4452;
+$od-menu-grey: $od-visual-grey;
+$od-special-grey: #3b4048;
+$od-vertsplit: #181a1f;
+
+$btn-primary-color: $od-purple;
 $btn-secondary-color: #ffffff;
 $left-max-length: 15vw;
 $left-min-length: 320px;
-$background-color: #fafafa;
+$background-color: $od-black;
 $standard-transition-duration: 300ms;
 $standard-btn-length: 40px;
-$sidebar-item-active-background-color: #2d3641;
+$sidebar-item-active-background-color: $od-visual-grey;
 $sidebar-width: 250px;
 $standard-box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
 
