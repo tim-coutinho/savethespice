@@ -1,50 +1,52 @@
 import React, { useEffect, useRef, useState } from "react";
 
+import Button from "./Button";
+
 import "./Header.scss";
 
-export default function Header(props) {
+export default function Header({ filter, handleFilterChange, handleViewChange, shiftedRight }) {
   const ref = useRef(null);
   const [focused, setFocused] = useState(false);
 
   const toggleFocus = () => {
-    props.filter === "" && setFocused(!focused);
+    filter === "" && setFocused(!focused);
   };
 
   useEffect(() => {
     focused
       ? setTimeout(() => ref.current.focus(), 50)
-      : props.filter === "" && ref.current.blur();
+      : filter === "" && ref.current.blur();
   });
 
   return (
     <div id="header" className={focused ? "filter-focused" : ""}>
-      <div
+      <Button
         id="sidebar-btn"
-        className="header-btn primary-btn"
-        onClick={props.handleViewChange("Sidebar")}
+        classes="header-btn"
+        onClick={handleViewChange("Sidebar")}
       >
-        <i className={`fa fa-${props.shiftedRight ? "arrow-left" : "bars"}`} />
-      </div>
-      <div
+        <i className={`fa fa-${shiftedRight ? "arrow-left" : "bars"}`} />
+      </Button>
+      <Button
         id="filter-wrapper"
         onClick={() => !focused && toggleFocus()}
-        className={`${focused ? "filter-focused" : ""} header-btn primary-btn`}
+        classes={`${focused ? "filter-focused" : ""} header-btn`}
       >
         <input
           id="filter"
           onBlur={toggleFocus}
-          onChange={props.handleFilterChange}
+          onChange={handleFilterChange}
           ref={ref}
-          value={props.filter}
+          value={filter}
         />
-      </div>
-      <div
+      </Button>
+      <Button
         id="add-btn"
-        className="header-btn primary-btn"
-        onClick={props.handleViewChange("Add")}
+        classes="header-btn"
+        onClick={handleViewChange("Add")}
       >
         <i className="fa fa-plus" />
-      </div>
+      </Button>
     </div>
   );
 }

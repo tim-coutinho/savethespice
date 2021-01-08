@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+import Button from "./Button";
 
 import "./AddForm.scss";
 
@@ -12,13 +14,18 @@ const initialForm = {
   desc: ""
 };
 
-export default function AddForm(props) {
+export default function AddForm({ handleAddRecipe, initialValues, visible }) {
+  const ref = useRef(null);
   const [submitHover, setSubmitHover] = useState(false);
-  const [form, setForm] = useState({ ...initialForm, ...props.initialValues });
+  const [form, setForm] = useState({ ...initialForm, ...initialValues });
 
   useEffect(() => {
-    setForm({ ...initialForm, ...props.initialValues });
-  }, [props.visible, props.initialValues]);
+    setForm({ ...initialForm, ...initialValues });
+  }, [visible, initialValues]);
+
+  useEffect(() => {
+    visible && setTimeout(() => ref.current.focus(), 100);
+  }, [visible]);
 
   const handleFormChange = e => {
     e.preventDefault();
@@ -32,7 +39,7 @@ export default function AddForm(props) {
       return;
     }
     const lastEditedTime = new Date().getTime();
-    props.handleAddRecipe({
+    handleAddRecipe({
       ...form,
       originalSubmitTime: form.lastEditedTime
         ? form.lastEditedTime
@@ -53,9 +60,9 @@ export default function AddForm(props) {
   return (
     <div
       id="add-form-card"
-      className={`${props.visible ? "visible" : ""} card`}
+      className={`${visible ? "visible" : ""} card`}
     >
-      <form id="add-form" onSubmit={handleSubmit}>
+      <form id="add-form">
         <input
           type="text"
           className={submitHover && errors["name"] ? "error" : ""}
@@ -63,6 +70,7 @@ export default function AddForm(props) {
           name="name"
           value={form.name}
           placeholder="Recipe Name"
+          ref={ref}
         />
         <br />
         <input
@@ -83,22 +91,28 @@ export default function AddForm(props) {
           placeholder="Image URL"
         />
         <span style={{ display: "flex" }}>
-          <div
+        <Button
             id="add-form-cancel"
-            className="form-btn primary-btn"
-            onClick={() => props.handleAddRecipe()}
+            classes="form-btn"
+            onClick={() => handleAddRecipe()}
             style={{ marginRight: "10px" }}
-          >
-            Cancel
-          </div>
-          <input
-            type="submit"
-            id="add-form-submit"
-            className={`${invalid ? "error" : ""} form-btn primary-btn`}
-            value="Save Recipe"
+        >
+          Cancel
+        </Button>
+          <span
             onMouseEnter={() => setSubmitHover(true)}
             onMouseLeave={() => setSubmitHover(false)}
-          />
+          >
+            <Button
+              id="add-form-submit"
+              classes={`${invalid ? "error" : ""} form-btn`}
+              onMouseEnter={() => setSubmitHover(true)}
+              onMouseLeave={() => setSubmitHover(false)}
+              onClick={handleSubmit}
+            >
+              Save Recipe
+            </Button>
+          </span>
         </span>
       </form>
     </div>

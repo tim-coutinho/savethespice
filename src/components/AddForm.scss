@@ -10,21 +10,29 @@
   transform: translate(calc(100vw - 50%), -50%);
   transition: transform, opacity;
   transition-duration: vars.$standard-transition-duration;
-  width: 95vw;
+  transition-timing-function: ease-in;
+  width: 45vw;
 
   &.visible {
     opacity: 1;
     transform: translate(-50%, -50%);
+    transition-timing-function: ease-out;
   }
 
   #add-form {
     height: 100%;
     width: 100%;
+
+    .form-btn {
+      padding: 5px;
+      font-size: 18px;
+    }
   }
 
   #add-form-cancel {
     background-color: vars.$btn-secondary-color;
     color: vars.$btn-primary-color;
+    margin-right: 10px;
 
     @media (hover: hover) and (pointer: fine) {
       &:hover {
@@ -34,28 +42,22 @@
     }
   }
 
-  #add-form .form-btn {
-    padding: 5px;
-    width: min-content;
-    font-size: 18px;
-  }
-
-  input[type="text"] {
-    border: 2px solid vars.$od-blue;
-    margin-bottom: 5px;
-    transition: vars.$standard-transition-duration;
-
-    &.error {
-      border-color: vars.$od-red;
-    }
-  }
-
-  input[type="submit"].error {
+  #add-form-submit.error {
     @include vars.btn-primary-nohover;
     opacity: 0.5;
 
     &:hover {
       cursor: default;
+    }
+  }
+
+  input[type="text"] {
+    border: 2px solid vars.$od-blue;
+    margin-bottom: 5px;
+    transition: 150ms;
+
+    &.error {
+      border-color: vars.$od-red;
     }
   }
 }

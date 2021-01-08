@@ -1,5 +1,7 @@
 import React from "react";
 
+import Button from "./Button";
+
 import "./DeleteForm.scss";
 
 export default function DeleteForm({ handleDeleteRecipe, visible }) {
@@ -10,20 +12,22 @@ export default function DeleteForm({ handleDeleteRecipe, visible }) {
       <span style={{ fontWeight: "initial" }}>This cannot be undone.</span>
       <hr />
       <div id="buttons">
-        <span
+        <Button
           id="delete-form-cancel"
-          className="primary-btn"
           onClick={() => handleDeleteRecipe(false)}
+          primaryColor="#FFFFFF"
+          secondaryColor="#C678DD"
+          secondary
         >
           Cancel
-        </span>
-        <span
-          id="delete-form-delete"
-          className="primary-btn"
+        </Button>
+        <Button
           onClick={() => handleDeleteRecipe(true)}
+          primaryColor="#BE5046"
+          secondaryColor="#FFFFFF"
         >
           Delete
-        </span>
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { hot } from "react-hot-loader/root"; // Enable live component reloading
+import { hot  } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
 import firebase, { auth, provider } from "../utils/firebase";
@@ -76,13 +76,8 @@ function App() {
 
   const handleDeleteRecipe = confirm => {
     const itemRef = firebase.ref(`users/${user.uid}/recipes`);
-    itemRef
-      .child(selectedRecipe)
-      .remove()
-      .then(() => {
-        setSelectedRecipe("");
-        handleViewChange("Delete");
-      });
+    confirm && itemRef.child(selectedRecipe).remove().then(() => setSelectedRecipe(""));
+    handleViewChange("Delete");
   };
 
   const handleAddToShoppingList = ingredient => {
@@ -94,7 +89,7 @@ function App() {
   };
 
   const handleListChange = snapshot => {
-    setIsLoading(true);
+    // setIsLoading(true);
     setItems(snapshot.val());
   };
 
@@ -131,7 +126,6 @@ function App() {
     }
     const itemsRef = firebase.ref(`users/${user.uid}/recipes`);
     itemsRef.on("value", handleListChange);
-    itemsRef.on("child_removed", handleListChange);
   }, [user]);
 
   useEffect(() => {

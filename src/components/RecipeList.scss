@@ -47,7 +47,7 @@
 
       .recipe {
         border-color: transparent;
-        color: #ffffffe6;
+        color: lighten(vars.$text-color, 30%);
       }
 
       + .recipe-wrapper .recipe {
@@ -60,7 +60,7 @@
         background-color: rgba(vars.$sidebar-item-active-background-color, 0.5);
 
         .recipe {
-          color: #fffc;
+          color: lighten(vars.$text-color, 15%);
         }
       }
     }

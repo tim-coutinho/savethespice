@@ -15,17 +15,6 @@
     right: 0;
     top: 0;
 
-    #delete-btn {
-      background-color: vars.$od-dark-red;
-      border-color: vars.$od-dark-red;
-
-      &:hover {
-        background-color: vars.$btn-secondary-color;
-        border-color: vars.$od-dark-red;
-        color: vars.$od-dark-red;
-      }
-    }
-
     .primary-btn {
       height: vars.$standard-btn-length;
       width: vars.$standard-btn-length;

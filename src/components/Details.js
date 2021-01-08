@@ -1,5 +1,7 @@
 import React from "react";
 
+import Button from "./Button";
+
 import "./Details.scss";
 
 export default function Details({
@@ -14,16 +16,21 @@ export default function Details({
     <div id="details" className="card">
       <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name} />
       <div id="detail-btns">
-        <div id="edit-btn" className="primary-btn" onClick={editRecipe}>
+        <Button
+          id="edit-btn"
+          onClick={editRecipe}
+          primaryColor="#C678DD"
+          secondaryColor="#FFFFFF"
+        >
           <i className="fa fa-pencil" />
-        </div>
-        <div
-          id="delete-btn"
-          className="primary-btn"
+        </Button>
+        <Button
           onClick={handleDeleteRecipe}
+          primaryColor="#BE5046"
+          secondaryColor="#FFFFFF"
         >
           <i className="fa fa-trash" />
-        </div>
+        </Button>
       </div>
       <div id="recipe-name">{recipe.name}</div>
       <ul id="ingredient-list">

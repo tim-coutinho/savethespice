@@ -44,7 +44,7 @@
 
     &.selected-item {
       background-color: vars.$sidebar-item-active-background-color;
-      color: #ffffffe6;
+      color: lighten(vars.$text-color, 30%);
 
       &::before {
         opacity: 1;
@@ -55,7 +55,7 @@
       /* Desktop */
       &:not(.sidebar-section):not(.selected-item):hover {
         background-color: rgba(vars.$sidebar-item-active-background-color, 0.5);
-        color: #fffc;
+        color: lighten(vars.$text-color, 15%);
 
         &::before {
           opacity: 0.25;
