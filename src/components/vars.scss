@@ -26,11 +26,11 @@ $standard-transition-duration: 300ms;
 $standard-btn-length: 40px;
 $sidebar-item-active-background-color: $od-visual-grey;
 $sidebar-width: 250px;
-$standard-box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
+$standard-box-shadow: -4px 4px 4px 0 #0006;
 
 @mixin btn-primary-nohover {
   background-color: $btn-primary-color;
-  box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: -2px 2px 4px 0 #0006;
   color: $btn-secondary-color;
 }
 
@@ -49,6 +49,6 @@ $standard-box-shadow: -4px 4px 4px 0 rgba(0, 0, 0, 0.4);
 .card {
   background-color: $background-color;
   border-radius: 10px;
-  box-shadow: 0 1pt 5pt 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1pt 5pt 0 #0000004d;
   padding: 10px;
 }

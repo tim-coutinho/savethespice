@@ -16,6 +16,7 @@
     margin: 0 20px;
     padding: 20px 0;
     transition: color 100ms;
+    width: 100%;
 
     &:not(.loading) {
       align-items: center;
@@ -31,6 +32,8 @@
   }
 
   .recipe-wrapper {
+    cursor: pointer;
+    display: flex;
     margin: -1px 0;
     min-height: 120px;
     transition: background-color 100ms;
@@ -44,7 +47,7 @@
 
       .recipe {
         border-color: transparent;
-        color: rgba(#ffffff, 0.9);
+        color: #ffffffe6;
       }
 
       + .recipe-wrapper .recipe {
@@ -53,12 +56,11 @@
     }
 
     @media (hover: hover) and (pointer: fine) {
-      &:hover {
+      &:hover:not(.selected-recipe) {
         background-color: rgba(vars.$sidebar-item-active-background-color, 0.5);
-        cursor: pointer;
 
         .recipe {
-          color: rgba(#ffffff, 0.8);
+          color: #fffc;
         }
       }
     }

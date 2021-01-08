@@ -75,7 +75,14 @@ function App() {
   };
 
   const handleDeleteRecipe = confirm => {
-    handleViewChange("Delete");
+    const itemRef = firebase.ref(`users/${user.uid}/recipes`);
+    itemRef
+      .child(selectedRecipe)
+      .remove()
+      .then(() => {
+        setSelectedRecipe("");
+        handleViewChange("Delete");
+      });
   };
 
   const handleAddToShoppingList = ingredient => {
@@ -106,9 +113,11 @@ function App() {
     }
     setCategories(categories);
     setFilteredItems(
-      Object.entries(items).filter(([, item]) =>
-        item.name.toLowerCase().includes(filter.toLowerCase())
-      )
+      Object.entries(items)
+        .reverse()
+        .filter(([, item]) =>
+          item.name.toLowerCase().includes(filter.toLowerCase())
+        )
     );
   }, [filter, items]);
 
