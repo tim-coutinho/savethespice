@@ -45,6 +45,7 @@
   #add-form-submit.error {
     @include vars.btn-primary-nohover;
     opacity: 0.5;
+    pointer-events: none;
 
     &:hover {
       cursor: default;

@@ -1,6 +1,7 @@
 import React from "react";
 
 import Button from "./Button";
+import colors from "../utils/colors";
 
 import "./Details.scss";
 
@@ -16,19 +17,10 @@ export default function Details({
     <div id="details" className="card">
       <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name} />
       <div id="detail-btns">
-        <Button
-          id="edit-btn"
-          onClick={editRecipe}
-          primaryColor="#C678DD"
-          secondaryColor="#FFFFFF"
-        >
+        <Button id="edit-btn" onClick={editRecipe}>
           <i className="fa fa-pencil" />
         </Button>
-        <Button
-          onClick={handleDeleteRecipe}
-          primaryColor="#BE5046"
-          secondaryColor="#FFFFFF"
-        >
+        <Button onClick={handleDeleteRecipe} primaryColor={colors.OD_DARK_RED}>
           <i className="fa fa-trash" />
         </Button>
       </div>

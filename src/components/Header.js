@@ -13,18 +13,12 @@ export default function Header({ filter, handleFilterChange, handleViewChange, s
   };
 
   useEffect(() => {
-    focused
-      ? setTimeout(() => ref.current.focus(), 50)
-      : filter === "" && ref.current.blur();
+    focused ? setTimeout(() => ref.current.focus(), 50) : filter === "" && ref.current.blur();
   });
 
   return (
     <div id="header" className={focused ? "filter-focused" : ""}>
-      <Button
-        id="sidebar-btn"
-        classes="header-btn"
-        onClick={handleViewChange("Sidebar")}
-      >
+      <Button id="sidebar-btn" classes="header-btn" onClick={handleViewChange("Sidebar")}>
         <i className={`fa fa-${shiftedRight ? "arrow-left" : "bars"}`} />
       </Button>
       <Button
@@ -40,11 +34,7 @@ export default function Header({ filter, handleFilterChange, handleViewChange, s
           value={filter}
         />
       </Button>
-      <Button
-        id="add-btn"
-        classes="header-btn"
-        onClick={handleViewChange("Add")}
-      >
+      <Button id="add-btn" classes="header-btn" onClick={handleViewChange("Add")}>
         <i className="fa fa-plus" />
       </Button>
     </div>

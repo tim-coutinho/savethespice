@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import colors from "../utils/colors";
+
 import "./Button.scss";
 
 export default function Button({
@@ -7,11 +9,10 @@ export default function Button({
   classes,
   id,
   onClick,
-  primaryColor,
+  primaryColor = colors.OD_PURPLE,
   secondary,
-  secondaryColor
+  secondaryColor = colors.WHITE
 }) {
-
   const [hover, setHover] = useState(false);
 
   return (
@@ -21,15 +22,19 @@ export default function Button({
       onClick={onClick}
       onMouseEnter={() => setHover(!hover)}
       onMouseLeave={() => setHover(!hover)}
-      style={!hover ? {
-        backgroundColor: primaryColor,
-        borderColor: secondary ? secondaryColor : primaryColor,
-        color: secondaryColor
-      } : {
-        backgroundColor: secondaryColor,
-        borderColor: secondary ? secondaryColor : primaryColor,
-        color: primaryColor
-      }}
+      style={
+        !hover
+          ? {
+              backgroundColor: primaryColor,
+              borderColor: secondary ? secondaryColor : primaryColor,
+              color: secondaryColor
+            }
+          : {
+              backgroundColor: secondaryColor,
+              borderColor: secondary ? secondaryColor : primaryColor,
+              color: primaryColor
+            }
+      }
     >
       {children}
     </div>

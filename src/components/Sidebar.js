@@ -4,12 +4,7 @@ import SidebarItem from "./SidebarItem";
 
 import "./Sidebar.scss";
 
-export default function Sidebar({
-  categories,
-  changeSelectedItem,
-  selectedItem,
-  classes
-}) {
+export default function Sidebar({ categories, changeSelectedItem, selectedItem, classes }) {
   const handleExport = () => {};
 
   const handleImport = () => {};

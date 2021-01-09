@@ -1,24 +1,23 @@
 import firebase from "firebase";
 
 import {
-    apiKey,
-    authDomain,
-    databaseURL,
-    projectId,
-    storageBucket,
-    messagingSenderId,
-    appId
+  apiKey,
+  authDomain,
+  databaseURL,
+  projectId,
+  storageBucket,
+  messagingSenderId,
+  appId
 } from "./secrets";
 
-
 const firebaseConfig = {
-    apiKey: apiKey,
-    authDomain: authDomain,
-    databaseURL: databaseURL,
-    projectId: projectId,
-    storageBucket: storageBucket,
-    messagingSenderId: messagingSenderId,
-    appId: appId
+  apiKey: apiKey,
+  authDomain: authDomain,
+  databaseURL: databaseURL,
+  projectId: projectId,
+  storageBucket: storageBucket,
+  messagingSenderId: messagingSenderId,
+  appId: appId
 };
 
 firebase.initializeApp(firebaseConfig);

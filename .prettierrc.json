@@ -1,3 +1,4 @@
 {
-  "endOfLine": "lf"
+  "arrowParens": "avoid",
+  "printWidth": 100
 }

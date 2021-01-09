@@ -1,14 +1,15 @@
-import { hot  } from "react-hot-loader/root"; // Enable live component reloading
+import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
-import firebase, { auth, provider } from "../utils/firebase";
+import { auth, provider } from "../utils/firebase";
+import Database from "../backend";
 
 import AddForm from "./AddForm";
 import DeleteForm from "./DeleteForm";
 import Details from "./Details";
 import Header from "./Header";
 import RecipeList from "./RecipeList";
-import ShoppingList from "./ShoppingList";
+// import ShoppingList from "./ShoppingList";
 import Sidebar from "./Sidebar";
 
 import "./App.scss";
@@ -25,6 +26,7 @@ function App() {
   const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
   const [editMode, setEditMode] = useState(false);
   const [shoppingList, setShoppingList] = useState([]);
+  const [database, setDatabase] = useState(null);
 
   const handleViewChange = source => {
     setCurrentView(() => {
@@ -47,36 +49,13 @@ function App() {
 
   const handleAddRecipe = values => {
     if (values) {
-      const [ingredients, instructions] = [{}, {}];
-      for (const [i, element] of values.ingredients.entries()) {
-        ingredients[i] = element;
-      }
-      for (const [i, element] of values.instructions.entries()) {
-        instructions[i] = element;
-      }
-      const itemsRef = firebase.ref(`users/${user.uid}/recipes`);
-      if ("id" in values) {
-        itemsRef.child(values.id).set({
-          ...values,
-          ingredients,
-          instructions,
-          id: null
-        });
-      } else {
-        itemsRef.push({
-          ...values,
-          ingredients,
-          instructions,
-          id: null
-        });
-      }
+      database.addRecipe(values, user);
     }
     handleViewChange("Add");
   };
 
   const handleDeleteRecipe = confirm => {
-    const itemRef = firebase.ref(`users/${user.uid}/recipes`);
-    confirm && itemRef.child(selectedRecipe).remove().then(() => setSelectedRecipe(""));
+    confirm && database.removeRecipe(selectedRecipe, user).then(() => setSelectedRecipe(""));
     handleViewChange("Delete");
   };
 
@@ -89,7 +68,6 @@ function App() {
   };
 
   const handleListChange = snapshot => {
-    // setIsLoading(true);
     setItems(snapshot.val());
   };
 
@@ -98,7 +76,10 @@ function App() {
   };
 
   useEffect(() => {
-    const categories = [{ name: "All Recipes", selected: true }];
+    const categories = [];
+    if (!items) {
+      return;
+    }
     for (const [, item] of Object.entries(items)) {
       if (item.categories) {
         Object.values(item.categories).forEach(category =>
@@ -106,13 +87,14 @@ function App() {
         );
       }
     }
-    setCategories(categories);
+    setCategories([
+      { name: "All Recipes", selected: true },
+      ...categories.sort((category1, category2) => category1.name > category2.name)
+    ]);
     setFilteredItems(
       Object.entries(items)
         .reverse()
-        .filter(([, item]) =>
-          item.name.toLowerCase().includes(filter.toLowerCase())
-        )
+        .filter(([, item]) => item.name.toLowerCase().includes(filter.toLowerCase()))
     );
   }, [filter, items]);
 
@@ -124,8 +106,7 @@ function App() {
     if (!user) {
       return;
     }
-    const itemsRef = firebase.ref(`users/${user.uid}/recipes`);
-    itemsRef.on("value", handleListChange);
+    setDatabase(new Database(user.uid, handleListChange));
   }, [user]);
 
   useEffect(() => {
@@ -152,9 +133,7 @@ function App() {
         categories={categories}
         changeSelectedItem={setSelectedSidebarItem}
         selectedItem={selectedSidebarItem}
-        classes={
-          currentView === "Add" || currentView === "Delete" ? "disabled" : ""
-        }
+        classes={currentView === "Add" || currentView === "Delete" ? "disabled" : ""}
       />
       <div
         id="main-content"
@@ -182,27 +161,24 @@ function App() {
         </div>
         <div id="right">
           {/*<ShoppingList shoppingList={shoppingList}/>*/}
-          <Details
-            recipe={items[selectedRecipe]}
-            handleDeleteRecipe={() => handleViewChange("Delete")}
-            editRecipe={() => handleViewChange("Edit")}
-            shoppingList={shoppingList}
-            handleAddToShoppingList={handleAddToShoppingList}
-            handleRemoveFromShoppingList={handleRemoveFromShoppingList}
-          />
+          {items && (
+            <Details
+              recipe={items[selectedRecipe]}
+              handleDeleteRecipe={() => handleViewChange("Delete")}
+              editRecipe={() => handleViewChange("Edit")}
+              shoppingList={shoppingList}
+              handleAddToShoppingList={handleAddToShoppingList}
+              handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+            />
+          )}
         </div>
       </div>
       <AddForm
         handleAddRecipe={handleAddRecipe}
         visible={currentView === "Add"}
-        initialValues={
-          editMode ? { id: selectedRecipe, ...items[selectedRecipe] } : {}
-        }
+        initialValues={editMode ? { id: selectedRecipe, ...items[selectedRecipe] } : {}}
       />
-      <DeleteForm
-        handleDeleteRecipe={handleDeleteRecipe}
-        visible={currentView === "Delete"}
-      />
+      <DeleteForm handleDeleteRecipe={handleDeleteRecipe} visible={currentView === "Delete"} />
     </div>
   );
 }

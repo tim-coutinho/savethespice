@@ -1,6 +1,7 @@
 import React from "react";
 
 import Button from "./Button";
+import colors from "../utils/colors";
 
 import "./DeleteForm.scss";
 
@@ -15,17 +16,13 @@ export default function DeleteForm({ handleDeleteRecipe, visible }) {
         <Button
           id="delete-form-cancel"
           onClick={() => handleDeleteRecipe(false)}
-          primaryColor="#FFFFFF"
-          secondaryColor="#C678DD"
+          primaryColor={colors.WHITE}
+          secondaryColor={colors.OD_PURPLE}
           secondary
         >
           Cancel
         </Button>
-        <Button
-          onClick={() => handleDeleteRecipe(true)}
-          primaryColor="#BE5046"
-          secondaryColor="#FFFFFF"
-        >
+        <Button onClick={() => handleDeleteRecipe(true)} primaryColor={colors.OD_DARK_RED}>
           Delete
         </Button>
       </div>

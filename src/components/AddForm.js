@@ -5,13 +5,13 @@ import Button from "./Button";
 import "./AddForm.scss";
 
 const initialForm = {
-  categories: [],
+  categories: "",
   cookTime: "",
+  desc: "",
   imgSrc: "",
-  ingredients: [],
-  instructions: [],
-  name: "",
-  desc: ""
+  ingredients: "",
+  instructions: "",
+  name: ""
 };
 
 export default function AddForm({ handleAddRecipe, initialValues, visible }) {
@@ -41,9 +41,8 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
     const lastEditedTime = new Date().getTime();
     handleAddRecipe({
       ...form,
-      originalSubmitTime: form.lastEditedTime
-        ? form.lastEditedTime
-        : lastEditedTime,
+      categories: form.categories.split(" "),
+      originalSubmitTime: form.lastEditedTime || lastEditedTime,
       lastEditedTime
     });
   };
@@ -58,10 +57,7 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
   const [invalid, errors] = valid();
 
   return (
-    <div
-      id="add-form-card"
-      className={`${visible ? "visible" : ""} card`}
-    >
+    <div id="add-form-card" className={`${visible ? "visible" : ""} card`}>
       <form id="add-form">
         <input
           type="text"
@@ -90,15 +86,24 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           value={form.imgSrc}
           placeholder="Image URL"
         />
+        <br />
+        <input
+          type="text"
+          className={submitHover && errors["categories"] ? "error" : ""}
+          onChange={handleFormChange}
+          name="categories"
+          value={form.categories}
+          placeholder="Categories"
+        />
         <span style={{ display: "flex" }}>
-        <Button
+          <Button
             id="add-form-cancel"
             classes="form-btn"
             onClick={() => handleAddRecipe()}
             style={{ marginRight: "10px" }}
-        >
-          Cancel
-        </Button>
+          >
+            Cancel
+          </Button>
           <span
             onMouseEnter={() => setSubmitHover(true)}
             onMouseLeave={() => setSubmitHover(false)}
