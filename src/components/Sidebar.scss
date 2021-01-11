@@ -2,63 +2,95 @@
 
 #sidebar {
   background-color: #1f252d;
-  width: vars.$sidebar-width;
-  position: absolute;
+  display: flex;
   height: 100%;
   opacity: 1;
+  position: absolute;
   transition: opacity 2 * vars.$standard-transition-duration;
+  width: vars.$sidebar-width;
 
   &.disabled {
-    transition: opacity vars.$standard-transition-duration / 2;
     opacity: 0;
     pointer-events: none;
+    transition: opacity vars.$standard-transition-duration / 2;
   }
 
   #sidebar-list {
-    @include vars.default-ul;
-  }
+    @include vars.default-list;
+    width: vars.$sidebar-width;
 
-  .sidebar-item {
-    align-items: center;
-    cursor: pointer;
-    display: flex;
-    justify-content: flex-start;
-    padding: 10px 20px;
-    transition: 50ms;
+    .sidebar-item {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      justify-content: flex-start;
+      padding: 10px 20px;
+      transition: transform 50ms;
 
-    &.sidebar-category::before {
-      color: vars.$btn-primary-color;
-      content: "\f0da";
-      font-family: FontAwesome;
-      font-size: 30px;
-      left: 0;
-      opacity: 0;
-      position: fixed;
-      transition: 50ms;
-    }
-
-    &.sidebar-section {
-      color: vars.$od-blue;
-      cursor: default;
-    }
-
-    &.selected-item {
-      background-color: vars.$sidebar-item-active-background-color;
-      color: lighten(vars.$text-color, 30%);
-
-      &::before {
-        opacity: 1;
+      &.sidebar-category::before {
+        color: vars.$btn-primary-color;
+        content: "\f0da";
+        font-family: FontAwesome;
+        font-size: 30px;
+        left: 0;
+        opacity: 0;
+        position: fixed;
+        transition: 50ms;
       }
-    }
 
-    @media (hover: hover) and (pointer: fine) {
-      /* Desktop */
-      &:not(.sidebar-section):not(.selected-item):hover {
-        background-color: rgba(vars.$sidebar-item-active-background-color, 0.5);
-        color: lighten(vars.$text-color, 15%);
+      &.sidebar-section {
+        color: vars.$od-blue;
+        cursor: default;
+
+        &#categories-header {
+          display: flex;
+          font-size: 1.2em;
+          height: vars.$standard-btn-length + 20px;
+          justify-content: space-between;
+          padding-right: 10px;
+          transition: vars.$standard-transition-duration;
+          width: vars.$sidebar-width * 2;
+
+          &.shifted-left {
+            transform: translate(-50%);
+          }
+
+          #categories-header-left {
+            display: flex;
+            justify-content: space-between;
+            width: calc(50% - 20px);
+
+            i {
+              cursor: pointer;
+              font-size: 1.3em;
+            }
+          }
+
+          #categories-header-right {
+            color: vars.$od-black;
+            font-size: 15px;
+            width: 50%;
+          }
+        }
+      }
+
+      &.selected-item {
+        background-color: vars.$sidebar-item-active-background-color;
+        color: lighten(vars.$text-color, 30%);
 
         &::before {
-          opacity: 0.25;
+          opacity: 1;
+        }
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        &:not(.sidebar-section):not(.selected-item):hover {
+          background-color: rgba(vars.$sidebar-item-active-background-color, 0.5);
+          color: lighten(vars.$text-color, 15%);
+
+          &::before {
+            opacity: 0.25;
+          }
         }
       }
     }

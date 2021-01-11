@@ -1,19 +1,19 @@
 import React from "react";
 import Recipe from "./Recipe";
-// import RecipeLoader from "./RecipeLoader";
+import RecipeLoader from "./RecipeLoader";
 
 import "./RecipeList.scss";
 
 export default function RecipeList({
   changeSelectedRecipe,
-  items,
+  recipes,
   selectedCategory,
-  selectedRecipe
+  selectedRecipe,
 }) {
-  return items !== null ? (
+  return recipes !== null ? (
     <ul id="recipe-list">
-      {items.length !== 0 ? (
-        items.map(([id, item]) => {
+      {recipes.length !== 0 ? (
+        recipes.map(([id, item]) => {
           const categories = Object.values(item.categories || {});
           return selectedCategory === "All Recipes" || categories.includes(selectedCategory) ? (
             <Recipe
@@ -29,9 +29,8 @@ export default function RecipeList({
       )}
     </ul>
   ) : (
-    <h2>No results found.</h2>
-    // Array(8)
-    //   .fill(0)
-    //   .map((_, i) => <RecipeLoader key={i} />)
+    Array(8)
+      .fill(0)
+      .map((_, i) => <RecipeLoader key={i} />)
   );
 }

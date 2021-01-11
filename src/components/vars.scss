@@ -42,7 +42,7 @@ $text-color: $od-white;
   color: $btn-primary-color;
 }
 
-@mixin default-ul {
+@mixin default-list {
   list-style-type: none;
   margin: 0;
   padding: 0;

@@ -9,5 +9,5 @@ export default {
   OD_CYAN: "#56b6c2",
   OD_WHITE: "#abb2bf",
   OD_BLACK: "#282c34",
-  WHITE: "#ffffff"
+  WHITE: "#ffffff",
 };

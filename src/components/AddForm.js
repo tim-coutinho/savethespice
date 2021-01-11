@@ -9,22 +9,30 @@ const initialForm = {
   cookTime: "",
   desc: "",
   imgSrc: "",
-  ingredients: "",
-  instructions: "",
-  name: ""
+  // ingredients: "",
+  // instructions: "",
+  name: "",
 };
 
 export default function AddForm({ handleAddRecipe, initialValues, visible }) {
-  const ref = useRef(null);
+  const inputRef = useRef(null);
   const [submitHover, setSubmitHover] = useState(false);
-  const [form, setForm] = useState({ ...initialForm, ...initialValues });
+  const [form, setForm] = useState({
+    ...initialForm,
+    ...initialValues,
+    categories: initialValues.categories?.join(" ") || "",
+  });
 
   useEffect(() => {
-    setForm({ ...initialForm, ...initialValues });
+    setForm({
+      ...initialForm,
+      ...initialValues,
+      categories: initialValues.categories?.join(" ") || "",
+    });
   }, [visible, initialValues]);
 
   useEffect(() => {
-    visible && setTimeout(() => ref.current.focus(), 100);
+    visible && setTimeout(() => inputRef.current.focus(), 100);
   }, [visible]);
 
   const handleFormChange = e => {
@@ -41,15 +49,17 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
     const lastEditedTime = new Date().getTime();
     handleAddRecipe({
       ...form,
-      categories: form.categories.split(" "),
+      categories: form.categories !== "" ? form.categories.split(" ") : [],
+      // ingredients: form.ingredients !== "" ? form.ingredients.split(" ") : [],
+      // instructions: form.instructions !== "" ? form.instructions.split(" ") : [],
       originalSubmitTime: form.lastEditedTime || lastEditedTime,
-      lastEditedTime
+      lastEditedTime,
     });
   };
 
   const valid = () => {
     const errors = {
-      name: form.name.length === 0
+      name: form.name.length === 0,
     };
     return [Object.keys(errors).some(x => errors[x]), errors];
   };
@@ -66,7 +76,7 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           name="name"
           value={form.name}
           placeholder="Recipe Name"
-          ref={ref}
+          ref={inputRef}
         />
         <br />
         <input
@@ -104,20 +114,15 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           >
             Cancel
           </Button>
-          <span
+          <Button
+            id="add-form-submit"
+            classes={`${invalid ? "error" : ""} form-btn`}
             onMouseEnter={() => setSubmitHover(true)}
             onMouseLeave={() => setSubmitHover(false)}
+            onClick={handleSubmit}
           >
-            <Button
-              id="add-form-submit"
-              classes={`${invalid ? "error" : ""} form-btn`}
-              onMouseEnter={() => setSubmitHover(true)}
-              onMouseLeave={() => setSubmitHover(false)}
-              onClick={handleSubmit}
-            >
-              Save Recipe
-            </Button>
-          </span>
+            Save Recipe
+          </Button>
         </span>
       </form>
     </div>

@@ -55,6 +55,7 @@
   input[type="text"] {
     border: 2px solid vars.$od-blue;
     margin-bottom: 5px;
+    outline: none;
     transition: 150ms;
 
     &.error {

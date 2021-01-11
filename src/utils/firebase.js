@@ -7,7 +7,7 @@ import {
   projectId,
   storageBucket,
   messagingSenderId,
-  appId
+  appId,
 } from "./secrets";
 
 const firebaseConfig = {
@@ -17,7 +17,7 @@ const firebaseConfig = {
   projectId: projectId,
   storageBucket: storageBucket,
   messagingSenderId: messagingSenderId,
-  appId: appId
+  appId: appId,
 };
 
 firebase.initializeApp(firebaseConfig);

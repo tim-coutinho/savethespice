@@ -33,22 +33,3 @@
     max-width: calc(100vw - #{vars.$left-max-length});
   }
 }
-
-.primary-btn {
-  @include vars.btn-primary-nohover;
-  align-items: center;
-  border: 2px solid vars.$btn-primary-color;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  font-size: 1.5em;
-  justify-content: center;
-  user-select: none;
-  transition: vars.$standard-transition-duration;
-
-  @media (hover: hover) and (pointer: fine) {
-    &:hover {
-      @include vars.btn-primary-hover;
-    }
-  }
-}

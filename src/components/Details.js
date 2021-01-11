@@ -11,22 +11,23 @@ export default function Details({
   editRecipe,
   shoppingList,
   handleAddToShoppingList,
-  handleRemoveFromShoppingList
+  handleRemoveFromShoppingList,
 }) {
   return recipe ? (
     <div id="details" className="card">
-      <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name} />
+      {recipe.imgSrc && <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name} />}
       <div id="detail-btns">
         <Button id="edit-btn" onClick={editRecipe}>
-          <i className="fa fa-pencil" />
+          <i className="fa fa-pencil-alt" />
         </Button>
         <Button onClick={handleDeleteRecipe} primaryColor={colors.OD_DARK_RED}>
           <i className="fa fa-trash" />
         </Button>
       </div>
       <div id="recipe-name">{recipe.name}</div>
+      <div id="recipe-desc">{recipe.desc}</div>
       <ul id="ingredient-list">
-        {["Hey", "You"].map(ingredient => {
+        {recipe.ingredients?.map(ingredient => {
           const ingredientInList = shoppingList.includes(ingredient);
           return (
             <li key={ingredient} className="ingredient">
@@ -45,6 +46,15 @@ export default function Details({
           );
         })}
       </ul>
+      <ol id="instruction-list">
+        {recipe.instructions?.map(instruction => {
+          return (
+            <li key={instruction} className="instruction">
+              {instruction}
+            </li>
+          );
+        })}
+      </ol>
     </div>
   ) : null;
 }

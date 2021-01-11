@@ -21,10 +21,15 @@
     }
   }
 
-  #ingredient-list {
-    @include vars.default-ul;
+  #ingredient-list,
+  #instruction-list {
+    @include vars.default-list;
     padding-left: 5px;
     padding-top: 20px;
+  }
+
+  #instruction-list {
+    list-style-type: revert;
   }
 
   #recipe-name {

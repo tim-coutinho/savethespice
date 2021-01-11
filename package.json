@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "husky": "^4.3.7",
-    "prettier": "1.19.1",
+    "prettier": "^2.2.1",
     "pretty-quick": "^2.0.2",
     "redux-devtools-extension": "^2.13.8"
   },
@@ -26,7 +26,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && surge -p build -d tim-recipes.surge.sh"
+    "deploy": "npm run build && surge -p build -d tim-recipes.surge.sh",
+    "lint": "prettier '**/*' --write --ignore-unknown"
   },
   "browserslist": {
     "production": [

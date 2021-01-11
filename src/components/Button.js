@@ -11,7 +11,7 @@ export default function Button({
   onClick,
   primaryColor = colors.OD_PURPLE,
   secondary,
-  secondaryColor = colors.WHITE
+  secondaryColor = colors.WHITE,
 }) {
   const [hover, setHover] = useState(false);
 
@@ -20,19 +20,19 @@ export default function Button({
       className={`primary-btn ${classes}`}
       id={id}
       onClick={onClick}
-      onMouseEnter={() => setHover(!hover)}
-      onMouseLeave={() => setHover(!hover)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={
         !hover
           ? {
               backgroundColor: primaryColor,
               borderColor: secondary ? secondaryColor : primaryColor,
-              color: secondaryColor
+              color: secondaryColor,
             }
           : {
               backgroundColor: secondaryColor,
               borderColor: secondary ? secondaryColor : primaryColor,
-              color: primaryColor
+              color: primaryColor,
             }
       }
     >

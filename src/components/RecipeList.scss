@@ -1,7 +1,7 @@
 @use "vars";
 
 #recipe-list {
-  @include vars.default-ul;
+  @include vars.default-list;
   height: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
