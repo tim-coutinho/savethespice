@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 
 import SidebarItem from "./SidebarItem";
+import TextInput from "./TextInput";
 
 import "./Sidebar.scss";
 
@@ -11,6 +12,7 @@ export default function Sidebar({
   handleAddCategory,
   handleExport,
   handleImport,
+  handleSignOut,
   selectedItem,
 }) {
   const ref = useRef(null);
@@ -39,33 +41,40 @@ export default function Sidebar({
 
   return (
     <div id="sidebar" className={classes}>
-      <ul id="sidebar-list">
-        <li
-          id="categories-header"
-          className={`sidebar-item sidebar-section ${shiftedLeft ? "shifted-left" : ""}`}
-        >
-          <div id="categories-header-left">
-            Categories
-            <i
-              className={`fa${addHover ? "" : "r"} fa-plus-square`}
-              onClick={() => {
-                setShiftedLeft(true);
-                ref.current.focus();
-              }}
-              onMouseEnter={() => setAddHover(true)}
-              onMouseLeave={() => setAddHover(false)}
-            />
-          </div>
-          <input
-            id="categories-header-right"
-            onBlur={() => newCategory === "" && handleBlur()}
-            onKeyDown={handleNewCategoryChange}
-            onChange={handleNewCategoryChange}
-            placeholder="Category Name"
-            ref={ref}
-            value={newCategory}
+      <span
+        id="categories-header"
+        className={`sidebar-item sidebar-section ${shiftedLeft ? "shifted-left" : ""}`}
+      >
+        <div id="categories-header-left">
+          Categories
+          <i
+            className={`fa${addHover ? "" : "r"} fa-plus-square`}
+            onClick={() => {
+              setShiftedLeft(true);
+              // ref.current.focus();
+            }}
+            onMouseEnter={() => setAddHover(true)}
+            onMouseLeave={() => setAddHover(false)}
           />
-        </li>
+        </div>
+        <TextInput
+          placeholder="Category Name"
+          // ref={ref}
+          setValue={handleNewCategoryChange}
+          // valid={() => valid(run1Id)}
+          value={newCategory}
+        />
+        {/*<input
+                  id="categories-header-right"
+                  onBlur={() => newCategory === "" && handleBlur()}
+                  onKeyDown={handleNewCategoryChange}
+                  onChange={handleNewCategoryChange}
+                  placeholder="Category Name"
+                  ref={ref}
+                  value={newCategory}
+                />*/}
+      </span>
+      <ul id="sidebar-list">
         {categories.map(category => (
           <SidebarItem
             key={category}
@@ -87,6 +96,12 @@ export default function Sidebar({
           category="Export Recipes"
           classes="sidebar-item export"
           handleClick={handleExport}
+        />
+        <SidebarItem
+          key="Sign Out"
+          category="Sign Out"
+          classes="sidebar-item signout"
+          handleClick={handleSignOut}
         />
       </ul>
     </div>

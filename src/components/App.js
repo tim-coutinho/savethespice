@@ -2,7 +2,7 @@ import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
 import Database from "../backend/database";
-import { login } from "../backend/auth";
+import { login, signOut } from "../backend/auth";
 
 import AddForm from "./AddForm";
 import DeleteForm from "./DeleteForm";
@@ -104,14 +104,10 @@ function App() {
 
   useEffect(() => {
     if (!user) {
-      return;
+      login(setUser);
     }
     setDatabase(new Database(user, handleRecipeListChange, handleCategoryListChange));
   }, [user]);
-
-  useEffect(() => {
-    login(setUser);
-  }, []);
 
   return (
     <div id="app">
@@ -122,6 +118,7 @@ function App() {
         handleAddCategory={category => handleAddCategory(category)}
         handleExport={handleExport}
         handleImport={handleImport}
+        handleSignOut={() => signOut(setUser)}
         selectedItem={selectedSidebarItem}
       />
       <div

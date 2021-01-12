@@ -28,4 +28,8 @@ export default class Database {
   addCategory(category) {
     this.categoriesRef.child(category).set(1);
   }
+
+  removeCategory(category) {
+    this.categoriesRef.child(category).remove();
+  }
 }

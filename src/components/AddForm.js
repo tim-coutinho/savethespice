@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import Button from "./Button";
+import TextInput from "./TextInput";
 
 import "./AddForm.scss";
 
@@ -32,7 +33,7 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
   }, [visible, initialValues]);
 
   useEffect(() => {
-    visible && setTimeout(() => inputRef.current.focus(), 100);
+    // visible && setTimeout(() => inputRef.current.focus(), 100);
   }, [visible]);
 
   const handleFormChange = e => {
@@ -69,41 +70,38 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
   return (
     <div id="add-form-card" className={`${visible ? "visible" : ""} card`}>
       <form id="add-form">
-        <input
-          type="text"
-          className={submitHover && errors["name"] ? "error" : ""}
-          onChange={handleFormChange}
-          name="name"
-          value={form.name}
+        <TextInput
           placeholder="Recipe Name"
           ref={inputRef}
+          name="name"
+          setValue={handleFormChange}
+          // valid={() => valid(run1Id)}
+          value={form.name}
+          width="15em"
         />
-        <br />
-        <input
-          type="text"
-          className={submitHover && errors["desc"] ? "error" : ""}
-          onChange={handleFormChange}
-          name="desc"
-          value={form.desc}
+        <TextInput
           placeholder="Description"
+          name="desc"
+          setValue={handleFormChange}
+          // valid={() => valid(run1Id)}
+          value={form.desc}
+          width="15em"
         />
-        <br />
-        <input
-          type="text"
-          className={submitHover && errors["imgSrc"] ? "error" : ""}
-          onChange={handleFormChange}
-          name="imgSrc"
-          value={form.imgSrc}
+        <TextInput
           placeholder="Image URL"
+          name="imgSrc"
+          setValue={handleFormChange}
+          // valid={() => valid(run1Id)}
+          value={form.imgSrc}
+          width="15em"
         />
-        <br />
-        <input
-          type="text"
-          className={submitHover && errors["categories"] ? "error" : ""}
-          onChange={handleFormChange}
-          name="categories"
-          value={form.categories}
+        <TextInput
           placeholder="Categories"
+          name="categories"
+          setValue={handleFormChange}
+          // valid={() => valid(run1Id)}
+          value={form.categories}
+          width="15em"
         />
         <span style={{ display: "flex" }}>
           <Button
