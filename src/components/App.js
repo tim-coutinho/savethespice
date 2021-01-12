@@ -52,7 +52,7 @@ function App() {
   };
 
   const handleAddRecipe = values => {
-    values && database.addRecipe(values, user, selectedRecipe);
+    values && database.addRecipe(values, user, currentView === "Edit", selectedRecipe);
     handleViewChange("Add");
   };
 
