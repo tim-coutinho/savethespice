@@ -7,7 +7,6 @@ export default function TextInput({
   id,
   name,
   placeholder,
-  ref,
   setValue,
   valid = () => [true, ""],
   value,
@@ -37,7 +36,7 @@ export default function TextInput({
   };
 
   const clear = ({ target: { previousSibling } }) => {
-    setValue({target: {name, value: ""}, preventDefault: () => {}});
+    setValue({ target: { name, value: "" }, preventDefault: () => {} });
     previousSibling.focus();
   };
 
@@ -49,7 +48,6 @@ export default function TextInput({
         onBlur={resize}
         onChange={setValue}
         onFocus={resize}
-        ref={ref}
         value={value}
       />
       <i className="fa fa-close" onClick={clear} />
@@ -85,5 +83,5 @@ TextInput.propTypes = {
     }
   },
   /* Value of the textbox. */
-  value: PropTypes.string.isRequired
+  value: PropTypes.string.isRequired,
 };

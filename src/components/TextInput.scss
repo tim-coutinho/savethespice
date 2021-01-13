@@ -1,9 +1,8 @@
 @use "vars";
 
-$padding-lr: 5px;
-$padding-tb: 5px;
 $input-border-width: 2px;
 $input-height: 1.5em;
+$padding-left: 5px;
 
 @mixin default-input($transition-duration, $border-width) {
   border-radius: 4px;
@@ -12,7 +11,7 @@ $input-height: 1.5em;
   font-size: initial;
   height: 100%;
   outline: none;
-  padding: 0 0 0 $padding-lr;
+  padding-left: $padding-left;
   transition: $transition-duration;
   width: inherit;
 }
@@ -34,12 +33,12 @@ $input-height: 1.5em;
   }
 
   .fa-close {
+    bottom: calc(#{$input-height} / 2 - 0.25em - #{$input-border-width});
     color: vars.$od-dark-red;
     cursor: pointer;
     opacity: 0.75;
     position: absolute;
     right: $input-border-width + 5px;
-    bottom: calc(#{$input-height} / 2 - 0.25em - #{$input-border-width});
     transition: opacity vars.$standard-transition-duration / 2;
     visibility: hidden;
 
@@ -66,7 +65,7 @@ $input-height: 1.5em;
       ~ label {
         cursor: default;
         left: $input-border-width;
-        top: -$input-border-width;
+        top: calc(-#{$input-height} - #{$input-border-width} * 3);
       }
     }
 
@@ -76,13 +75,18 @@ $input-height: 1.5em;
   }
 
   label {
+    align-items: center;
+    bottom: 0;
     color: vars.$od-white;
     cursor: text;
+    display: flex;
     font-size: initial;
-    left: $input-border-width + $padding-lr;
+    height: 50%;
+    left: $input-border-width + $padding-left;
+    margin: auto;
     pointer-events: none;
     position: absolute;
-    top: calc(#{$input-height} / 2);
+    top: 0;
     transition: vars.$standard-transition-duration / 2;
     user-select: none;
 

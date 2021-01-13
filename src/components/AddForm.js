@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Button from "./Button";
 import TextInput from "./TextInput";
@@ -16,7 +16,6 @@ const initialForm = {
 };
 
 export default function AddForm({ handleAddRecipe, initialValues, visible }) {
-  const inputRef = useRef(null);
   const [submitHover, setSubmitHover] = useState(false);
   const [form, setForm] = useState({
     ...initialForm,
@@ -31,10 +30,6 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
       categories: initialValues.categories?.join(" ") || "",
     });
   }, [visible, initialValues]);
-
-  useEffect(() => {
-    // visible && setTimeout(() => inputRef.current.focus(), 100);
-  }, [visible]);
 
   const handleFormChange = e => {
     e.preventDefault();
@@ -72,7 +67,6 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
       <form id="add-form">
         <TextInput
           placeholder="Recipe Name"
-          ref={inputRef}
           name="name"
           setValue={handleFormChange}
           // valid={() => valid(run1Id)}
