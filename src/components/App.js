@@ -26,7 +26,7 @@ function App() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
   const [shoppingList, setShoppingList] = useState([]);
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState(null);
 
   const handleViewChange = source => {
     setCurrentView(() => {
@@ -48,16 +48,17 @@ function App() {
   };
 
   const handleAddCategory = category => {
-    database?.addCategory(category);
+    database.addCategory(category);
   };
 
   const handleAddRecipe = values => {
-    values && database.addRecipe(values, user, editMode && selectedRecipe);
+    values && database.addRecipe(values, editMode ? selectedRecipe : null);
     handleViewChange("Add");
   };
 
   const handleDeleteRecipe = confirm => {
-    confirm && database.removeRecipe(selectedRecipe, user).then(() => setSelectedRecipe(null));
+    confirm && database.removeRecipe(selectedRecipe);
+    setSelectedRecipe(null);
     handleViewChange("Delete");
   };
 
@@ -69,19 +70,13 @@ function App() {
     setShoppingList(shoppingList.filter(other => other !== ingredient));
   };
 
-  const handleRecipeListChange = snapshot => {
-    if (snapshot.val() === null) {
-      return;
-    }
-    setRecipes(snapshot.val());
+  const handleRecipeListChange = recipes => {
+    setRecipes(recipes);
     setIsLoading(false);
   };
 
-  const handleCategoryListChange = snapshot => {
-    if (snapshot.val() === null) {
-      return;
-    }
-    setCategories(["All Recipes", ...Object.keys(snapshot.val())]);
+  const handleCategoryListChange = categories => {
+    setCategories(["All Recipes", ...Object.keys(categories)]);
   };
 
   const handleFilterChange = ({ target }) => {
@@ -103,7 +98,7 @@ function App() {
   }, [filter, recipes]);
 
   useEffect(() => {
-    if (!user) {
+    if (user === null) {
       login(setUser);
     }
     setDatabase(new Database(user, handleRecipeListChange, handleCategoryListChange));
@@ -115,7 +110,7 @@ function App() {
         categories={categories}
         changeSelectedItem={setSelectedSidebarItem}
         classes={currentView === "Add" || currentView === "Delete" ? "disabled" : ""}
-        handleAddCategory={category => handleAddCategory(category)}
+        handleAddCategory={handleAddCategory}
         handleExport={handleExport}
         handleImport={handleImport}
         handleSignOut={() => signOut(setUser)}

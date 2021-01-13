@@ -47,6 +47,7 @@ export default function TextInput({
         name={name}
         onBlur={resize}
         onChange={setValue}
+        onKeyDown={setValue}
         onFocus={resize}
         value={value}
       />

@@ -21,15 +21,17 @@ export default function Sidebar({
   const [newCategory, setNewCategory] = useState("");
 
   const handleNewCategoryChange = e => {
-    if (e.key === "Escape") {
-      handleBlur();
-      return;
-    }
-    if (e.key === "Enter" && newCategory !== "") {
-      handleAddCategory(newCategory);
-      setNewCategory("");
-      handleBlur();
-      return;
+    if (e.key) {
+      if (e.key === "Escape") {
+        handleBlur();
+        return;
+      }
+      if (e.key === "Enter" && newCategory !== "") {
+        handleAddCategory(newCategory);
+        setNewCategory("");
+        handleBlur();
+        return;
+      }
     }
     setNewCategory(e.target.value);
   };

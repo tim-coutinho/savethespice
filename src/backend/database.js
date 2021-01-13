@@ -1,35 +1,37 @@
-import firebase from "../utils/firebase";
-
 export default class Database {
   constructor(user, recipeListListener, categoryListListener) {
     this.user = user;
-    this.recipesRef = firebase.ref(`users/${this.user}/recipes`);
-    this.categoriesRef = firebase.ref(`users/${this.user}/categories`);
+    this.database = { [this.user]: { recipes: {}, categories: {} } };
+    this.recipeListListener = recipeListListener;
+    this.categoryListListener = categoryListListener;
 
-    this.recipesRef.on("value", recipeListListener);
-    this.categoriesRef.on("value", categoryListListener);
+    this.addRecipe({
+      name: "Test Recipe",
+      categories: ["cat1", "cat2"],
+      instructions: ["Instruction 1", "Instruction 2"],
+      ingredients: ["Ingredient 1", "Ingredient 2", "Ingredient 3"],
+    });
   }
 
-  addRecipe(values, user, recipeId) {
-    if (recipeId) {
-      this.recipesRef.child(recipeId).set({
-        ...values,
-      });
-    } else {
-      this.recipesRef.push(values);
-    }
-    values.categories.forEach(category => this.categoriesRef.child(category).set(1));
+  addRecipe(values, recipeId) {
+    recipeId = recipeId ?? this.database[this.user].recipes.length;
+    this.database[this.user].recipes[recipeId] = values;
+    values.categories.forEach(this.addCategory.bind(this));
+    this.recipeListListener(this.database[this.user].recipes);
   }
 
-  removeRecipe(recipeId, user) {
-    return firebase.ref(`users/${user}/recipes`).child(recipeId).remove();
+  removeRecipe(recipeId) {
+    delete this.database[this.user].recipes[category];
+    this.recipeListListener(this.database[this.user].recipes);
   }
 
   addCategory(category) {
-    this.categoriesRef.child(category).set(1);
+    this.database[this.user].categories[category] = 1;
+    this.categoryListListener(this.database[this.user].categories);
   }
 
   removeCategory(category) {
-    this.categoriesRef.child(category).remove();
+    delete this.database[this.user].categories[category];
+    this.categoryListListener(this.database[this.user].categories);
   }
 }
