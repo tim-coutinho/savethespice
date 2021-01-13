@@ -10,8 +10,8 @@ export default class Database {
     this.categoriesRef.on("value", categoryListListener);
   }
 
-  addRecipe(values, user, edit, recipeId) {
-    if (edit) {
+  addRecipe(values, user, recipeId) {
+    if (recipeId) {
       this.recipesRef.child(recipeId).set({
         ...values,
       });

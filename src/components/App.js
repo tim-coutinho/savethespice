@@ -48,11 +48,11 @@ function App() {
   };
 
   const handleAddCategory = category => {
-    database && database.addCategory(category);
+    database?.addCategory(category);
   };
 
   const handleAddRecipe = values => {
-    values && database.addRecipe(values, user, currentView === "Edit", selectedRecipe);
+    values && database.addRecipe(values, user, editMode && selectedRecipe);
     handleViewChange("Add");
   };
 
@@ -161,11 +161,13 @@ function App() {
         </div>
       </div>
       <div id="modals">
-        <AddForm
-          handleAddRecipe={handleAddRecipe}
-          visible={currentView === "Add"}
-          initialValues={editMode ? recipes[selectedRecipe] : {}}
-        />
+        {currentView === "Add" && (
+          <AddForm
+            handleAddRecipe={handleAddRecipe}
+            visible={currentView === "Add"}
+            initialValues={editMode ? recipes[selectedRecipe] : {}}
+          />
+        )}
         <DeleteForm handleDeleteRecipe={handleDeleteRecipe} visible={currentView === "Delete"} />
       </div>
     </div>

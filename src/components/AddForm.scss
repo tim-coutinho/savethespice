@@ -52,14 +52,38 @@
     }
   }
 
-  input[type="text"] {
-    border: 2px solid vars.$od-blue;
-    margin-bottom: 5px;
-    outline: none;
-    transition: 150ms;
+  ul,
+  ol {
+    background-color: white;
+    border-radius: 4px;
+    border: 2px solid vars.$od-comment-grey;
+    padding: 0 1em 0 1.5em;
+    transition: vars.$standard-transition-duration / 2;
+    width: 15em;
+
+    &:focus-within {
+      border-color: vars.$od-blue;
+    }
 
     &.error {
       border-color: vars.$od-red;
+    }
+
+    li {
+      &:first-child input {
+        padding-top: 0.5em;
+      }
+
+      &:last-child input {
+        padding-bottom: 0.5em;
+      }
+    }
+
+    input[type="text"] {
+      outline: none;
+      background-color: unset;
+      width: 100%;
+      border: none;
     }
   }
 }

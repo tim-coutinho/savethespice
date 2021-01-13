@@ -52,36 +52,36 @@ export default function TextInput({
       />
       <i className="fa fa-close" onClick={clear} />
       <label htmlFor={id}>
-        {placeholder}&nbsp;&nbsp;
-        <i className="fa fa-xs fa-question-circle-o" ref={helpRef} />
+        {placeholder}
+        <i className="far fa-question-circle fa-xs" ref={helpRef} />
       </label>
     </div>
   );
 }
 
-TextInput.propTypes = {
-  /* HMTL id of the textbox. */
-  id: PropTypes.string.isRequired,
-  /* Placeholder value to be displayed. Required because there's really no
-  point in using this component without a placeholder. */
-  placeholder: PropTypes.string.isRequired,
-  /* Function to set the value of the textbox. */
-  setValue: PropTypes.func.isRequired,
-  /* Optional function to run against the current value to determine validity. */
-  valid: (props, propName) => {
-    if (props[propName]) {
-      const ret = props[propName]("");
-      if (typeof ret !== "boolean") {
-        const [isValid, reason] = ret;
-        if (typeof isValid !== "boolean" || typeof reason !== "string") {
-          return new Error(
-            "valid should be a function returning either a boolean or an " +
-              "array of the form [boolean, string]"
-          );
-        }
-      }
-    }
-  },
-  /* Value of the textbox. */
-  value: PropTypes.string.isRequired,
-};
+// TextInput.propTypes = {
+//   /* HMTL id of the textbox. */
+//   id: PropTypes.string.isRequired,
+//   /* Placeholder value to be displayed. Required because there's really no
+//   point in using this component without a placeholder. */
+//   placeholder: PropTypes.string.isRequired,
+//   /* Function to set the value of the textbox. */
+//   setValue: PropTypes.func.isRequired,
+//   /* Optional function to run against the current value to determine validity. */
+//   valid: (props, propName) => {
+//     if (props[propName]) {
+//       const ret = props[propName]("");
+//       if (typeof ret !== "boolean") {
+//         const [isValid, reason] = ret;
+//         if (typeof isValid !== "boolean" || typeof reason !== "string") {
+//           return new Error(
+//             "valid should be a function returning either a boolean or an " +
+//               "array of the form [boolean, string]"
+//           );
+//         }
+//       }
+//     }
+//   },
+//   /* Value of the textbox. */
+//   value: PropTypes.string.isRequired,
+// };

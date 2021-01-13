@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import AddFormList from "./AddFormList";
 import Button from "./Button";
 import TextInput from "./TextInput";
 
@@ -10,8 +11,8 @@ const initialForm = {
   cookTime: "",
   desc: "",
   imgSrc: "",
-  // ingredients: "",
-  // instructions: "",
+  ingredients: [""],
+  instructions: [""],
   name: "",
 };
 
@@ -46,8 +47,8 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
     handleAddRecipe({
       ...form,
       categories: form.categories !== "" ? form.categories.split(" ") : [],
-      // ingredients: form.ingredients !== "" ? form.ingredients.split(" ") : [],
-      // instructions: form.instructions !== "" ? form.instructions.split(" ") : [],
+      ingredients: form.ingredients.map(item => item.trim()).filter(item => item !== ""),
+      instructions: form.instructions.map(item => item.trim()).filter(item => item !== ""),
       originalSubmitTime: form.lastEditedTime || lastEditedTime,
       lastEditedTime,
     });
@@ -69,7 +70,7 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           placeholder="Recipe Name"
           name="name"
           setValue={handleFormChange}
-          // valid={() => valid(run1Id)}
+          valid={valid}
           value={form.name}
           width="15em"
         />
@@ -77,7 +78,6 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           placeholder="Description"
           name="desc"
           setValue={handleFormChange}
-          // valid={() => valid(run1Id)}
           value={form.desc}
           width="15em"
         />
@@ -85,7 +85,6 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           placeholder="Image URL"
           name="imgSrc"
           setValue={handleFormChange}
-          // valid={() => valid(run1Id)}
           value={form.imgSrc}
           width="15em"
         />
@@ -93,9 +92,15 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           placeholder="Categories"
           name="categories"
           setValue={handleFormChange}
-          // valid={() => valid(run1Id)}
           value={form.categories}
           width="15em"
+        />
+        <AddFormList name="ingredients" items={form.ingredients} setItems={handleFormChange} />
+        <AddFormList
+          name="instructions"
+          items={form.instructions}
+          setItems={handleFormChange}
+          ordered
         />
         <span style={{ display: "flex" }}>
           <Button

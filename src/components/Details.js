@@ -27,10 +27,10 @@ export default function Details({
       <div id="recipe-name">{recipe.name}</div>
       <div id="recipe-desc">{recipe.desc}</div>
       <ul id="ingredient-list">
-        {recipe.ingredients?.map(ingredient => {
+        {recipe.ingredients?.map((ingredient, i) => {
           const ingredientInList = shoppingList.includes(ingredient);
           return (
-            <li key={ingredient} className="ingredient">
+            <li key={`${ingredient + i}`} className="ingredient">
               <span
                 className="ingredient-span"
                 onClick={() =>
@@ -47,9 +47,9 @@ export default function Details({
         })}
       </ul>
       <ol id="instruction-list">
-        {recipe.instructions?.map(instruction => {
+        {recipe.instructions?.map((instruction, i) => {
           return (
-            <li key={instruction} className="instruction">
+            <li key={`${instruction + i}`} className="instruction">
               {instruction}
             </li>
           );
