@@ -4,7 +4,7 @@ import TextInput from "./TextInput";
 
 import "./AddFormList.scss";
 
-export default function AddFormList({ name, items, setItems, ordered = false }) {
+export default function AddFormList({ name, items, setItems, visible, ordered = false }) {
   const listRef = useRef(null);
   const tagName = useRef(ordered ? "ol" : "ul");
   const [currentInput, setCurrentInput] = useState(0);
@@ -55,6 +55,9 @@ export default function AddFormList({ name, items, setItems, ordered = false }) 
   };
 
   useEffect(() => {
+    if (!visible) {
+      return;
+    }
     listRef.current.children[currentInput]?.firstChild.focus();
     listRef.current.children[currentInput]?.firstChild.setSelectionRange(
       caretPosition,

@@ -17,7 +17,6 @@ export default class Database {
   }
 
   addRecipe(values, recipeId) {
-    console.log(values);
     recipeId = recipeId ?? Object.keys(this.database[this.user].recipes).length;
     this.database[this.user].recipes[recipeId] = values;
     values.categories?.forEach(this.addCategory.bind(this));

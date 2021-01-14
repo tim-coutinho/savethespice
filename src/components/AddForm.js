@@ -26,13 +26,14 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
   });
 
   useEffect(() => {
-    setForm({
-      ...initialForm.current,
-      ...initialValues,
-      categories: initialValues.categories?.join(" ") || "",
-      ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
-      instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
-    });
+    visible &&
+      setForm({
+        ...initialForm.current,
+        ...initialValues,
+        categories: initialValues.categories?.join(" ") || "",
+        ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
+        instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
+      });
   }, [visible, initialValues]);
 
   const handleFormChange = e => {
@@ -102,11 +103,17 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           value={form.categories}
           width="15em"
         />
-        <AddFormList name="ingredients" items={form.ingredients} setItems={handleFormChange} />
         <AddFormList
-          name="instructions"
-          items={form.instructions}
+          name="ingredients"
+          items={form.ingredients}
           setItems={handleFormChange}
+          visible={visible}
+        />
+        <AddFormList
+          items={form.instructions}
+          name="instructions"
+          setItems={handleFormChange}
+          visible={visible}
           ordered
         />
         <span style={{ display: "flex" }}>

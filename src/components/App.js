@@ -57,7 +57,11 @@ function App() {
   };
 
   const handleDeleteRecipe = confirm => {
-    confirm && database.removeRecipe(selectedRecipe);
+    if (!confirm) {
+      setCurrentView("Home");
+      return;
+    }
+    database.removeRecipe(selectedRecipe);
     setSelectedRecipe(null);
     handleViewChange("Delete");
   };
@@ -156,13 +160,11 @@ function App() {
         </div>
       </div>
       <div id="modals">
-        {currentView === "Add" && (
-          <AddForm
-            handleAddRecipe={handleAddRecipe}
-            visible={currentView === "Add"}
-            initialValues={editMode ? recipes[selectedRecipe] : {}}
-          />
-        )}
+        <AddForm
+          handleAddRecipe={handleAddRecipe}
+          visible={currentView === "Add"}
+          initialValues={editMode ? recipes[selectedRecipe] : {}}
+        />
         <DeleteForm handleDeleteRecipe={handleDeleteRecipe} visible={currentView === "Delete"} />
       </div>
     </div>
