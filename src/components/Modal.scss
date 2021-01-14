@@ -1,0 +1,44 @@
+@use "vars";
+
+.modal {
+  @include vars.card;
+  display: flex;
+  flex-direction: column;
+  font-size: 18px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(calc(100vw - 50%), -50%);
+  transition: transform vars.$standard-transition-duration ease-in;
+
+  &.visible {
+    transform: translate(-50%, -50%);
+    transition-timing-function: ease-out;
+  }
+
+  .modal-btns {
+    display: flex;
+    justify-content: flex-end;
+
+    :not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .modal-btn {
+      font-size: 18px;
+      padding: 5px;
+
+      &.error {
+        @include vars.btn-primary-nohover;
+        opacity: 0.5;
+        pointer-events: none;
+
+        @media (hover: hover) and (pointer: fine) {
+          &:hover {
+            cursor: default;
+          }
+        }
+      }
+    }
+  }
+}

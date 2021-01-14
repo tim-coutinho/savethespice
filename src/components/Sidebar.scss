@@ -8,7 +8,7 @@
   z-index: -1;
 
   &.disabled {
-    filter: brightness(0.7) saturate(1.3);
+    filter: brightness(0.7);
     pointer-events: none;
     transition: vars.$standard-transition-duration;
   }
@@ -34,6 +34,20 @@
         background-color: vars.$sidebar-item-active-background-color;
         color: lighten(vars.$text-color, 30%);
       }
+    }
+
+    &.import::after {
+      content: "\f0ea";
+      font-family: FontAwesome;
+      position: absolute;
+      right: 15px;
+    }
+
+    &.export::after {
+      content: "\f0c5";
+      font-family: FontAwesome;
+      position: absolute;
+      right: 15px;
     }
 
     &.signout {
@@ -119,5 +133,26 @@
     overflow-x: hidden;
     overflow-y: auto;
     width: vars.$sidebar-width;
+
+    #floating-export-text {
+      animation-iteration-count: 1;
+      animation-name: floatup;
+      animation-timing-function: linear;
+      left: vars.$sidebar-width / 2;
+      pointer-events: none;
+      position: absolute;
+      z-index: 100;
+    }
+
+    @keyframes floatup {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+    }
   }
 }

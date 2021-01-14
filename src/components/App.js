@@ -2,31 +2,38 @@ import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
 import Database from "../backend/database";
+import { copyToClipboard } from "../utils/common";
 import { login, signOut } from "../backend/auth";
 
 import AddForm from "./AddForm";
 import DeleteForm from "./DeleteForm";
 import Details from "./Details";
 import Header from "./Header";
+import Modal from "./Modal";
+import ImportForm from "./ImportForm";
 import RecipeList from "./RecipeList";
 // import ShoppingList from "./ShoppingList";
 import Sidebar from "./Sidebar";
 
 import "./App.scss";
 
-function App() {
+export default hot(() => {
   const [categories, setCategories] = useState([]);
   const [currentView, setCurrentView] = useState("Home");
   const [database, setDatabase] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [filter, setFilter] = useState("");
   const [filteredRecipes, setFilteredRecipes] = useState([]);
+  const [importValid, setImportValid] = useState(false);
+  const [importVisible, setImportVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [modalActive, setModalActive] = useState(false);
   const [recipes, setRecipes] = useState({});
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
   const [shoppingList, setShoppingList] = useState([]);
   const [user, setUser] = useState(null);
+  const [importString, setImportString] = useState("");
 
   const handleViewChange = source => {
     setCurrentView(() => {
@@ -87,11 +94,16 @@ function App() {
     setFilter(target.value);
   };
 
-  const handleImport = () => {};
+  const handleExport = () => copyToClipboard(JSON.stringify(Object.values(recipes)));
 
-  const handleExport = () => {
-    console.log(recipes);
+  const handleImport = () => {
+    handleViewChange("Sidebar");
+    setImportVisible(true);
   };
+
+  useEffect(() => {
+    setModalActive(currentView === "Delete" || currentView === "Add" || importVisible);
+  }, [currentView, importVisible]);
 
   useEffect(() => {
     setFilteredRecipes(
@@ -113,7 +125,7 @@ function App() {
       <Sidebar
         categories={categories}
         changeSelectedItem={setSelectedSidebarItem}
-        classes={currentView === "Add" || currentView === "Delete" ? "disabled" : ""}
+        classes={modalActive ? "disabled" : ""}
         handleAddCategory={handleAddCategory}
         handleExport={handleExport}
         handleImport={handleImport}
@@ -122,13 +134,7 @@ function App() {
       />
       <div
         id="main-content"
-        className={`${
-          currentView === "Sidebar"
-            ? "shifted-right"
-            : currentView === "Add" || currentView === "Delete"
-            ? "disabled"
-            : ""
-        }`}
+        className={`${currentView === "Sidebar" ? "shifted-right" : modalActive ? "disabled" : ""}`}
       >
         <div id="left">
           <Header
@@ -146,7 +152,6 @@ function App() {
           />
         </div>
         <div id="right">
-          {/*<ShoppingList shoppingList={shoppingList}/>*/}
           {selectedRecipe && (
             <Details
               recipe={recipes[selectedRecipe]}
@@ -166,9 +171,29 @@ function App() {
           initialValues={editMode ? recipes[selectedRecipe] : {}}
         />
         <DeleteForm handleDeleteRecipe={handleDeleteRecipe} visible={currentView === "Delete"} />
+        <Modal
+          handleModalCancel={() => setImportVisible(false)}
+          handleModalSubmit={() => {
+            const recipes = JSON.parse(importString);
+            recipes.forEach(recipe => database.addRecipe(recipe));
+            setImportVisible(false);
+          }}
+          modalCancelText="Cancel"
+          modalSubmitText="Import"
+          title="Paste JSON:"
+          valid={importValid}
+          visible={importVisible}
+        >
+          <ImportForm
+            handleAddRecipe={recipe => database.addRecipe(recipe)}
+            importString={importString}
+            setImportString={setImportString}
+            setValid={setImportValid}
+            valid={importValid}
+            visible={importVisible}
+          />
+        </Modal>
       </div>
     </div>
   );
-}
-
-export default hot(App);
+});

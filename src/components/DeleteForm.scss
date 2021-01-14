@@ -1,18 +1,15 @@
 @use "vars";
 
 #delete-form {
+  @include vars.card;
   left: 50%;
-  opacity: 0;
   position: absolute;
   top: 50%;
-  transform: translate(-50%, calc(-75vh - 50%));
-  transition: transform, opacity;
-  transition-duration: vars.$standard-transition-duration;
-  transition-timing-function: ease-in;
+  transform: translate(-50%, calc(-100vh - 50%));
+  transition: transform vars.$standard-transition-duration ease-in;
   width: 300px;
 
   &.visible {
-    opacity: 1;
     transform: translate(-50%, -50%);
     transition-timing-function: ease-out;
   }
@@ -38,7 +35,6 @@
   }
 
   .primary-btn {
-    display: inline-flex;
     font-size: 18px;
     padding: 5px;
     width: min-content;

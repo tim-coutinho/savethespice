@@ -1,20 +1,17 @@
 @use "vars";
 
 #add-form-card {
+  @include vars.card;
   color: vars.$od-black;
   height: 95vh;
   left: 50%;
-  opacity: 0;
   position: absolute;
   top: 50%;
-  transform: translate(calc(100vw - 50%), -50%);
-  transition: transform, opacity;
-  transition-duration: vars.$standard-transition-duration;
-  transition-timing-function: ease-in;
+  transform: translate(calc(75vw - 50%), -50%);
+  transition: transform vars.$standard-transition-duration ease-in;
   width: 45vw;
 
   &.visible {
-    opacity: 1;
     transform: translate(-50%, -50%);
     transition-timing-function: ease-out;
   }
@@ -47,8 +44,10 @@
     opacity: 0.5;
     pointer-events: none;
 
-    &:hover {
-      cursor: default;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        cursor: default;
+      }
     }
   }
 

@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import AddFormList from "./AddFormList";
 import Button from "./Button";
 import TextInput from "./TextInput";
+import colors from "../utils/colors";
 
 import "./AddForm.scss";
 
@@ -117,7 +118,14 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           ordered
         />
         <span style={{ display: "flex" }}>
-          <Button id="add-form-cancel" classes="form-btn" onClick={() => handleAddRecipe()}>
+          <Button
+            classes="form-btn"
+            id="add-form-cancel"
+            onClick={() => handleAddRecipe()}
+            primaryColor={colors.WHITE}
+            secondaryColor={colors.OD_PURPLE}
+            secondary
+          >
             Cancel
           </Button>
           <Button

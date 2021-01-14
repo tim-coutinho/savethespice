@@ -48,7 +48,7 @@ $text-color: $od-white;
   padding: 0;
 }
 
-.card {
+@mixin card {
   background-color: $background-color;
   border-radius: 10px;
   box-shadow: 0 1pt 5pt 0 #0000004d;

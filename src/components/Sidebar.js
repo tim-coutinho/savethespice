@@ -15,10 +15,20 @@ export default function Sidebar({
   handleSignOut,
   selectedItem,
 }) {
+  const animationDuration = useRef(2000);
   const ref = useRef(null);
   const [addHover, setAddHover] = useState(false);
-  const [shiftedLeft, setShiftedLeft] = useState(false);
+  const [floatingTextVisible, setFloatingTextVisible] = useState(false);
   const [newCategory, setNewCategory] = useState("");
+  const [shiftedLeft, setShiftedLeft] = useState(false);
+
+  const triggerExport = () => {
+    setFloatingTextVisible(true);
+    setTimeout(() => {
+      setFloatingTextVisible(false);
+    }, animationDuration.current);
+    handleExport();
+  };
 
   const handleNewCategoryChange = e => {
     if (e.key) {
@@ -63,18 +73,8 @@ export default function Sidebar({
           placeholder="Category Name"
           // ref={ref}
           setValue={handleNewCategoryChange}
-          // valid={() => valid(run1Id)}
           value={newCategory}
         />
-        {/*<input
-                  id="categories-header-right"
-                  onBlur={() => newCategory === "" && handleBlur()}
-                  onKeyDown={handleNewCategoryChange}
-                  onChange={handleNewCategoryChange}
-                  placeholder="Category Name"
-                  ref={ref}
-                  value={newCategory}
-                />*/}
       </span>
       <ul id="sidebar-list">
         {categories.map(category => (
@@ -93,12 +93,22 @@ export default function Sidebar({
           classes="sidebar-item import"
           handleClick={handleImport}
         />
-        <SidebarItem
-          key="Export Recipes"
-          category="Export Recipes"
-          classes="sidebar-item export"
-          handleClick={handleExport}
-        />
+        <span style={{ position: "relative" }}>
+          {floatingTextVisible && (
+            <div
+              id="floating-export-text"
+              style={{ animationDuration: `${animationDuration.current}ms` }}
+            >
+              Copied to Clipboard!
+            </div>
+          )}
+          <SidebarItem
+            key="Export Recipes"
+            category="Export Recipes"
+            classes="sidebar-item export"
+            handleClick={triggerExport}
+          />
+        </span>
         <SidebarItem
           key="Sign Out"
           category="Sign Out"

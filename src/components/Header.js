@@ -22,7 +22,7 @@ export default function Header({
     focused
       ? setTimeout(() => inputRef.current.focus(), 50)
       : filter === "" && inputRef.current.blur();
-  });
+  }, [focused]);
 
   return (
     <div id="header" className={focused ? "filter-focused" : ""}>

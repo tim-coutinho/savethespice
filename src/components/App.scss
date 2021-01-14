@@ -13,7 +13,7 @@
   }
 
   &.disabled {
-    filter: brightness(0.7) saturate(1.3);
+    filter: brightness(0.7);
     pointer-events: none;
   }
 
