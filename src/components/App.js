@@ -22,7 +22,7 @@ function App() {
   const [filter, setFilter] = useState("");
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [recipes, setRecipes] = useState([]);
+  const [recipes, setRecipes] = useState({});
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState("All Recipes");
   const [shoppingList, setShoppingList] = useState([]);

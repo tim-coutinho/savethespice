@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import AddFormList from "./AddFormList";
 import Button from "./Button";
@@ -6,49 +6,57 @@ import TextInput from "./TextInput";
 
 import "./AddForm.scss";
 
-const initialForm = {
-  categories: "",
-  cookTime: "",
-  desc: "",
-  imgSrc: "",
-  ingredients: [""],
-  instructions: [""],
-  name: "",
-};
-
 export default function AddForm({ handleAddRecipe, initialValues, visible }) {
+  const initialForm = useRef({
+    categories: "",
+    cookTime: "",
+    desc: "",
+    imgSrc: "",
+    ingredients: [""],
+    instructions: [""],
+    name: "",
+  });
   const [submitHover, setSubmitHover] = useState(false);
   const [form, setForm] = useState({
-    ...initialForm,
+    ...initialForm.current,
     ...initialValues,
     categories: initialValues.categories?.join(" ") || "",
+    ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
+    instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
   });
 
   useEffect(() => {
     setForm({
-      ...initialForm,
+      ...initialForm.current,
       ...initialValues,
       categories: initialValues.categories?.join(" ") || "",
+      ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
+      instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
     });
   }, [visible, initialValues]);
 
   const handleFormChange = e => {
-    e.preventDefault();
+    if (e.key) {
+      return;
+    }
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = e => {
-    e.preventDefault();
     if (valid()[0]) {
       return;
     }
     const lastEditedTime = new Date().getTime();
+    const categories = form.categories !== "" ? form.categories.split(" ") : [];
+    const ingredients = form.ingredients.map(item => item.trim()).filter(item => item !== "");
+    const instructions = form.instructions.map(item => item.trim()).filter(item => item !== "");
+
     handleAddRecipe({
       ...form,
-      categories: form.categories !== "" ? form.categories.split(" ") : [],
-      ingredients: form.ingredients.map(item => item.trim()).filter(item => item !== ""),
-      instructions: form.instructions.map(item => item.trim()).filter(item => item !== ""),
+      categories,
+      ingredients,
+      instructions,
       originalSubmitTime: form.lastEditedTime || lastEditedTime,
       lastEditedTime,
     });
@@ -70,7 +78,6 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           placeholder="Recipe Name"
           name="name"
           setValue={handleFormChange}
-          valid={valid}
           value={form.name}
           width="15em"
         />
@@ -103,12 +110,7 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
           ordered
         />
         <span style={{ display: "flex" }}>
-          <Button
-            id="add-form-cancel"
-            classes="form-btn"
-            onClick={() => handleAddRecipe()}
-            style={{ marginRight: "10px" }}
-          >
+          <Button id="add-form-cancel" classes="form-btn" onClick={() => handleAddRecipe()}>
             Cancel
           </Button>
           <Button

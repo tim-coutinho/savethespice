@@ -1,5 +1,8 @@
 export default class Database {
   constructor(user, recipeListListener, categoryListListener) {
+    if (user === null) {
+      return;
+    }
     this.user = user;
     this.database = { [this.user]: { recipes: {}, categories: {} } };
     this.recipeListListener = recipeListListener;
@@ -14,14 +17,15 @@ export default class Database {
   }
 
   addRecipe(values, recipeId) {
-    recipeId = recipeId ?? this.database[this.user].recipes.length;
+    console.log(values);
+    recipeId = recipeId ?? Object.keys(this.database[this.user].recipes).length;
     this.database[this.user].recipes[recipeId] = values;
-    values.categories.forEach(this.addCategory.bind(this));
-    this.recipeListListener(this.database[this.user].recipes);
+    values.categories?.forEach(this.addCategory.bind(this));
+    this.recipeListListener({ ...this.database[this.user].recipes });
   }
 
   removeRecipe(recipeId) {
-    delete this.database[this.user].recipes[category];
+    delete this.database[this.user].recipes[recipeId];
     this.recipeListListener(this.database[this.user].recipes);
   }
 
