@@ -1,6 +1,7 @@
 @use "vars";
 
 #details {
+  @include vars.card;
   flex-grow: inherit;
   margin: 10px;
   position: relative;
