@@ -1,0 +1,39 @@
+[tool.isort]
+line_length = 100
+multi_line_output = 3
+profile = "black"
+skip_gitignore = true
+
+[tool.black]
+line-length = 100
+
+[tool.taskipy.tasks]
+deploy = "sam validate && poetry export -f requirements.txt --without-hashes > src/requirements.txt && sam build && sam deploy"
+format = "echo 'isort:' && isort . && echo 'black:' && black . && echo 'flake8:' && flake8 && echo 'prettier:' && npm run lint"
+lint = "task format"
+release = "task format && task test"
+synth = "task format && cdk synth"
+
+[tool.poetry]
+name = "SaveTheSpice"
+version = "0.1.0"
+description = "Recipe saver."
+authors = ["Tim Coutinho <tmcoutinho42@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.8"
+
+[tool.poetry.dev-dependencies]
+"aws-cdk.aws-amplify" = "^1.85.0"
+"aws-cdk.core" = "^1.85.0"
+awscli = "^1.18.216"
+black = "^20.8b1"
+flake8 = "^3.8.4"
+isort = "^5.7.0"
+taskipy = "^1.6.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
