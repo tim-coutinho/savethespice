@@ -12,7 +12,7 @@ cdk.out
 
 # misc
 __pycache__
-secrets.js
+secrets.*
 .DS_Store
 .env
 npm-debug.log*
