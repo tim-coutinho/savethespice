@@ -270,7 +270,7 @@ Then add the block below to your `launch.json` file and put it inside the `.vsco
     "type": "chrome",
     "request": "launch",
     "url": "http://localhost:3000",
-    "webRoot": "${workspaceRoot}/src",
+    "webRoot": "${workspaceRoot}/src/js",
     "userDataDir": "${workspaceRoot}/.vscode/chrome",
     "sourceMapPathOverrides": {
       "webpack:///src/*": "${webRoot}/*"

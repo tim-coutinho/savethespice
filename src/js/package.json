@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "jose": "^3.5.3",
     "react": "^16.14.0",
     "react-content-loader": "^5.1.4",
     "react-dom": "^16.14.0",
@@ -23,10 +24,10 @@
   "scripts": {
     "start": "PORT=5001 react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
+    "test": "node_modules/.bin/react-scripts test --env=jsdom",
+    "eject": "node_modules/.bin/react-scripts eject",
     "deploy": "npm run build && surge -p build -d tim-recipes.surge.sh",
-    "lint": "prettier '**/*' --write --ignore-unknown"
+    "lint": "node_modules/.bin/prettier '**/*' --write --ignore-unknown"
   },
   "browserslist": {
     "production": [

@@ -2,7 +2,7 @@ import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
 import Database from "../backend/database";
-import { copyToClipboard } from "../utils/common";
+import { copyToClipboard, prefix } from "../utils/common";
 import { login, signOut } from "../backend/auth";
 
 import AddForm from "./AddForm";
@@ -114,11 +114,12 @@ export default hot(() => {
   }, [filter, recipes]);
 
   useEffect(() => {
-    if (user === null) {
-      login(setUser);
-    }
-    setDatabase(new Database(user, handleRecipeListChange, handleCategoryListChange));
+    setDatabase(user ? new Database(user, handleRecipeListChange, handleCategoryListChange) : null);
   }, [user]);
+
+  useEffect(() => {
+    login(setUser);
+  }, []);
 
   return (
     <div id="app">

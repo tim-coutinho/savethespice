@@ -18,6 +18,7 @@ export default class Database {
 
   addRecipe(values, recipeId) {
     recipeId = recipeId ?? Object.keys(this.database[this.user].recipes).length;
+
     this.database[this.user].recipes[recipeId] = values;
     values.categories?.forEach(this.addCategory.bind(this));
     this.recipeListListener({ ...this.database[this.user].recipes });

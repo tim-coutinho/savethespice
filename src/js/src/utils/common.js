@@ -1,3 +1,5 @@
+export const prefix = "SaveTheSpice-";
+
 export function getById(elementId) {
   const elem = document.getElementById(elementId);
   if (!elem) {
