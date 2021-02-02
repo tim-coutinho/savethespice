@@ -9,8 +9,15 @@ export default class Database {
     this.categoryListListener = categoryListListener;
 
     this.addRecipe({
-      name: "Test Recipe",
+      name: "Test Recipe 1",
       categories: ["cat1", "cat2"],
+      instructions: ["Instruction 1", "Instruction 2"],
+      ingredients: ["Ingredient 1", "Ingredient 2", "Ingredient 3"],
+    });
+
+    this.addRecipe({
+      name: "Test Recipe 2",
+      categories: ["cat2", "cat3"],
       instructions: ["Instruction 1", "Instruction 2"],
       ingredients: ["Ingredient 1", "Ingredient 2", "Ingredient 3"],
     });

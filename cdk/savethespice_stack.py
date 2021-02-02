@@ -54,6 +54,7 @@ class SaveTheSpiceStack(Stack):
             bucket_name=bucket_name.lower(),
             website_index_document="index.html",
             removal_policy=RemovalPolicy.DESTROY,
+            public_read_access=False,
         )
 
         # noinspection PyTypeChecker
