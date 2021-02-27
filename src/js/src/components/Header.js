@@ -1,65 +1,40 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext } from "react";
+
+import { ViewContext } from "../utils/context";
+import { colors, Views } from "../utils/common";
 
 import Button from "./Button";
-
 import "./Header.scss";
 
-export default function Header({
-  category,
-  filter,
-  handleFilterChange,
-  handleViewChange,
-  shiftedRight,
-}) {
-  const inputRef = useRef(null);
-  const [focused, setFocused] = useState(false);
-
-  const toggleFocus = () => {
-    filter === "" && setFocused(!focused);
-  };
-
-  useEffect(() => {
-    focused
-      ? setTimeout(() => inputRef.current.focus(), 50)
-      : filter === "" && inputRef.current.blur();
-  }, [focused]);
+export default function Header({ category, filter, handleFilterChange, handleViewChange }) {
+  const currentView = useContext(ViewContext);
 
   return (
-    <div id="header" className={focused ? "filter-focused" : ""}>
-      <span
-        style={{
-          transition: "300ms",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "40px",
-        }}
-      >
-        <Button id="sidebar-btn" classes="header-btn" onClick={handleViewChange("Sidebar")}>
-          <i className={`fa fa-${shiftedRight ? "arrow-left" : "bars"}`} />
-        </Button>
-      </span>
-      <span id="category-label">{category}</span>
-      <span
-        style={{ transition: "300ms", display: "flex", justifyContent: "flex-end", width: "auto" }}
-      >
-        <Button
+    <header>
+      <Button id="sidebar-btn" classes="header-btn" onClick={handleViewChange(Views.SIDEBAR)}>
+        <i className={`fa fa-${currentView === Views.SIDEBAR ? "arrow-left" : "bars"}`} />
+      </Button>
+      <span>
+        <h3 id="category-label" style={filter !== "" ? { opacity: "0" } : {}}>
+          {category}
+        </h3>
+        <span
           id="filter-wrapper"
-          onClick={() => !focused && toggleFocus()}
-          classes={`${focused ? "filter-focused" : ""} header-btn`}
+          style={
+            filter !== ""
+              ? { backgroundColor: "white", color: colors.OD_PURPLE, width: "100%" }
+              : {}
+          }
         >
-          <input
-            id="filter"
-            onBlur={toggleFocus}
-            onChange={handleFilterChange}
-            ref={inputRef}
-            value={filter}
-          />
-        </Button>
-        <Button id="add-btn" classes="header-btn" onClick={handleViewChange("Add")}>
-          <i className="fa fa-plus" />
-        </Button>
+          <input id="filter" value={filter} onChange={handleFilterChange} />
+          <button type="button" id="filter-btn" className="header-btn">
+            <i className="fa fa-search" />
+          </button>
+        </span>
       </span>
-    </div>
+      <Button id="add-btn" classes="header-btn" onClick={handleViewChange(Views.ADD)}>
+        <i className="fa fa-plus" />
+      </Button>
+    </header>
   );
 }

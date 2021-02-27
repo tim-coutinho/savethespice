@@ -1,16 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
-import PropTypes from "prop-types";
+// import PropTypes from "prop-types";
 
 import "./TextInput.scss";
 
 export default function TextInput({
+  autofocus = false,
+  autofocusDelay = 100,
   id,
+  maxLength = -1,
   name,
   placeholder,
   setValue,
+  type = "text",
   valid = () => [true, ""],
   value,
-  width,
+  width = "15em",
 }) {
   const mainRef = useRef(null);
   const helpRef = useRef(null);
@@ -18,10 +22,14 @@ export default function TextInput({
   const [reason, setReason] = useState(valid()[1]);
 
   useEffect(() => {
-    const [isValid, reason] = valid();
-    setIsValid(isValid);
-    setReason(reason);
+    const validity = valid();
+    setIsValid(validity[0]);
+    setReason(validity[1]);
   }, [valid, value]);
+
+  useEffect(() => {
+    autofocus && setTimeout(() => mainRef.current.firstChild.focus(), autofocusDelay);
+  }, []);
 
   const resize = ({ type }) => {
     if (!isValid && type === "blur" && value !== "") {
@@ -50,6 +58,8 @@ export default function TextInput({
         onKeyDown={setValue}
         onFocus={resize}
         value={value}
+        type={type}
+        maxLength={maxLength}
       />
       <i className="fa fa-close" onClick={clear} />
       <label htmlFor={id}>

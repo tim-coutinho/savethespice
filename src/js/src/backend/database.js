@@ -1,48 +1,78 @@
+/* eslint-disable */
+import {
+  addCategory,
+  addRecipe,
+  deleteCategory,
+  deleteRecipe,
+  getAllCategories,
+  getAllRecipes,
+} from "./operations";
+
 export default class Database {
   constructor(user, recipeListListener, categoryListListener) {
     if (user === null) {
       return;
     }
-    this.user = user;
-    this.database = { [this.user]: { recipes: {}, categories: {} } };
+    this.recipes = {};
+    this.categories = {};
     this.recipeListListener = recipeListListener;
     this.categoryListListener = categoryListListener;
 
-    this.addRecipe({
-      name: "Test Recipe 1",
-      categories: ["cat1", "cat2"],
-      instructions: ["Instruction 1", "Instruction 2"],
-      ingredients: ["Ingredient 1", "Ingredient 2", "Ingredient 3"],
+    getAllRecipes().then(({ recipes }) => {
+      recipes.forEach(recipe => (this.recipes[recipe.recipeId] = recipe));
+      this.updateLocalDatabase(true, false);
     });
-
-    this.addRecipe({
-      name: "Test Recipe 2",
-      categories: ["cat2", "cat3"],
-      instructions: ["Instruction 1", "Instruction 2"],
-      ingredients: ["Ingredient 1", "Ingredient 2", "Ingredient 3"],
+    getAllCategories().then(({ categories }) => {
+      categories.forEach(category => (this.categories[category.categoryId] = category));
+      this.updateLocalDatabase(false, true);
     });
   }
 
-  addRecipe(values, recipeId) {
-    recipeId = recipeId ?? Object.keys(this.database[this.user].recipes).length;
-
-    this.database[this.user].recipes[recipeId] = values;
-    values.categories?.forEach(this.addCategory.bind(this));
-    this.recipeListListener({ ...this.database[this.user].recipes });
+  updateLocalDatabase(recipes = true, categories = true) {
+    recipes && this.recipeListListener(this.recipes);
+    categories && this.categoryListListener(this.categories);
   }
 
-  removeRecipe(recipeId) {
-    delete this.database[this.user].recipes[recipeId];
-    this.recipeListListener(this.database[this.user].recipes);
+  async addRecipe(values, recipeId = null) {
+    const res = await addRecipe(values, recipeId);
+    if (!res) {
+      return;
+    }
+    this.recipes[res.recipeId] = { ...this.recipes[res.recipeId], ...values };
+    res.originalSubmitTime &&
+      (this.recipes[res.recipeId].originalSubmitTime = res.originalSubmitTime);
+    res?.newCategories.forEach(category => (this.categories[category.categoryId] = category));
+    this.updateLocalDatabase();
   }
 
-  addCategory(category) {
-    this.database[this.user].categories[category] = 1;
-    this.categoryListListener(this.database[this.user].categories);
+  async deleteRecipe(recipeId) {
+    await deleteRecipe(recipeId);
+    delete this.recipes[recipeId];
+    this.updateLocalDatabase(true, false);
   }
 
-  removeCategory(category) {
-    delete this.database[this.user].categories[category];
-    this.categoryListListener(this.database[this.user].categories);
+  async addCategory(category, categoryId = null) {
+    if (category in this.categories) {
+      return;
+    }
+    const res = await addCategory(category, categoryId);
+    if (!res) {
+      return;
+    }
+    this.categories[res.categoryId] = {
+      ...this.categories[res.categoryId],
+      name: category,
+    };
+    this.updateLocalDatabase(false, true);
+  }
+
+  async deleteCategory(categoryId) {
+    const res = await deleteCategory(categoryId);
+    if (!res) {
+      return;
+    }
+    delete this.categories[categoryId];
+    res.updatedRecipes?.forEach(recipeId => delete this.recipes[recipeId].categories[categoryId]);
+    this.updateLocalDatabase();
   }
 }

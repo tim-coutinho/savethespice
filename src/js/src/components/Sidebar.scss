@@ -1,4 +1,4 @@
-@use "vars";
+@use "_vars";
 
 #sidebar {
   background-color: #1f252d;
@@ -53,10 +53,8 @@
     &.signout {
       color: vars.$od-red;
 
-      @media (hover: hover) and (pointer: fine) {
-        &:hover {
-          color: vars.$od-dark-red;
-        }
+      @include vars.on-hover {
+        color: vars.$od-dark-red;
       }
     }
 
@@ -80,8 +78,8 @@
       }
     }
 
-    @media (hover: hover) and (pointer: fine) {
-      &:not(.sidebar-section):not(.selected-item):hover {
+    &:not(.sidebar-section):not(.selected-item) {
+      @include vars.on-hover {
         background-color: darken(vars.$sidebar-item-active-background-color, 5%);
         color: lighten(vars.$text-color, 15%);
 
@@ -134,14 +132,14 @@
     overflow-y: auto;
     width: vars.$sidebar-width;
 
-    #floating-export-text {
-      animation-iteration-count: 1;
-      animation-name: floatup;
-      animation-timing-function: linear;
+    span.float::after {
+      animation: 2s cubic-bezier(0.35, 1, 0.5, 1) 1 forwards floatup;
+      bottom: 0;
+      content: "Copied to clipboard!";
       left: vars.$sidebar-width / 2;
       pointer-events: none;
       position: absolute;
-      z-index: 100;
+      z-index: 2;
     }
 
     @keyframes floatup {

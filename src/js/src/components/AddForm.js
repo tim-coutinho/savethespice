@@ -1,41 +1,72 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { scrape } from "../backend/operations";
+
+import { colors, Views } from "../utils/common";
+import { ViewContext } from "../utils/context";
 
 import AddFormList from "./AddFormList";
 import Button from "./Button";
 import TextInput from "./TextInput";
-import colors from "../utils/colors";
 
 import "./AddForm.scss";
 
-export default function AddForm({ handleAddRecipe, initialValues, visible }) {
+export default function AddForm({ handleAddRecipe, initialValues }) {
   const initialForm = useRef({
-    categories: "",
-    cookTime: "",
+    name: "",
     desc: "",
-    imgSrc: "",
+    cookTime: "",
+    yield: "",
+    categories: [""],
     ingredients: [""],
     instructions: [""],
-    name: "",
+    imgSrc: "",
   });
-  const [submitHover, setSubmitHover] = useState(false);
+  const currentView = useContext(ViewContext);
+  // const [submitHover, setSubmitHover] = useState(false);
   const [form, setForm] = useState({
     ...initialForm.current,
     ...initialValues,
-    categories: initialValues.categories?.join(" ") || "",
+    categories: initialValues.categories?.length > 0 ? initialValues.categories : [""],
     ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
     instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
   });
+  const [urlToScrape, setUrlToScrape] = useState("");
+  const [scrapeStatus, setScrapeStatus] = useState({
+    complete: false,
+    inProgress: false,
+    success: false,
+  });
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    visible &&
-      setForm({
-        ...initialForm.current,
-        ...initialValues,
-        categories: initialValues.categories?.join(" ") || "",
-        ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
-        instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
-      });
+    if (!visible) {
+      return;
+    }
+    setForm({
+      ...initialForm.current,
+      ...initialValues,
+      categories: initialValues.categories?.length > 0 ? initialValues.categories : [""],
+      ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
+      instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
+    });
+    setUrlToScrape("");
+    setScrapeStatus({
+      complete: false,
+      inProgress: false,
+      success: false,
+    });
   }, [visible, initialValues]);
+
+  useEffect(() => {
+    setVisible(currentView === Views.ADD);
+  }, [currentView]);
+
+  const valid = () => {
+    const errors = {
+      name: form.name.length === 0,
+    };
+    return [Object.keys(errors).some(x => errors[x]), errors];
+  };
 
   const handleFormChange = e => {
     if (e.key) {
@@ -45,12 +76,11 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = () => {
     if (valid()[0]) {
       return;
     }
-    const lastEditedTime = new Date().getTime();
-    const categories = form.categories !== "" ? form.categories.split(" ") : [];
+    const categories = form.categories.map(item => item.trim()).filter(item => item !== "");
     const ingredients = form.ingredients.map(item => item.trim()).filter(item => item !== "");
     const instructions = form.instructions.map(item => item.trim()).filter(item => item !== "");
 
@@ -59,86 +89,114 @@ export default function AddForm({ handleAddRecipe, initialValues, visible }) {
       categories,
       ingredients,
       instructions,
-      originalSubmitTime: form.lastEditedTime || lastEditedTime,
-      lastEditedTime,
     });
   };
 
-  const valid = () => {
-    const errors = {
-      name: form.name.length === 0,
-    };
-    return [Object.keys(errors).some(x => errors[x]), errors];
+  const scrapeUrl = () => {
+    setScrapeStatus({ complete: false, inProgress: true, success: false });
+    scrape(urlToScrape).then(res => {
+      setScrapeStatus({ complete: true, inProgress: false, success: true });
+      setTimeout(
+        () =>
+          setScrapeStatus({
+            complete: false,
+            inProgress: false,
+            success: false,
+          }),
+        500
+      );
+      setForm({ ...form, ...res });
+    });
   };
 
-  const [invalid, errors] = valid();
+  // const [invalid, errors] = valid();
 
   return (
     <div id="add-form-card" className={`${visible ? "visible" : ""} card`}>
-      <form id="add-form">
-        <TextInput
-          placeholder="Recipe Name"
-          name="name"
-          setValue={handleFormChange}
-          value={form.name}
-          width="15em"
-        />
-        <TextInput
-          placeholder="Description"
-          name="desc"
-          setValue={handleFormChange}
-          value={form.desc}
-          width="15em"
-        />
-        <TextInput
-          placeholder="Image URL"
-          name="imgSrc"
-          setValue={handleFormChange}
-          value={form.imgSrc}
-          width="15em"
-        />
-        <TextInput
-          placeholder="Categories"
-          name="categories"
-          setValue={handleFormChange}
-          value={form.categories}
-          width="15em"
-        />
-        <AddFormList
-          name="ingredients"
-          items={form.ingredients}
-          setItems={handleFormChange}
-          visible={visible}
-        />
-        <AddFormList
-          items={form.instructions}
-          name="instructions"
-          setItems={handleFormChange}
-          visible={visible}
-          ordered
-        />
-        <span style={{ display: "flex" }}>
-          <Button
-            classes="form-btn"
-            id="add-form-cancel"
-            onClick={() => handleAddRecipe()}
-            primaryColor={colors.WHITE}
-            secondaryColor={colors.OD_PURPLE}
-            secondary
-          >
-            Cancel
-          </Button>
-          <Button
-            id="add-form-submit"
-            classes={`${invalid ? "error" : ""} form-btn`}
-            onMouseEnter={() => setSubmitHover(true)}
-            onMouseLeave={() => setSubmitHover(false)}
-            onClick={handleSubmit}
-          >
-            Save Recipe
-          </Button>
-        </span>
-      </form>
+      {visible && (
+        <form id="add-form">
+          <TextInput
+            placeholder="Recipe Name"
+            name="name"
+            setValue={handleFormChange}
+            value={form.name}
+            maxLength={200}
+            autofocus
+          />
+          <TextInput
+            placeholder="Description"
+            name="desc"
+            setValue={handleFormChange}
+            value={form.desc}
+          />
+          <TextInput
+            placeholder="Image URL"
+            name="imgSrc"
+            setValue={handleFormChange}
+            value={form.imgSrc}
+          />
+          <TextInput
+            placeholder="Cook Time (min)"
+            name="cookTime"
+            setValue={handleFormChange}
+            value={form.cookTime}
+          />
+          <TextInput
+            placeholder="Yield (servings)"
+            name="yield"
+            setValue={handleFormChange}
+            value={form.yield}
+          />
+          <AddFormList
+            name="categories"
+            items={form.categories}
+            setItems={handleFormChange}
+            visible={visible}
+          />
+          <AddFormList
+            name="ingredients"
+            items={form.ingredients}
+            setItems={handleFormChange}
+            visible={visible}
+          />
+          <AddFormList
+            items={form.instructions}
+            name="instructions"
+            setItems={handleFormChange}
+            visible={visible}
+            ordered
+          />
+          <h1 style={{ color: colors.OD_WHITE }}>OR</h1>
+          <TextInput
+            placeholder="Add by URL"
+            name="scrapeUrl"
+            setValue={e => setUrlToScrape(e.target.value)}
+            value={urlToScrape}
+          />
+          <span style={{ display: "flex" }}>
+            <Button id="add-form-cancel" onClick={() => handleAddRecipe()} secondary>
+              Cancel
+            </Button>
+            <Button
+              id="add-form-submit"
+              // classes={`${invalid ? "error" : ""} form-btn`}
+              // onMouseEnter={() => setSubmitHover(true)}
+              // onMouseLeave={() => setSubmitHover(false)}
+              onClick={handleSubmit}
+              disabled={!form.name || scrapeStatus.inProgress}
+            >
+              Save Recipe
+            </Button>
+            <Button
+              id="add-form-scrape"
+              onClick={scrapeUrl}
+              disabled={scrapeStatus.inProgress || urlToScrape === ""}
+            >
+              Scrape
+            </Button>
+          </span>
+        </form>
+      )}
     </div>
   );
 }

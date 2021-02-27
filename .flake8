@@ -5,6 +5,6 @@ exclude =
     cdk.out,
     build,
     node_modules
-ignore = D203, F841
+ignore = D203, F841, W503, E203
 max-complexity = 10
 max-line-length = 100

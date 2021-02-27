@@ -1,4 +1,4 @@
-@use "vars";
+@use "_vars";
 
 .primary-btn {
   @include vars.btn-primary-nohover;
@@ -8,7 +8,21 @@
   cursor: pointer;
   display: flex;
   font-size: 1.5em;
+  height: vars.$standard-btn-length;
   justify-content: center;
-  transition: vars.$standard-transition-duration;
+  outline: none;
+  transition-duration: vars.$standard-transition-duration;
+  transition-property: background-color, color, opacity;
   user-select: none;
+  width: max-content;
+
+  &[disabled] {
+    @include vars.btn-primary-nohover;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  + .primary-btn {
+    margin-left: 10px;
+  }
 }

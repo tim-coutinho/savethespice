@@ -1,14 +1,69 @@
+import { endpoint } from "./secrets";
+
+const serialize = obj =>
+  encodeURI(
+    Object.entries(obj ?? {}).reduce(
+      (acc, [key, val]) => `${acc}${acc === "" ? "?" : "&"}${key}=${val}`,
+      ""
+    )
+  );
+
 export const prefix = "SaveTheSpice-";
 
-export function getById(elementId) {
+export const Views = {
+  ADD: "Add",
+  DELETE: "Delete",
+  EDIT: "Edit",
+  HOME: "Home",
+  SIDEBAR: "Sidebar",
+};
+
+export const SignedInStates = {
+  SIGNED_IN: "signed_in",
+  PENDING: "pending",
+  REFRESHING_ID_TOKEN: "refreshing_id_token",
+  SIGNED_OUT: "signed_out",
+};
+
+export const colors = {
+  OD_RED: "#e06c75",
+  OD_DARK_RED: "#be5046",
+  OD_GREEN: "#98c379",
+  OD_YELLOW: "#e5c07b",
+  OD_DARK_YELLOW: "#d19a66",
+  OD_BLUE: "#61afef",
+  OD_PURPLE: "#c678dd",
+  OD_CYAN: "#56b6c2",
+  OD_WHITE: "#abb2bf",
+  OD_BLACK: "#282c34",
+  WHITE: "#ffffff",
+};
+
+export const wrapFetch = (resource, options = { options: { method: "GET" }, params: "" }) =>
+  fetch(`${endpoint}/${resource}${serialize(options.params)}`, {
+    headers: {
+      Authorization: sessionStorage.getItem(`${prefix}idToken`),
+      "Content-Type": "application/json",
+    },
+    ...options.options,
+  })
+    .then(res => res.json())
+    .then(res => {
+      if (res.error) {
+        throw new Error(res.message);
+      }
+      return res;
+    });
+
+export const getById = elementId => {
   const elem = document.getElementById(elementId);
   if (!elem) {
     throw ReferenceError(`${elementId} does not exist`);
   }
   return elem;
-}
+};
 
-export function copyToClipboard(str) {
+export const copyToClipboard = str => {
   const el = document.createElement("textarea");
   el.value = str;
   el.setAttribute("readonly", ""); // Make it readonly to be tamper-proof
@@ -26,4 +81,4 @@ export function copyToClipboard(str) {
     document.getSelection().removeAllRanges(); // Unselect everything
     document.getSelection().addRange(selected); // Restore original selection
   }
-}
+};

@@ -43,6 +43,7 @@ class SaveTheSpiceStack(Stack):
         auth_lambda_name = f"{prefix}AuthLambda"
         main_lambda_name = f"{prefix}Lambda"
         user_pool_name = f"{prefix}UserPool"
+        meta_table_name = f"{prefix}Meta"
         recipes_table_name = f"{prefix}Recipes"
         categories_table_name = f"{prefix}Categories"
         endpoint_name = f"{prefix}Endpoint"
@@ -54,7 +55,7 @@ class SaveTheSpiceStack(Stack):
             bucket_name=bucket_name.lower(),
             website_index_document="index.html",
             removal_policy=RemovalPolicy.DESTROY,
-            public_read_access=False,
+            public_read_access=True,
         )
 
         # noinspection PyTypeChecker
@@ -105,20 +106,27 @@ class SaveTheSpiceStack(Stack):
             account_recovery=AccountRecovery.EMAIL_ONLY,
         )
 
-        Table(
+        meta_table = Table(
+            self,
+            meta_table_name.lower(),
+            table_name=meta_table_name,
+            partition_key=Attribute(name="userId", type=AttributeType.STRING),
+        )
+
+        recipes_table = Table(
             self,
             recipes_table_name.lower(),
             table_name=recipes_table_name,
-            partition_key=Attribute(name="user_id", type=AttributeType.STRING),
-            sort_key=Attribute(name="recipe_id", type=AttributeType.STRING),
+            partition_key=Attribute(name="userId", type=AttributeType.STRING),
+            sort_key=Attribute(name="recipeId", type=AttributeType.NUMBER),
         )
 
-        Table(
+        categories_table = Table(
             self,
             categories_table_name.lower(),
             table_name=categories_table_name,
-            partition_key=Attribute(name="user_id", type=AttributeType.STRING),
-            sort_key=Attribute(name="category", type=AttributeType.STRING),
+            partition_key=Attribute(name="userId", type=AttributeType.STRING),
+            sort_key=Attribute(name="categoryId", type=AttributeType.NUMBER),
         )
 
         auth_lambda = PythonFunction(
@@ -129,12 +137,19 @@ class SaveTheSpiceStack(Stack):
             index="auth.py",
             runtime=Runtime.PYTHON_3_8,
             timeout=Duration.minutes(1),
-            environment={"user_pool_id": user_pool.user_pool_id},
+            environment={
+                "meta_table_name": meta_table_name,
+                "user_pool_id": user_pool.user_pool_id,
+            },
             initial_policy=[
                 PolicyStatement(
                     actions=["cognito-idp:*"],
                     resources=[user_pool.user_pool_arn],
-                )
+                ),
+                PolicyStatement(
+                    actions=["dynamodb:PutItem"],
+                    resources=[meta_table.table_arn],
+                ),
             ],
         )
 
@@ -147,10 +162,27 @@ class SaveTheSpiceStack(Stack):
             runtime=Runtime.PYTHON_3_8,
             timeout=Duration.minutes(1),
             environment={
+                "meta_table_name": meta_table_name,
                 "recipes_table_name": recipes_table_name,
                 "categories_table_name": categories_table_name,
                 "user_pool_id": user_pool.user_pool_id,
             },
+            initial_policy=[
+                PolicyStatement(
+                    actions=[
+                        "dynamodb:DeleteItem",
+                        "dynamodb:GetItem",
+                        "dynamodb:PutItem",
+                        "dynamodb:Query",
+                        "dynamodb:UpdateItem",
+                    ],
+                    resources=[
+                        meta_table.table_arn,
+                        recipes_table.table_arn,
+                        categories_table.table_arn,
+                    ],
+                )
+            ],
         )
 
         # Endpoint url is created by hashing the model (methods, resources, etc.)
@@ -167,10 +199,11 @@ class SaveTheSpiceStack(Stack):
             default_cors_preflight_options=CorsOptions(allow_origins=["*"]),
             proxy=False,
         )
-        recipes_endpoint = root_endpoint.root.add_resource("recipes")
-        categories_endpoint = root_endpoint.root.add_resource("categories")
-        individual_recipe_endpoint = recipes_endpoint.add_resource("{recipe}")
-        individual_category_endpoint = categories_endpoint.add_resource("{category}")
+        recipes_resource = root_endpoint.root.add_resource("recipes")
+        categories_resource = root_endpoint.root.add_resource("categories")
+        scrape_resource = root_endpoint.root.add_resource("scrape")
+        individual_recipe_resource = recipes_resource.add_resource("{recipe}")
+        individual_category_resource = categories_resource.add_resource("{category}")
 
         authorizer = CfnAuthorizer(
             self,
@@ -184,7 +217,7 @@ class SaveTheSpiceStack(Stack):
 
         root_endpoint.root.add_resource("auth").add_method("POST", LambdaIntegration(auth_lambda))
 
-        recipes_endpoint.add_method(
+        scrape_resource.add_method(
             "GET",
             LambdaIntegration(main_lambda),
             authorization_type=AuthorizationType.COGNITO,
@@ -193,19 +226,26 @@ class SaveTheSpiceStack(Stack):
             "AuthorizerId", {"Ref": authorizer.logical_id}
         )
 
-        categories_endpoint.add_method(
-            "GET",
-            LambdaIntegration(main_lambda),
-            authorization_type=AuthorizationType.COGNITO,
-            # authorizer=authorizer.ref,
-        ).node.find_child("Resource").add_property_override(
-            "AuthorizerId", {"Ref": authorizer.logical_id}
-        )
-
-        for endpoint, method in product(
-            (individual_recipe_endpoint, individual_category_endpoint), ("GET", "POST", "DELETE")
+        # POST: Create, send back identifier
+        # PATCH: Update resource's specified fields, exception if identifier not found
+        # PUT: Update, replacing resource with specified fields, create if identifier not found
+        for resource, method in product(
+            (individual_recipe_resource, individual_category_resource),
+            ("DELETE", "GET", "PATCH", "PUT"),
         ):
-            endpoint.add_method(
+            resource.add_method(
+                method,
+                LambdaIntegration(main_lambda),
+                authorization_type=AuthorizationType.COGNITO,
+                # authorizer=authorizer.ref,
+            ).node.find_child("Resource").add_property_override(
+                "AuthorizerId", {"Ref": authorizer.logical_id}
+            )
+
+        for resource, method in product(
+            (recipes_resource, categories_resource), ("DELETE", "GET", "PATCH", "POST")
+        ):
+            resource.add_method(
                 method,
                 LambdaIntegration(main_lambda),
                 authorization_type=AuthorizationType.COGNITO,
@@ -222,5 +262,7 @@ class SaveTheSpiceStack(Stack):
             auth_lambda_name.lower(),
             user_pool_client_name=auth_lambda_name,
             auth_flows=AuthFlow(admin_user_password=True, user_password=True),
+            id_token_validity=Duration.days(1),
+            refresh_token_validity=Duration.days(365),
         )
         auth_lambda.add_environment(key="client_id", value=client.user_pool_client_id)

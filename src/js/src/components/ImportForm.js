@@ -1,19 +1,21 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 
-import Button from "./Button";
-import colors from "../utils/colors";
+import { ImportContext } from "../utils/context";
+
+// import Button from "./Button";
+// import { colors } from "../utils/colors";
 
 import "./ImportForm.scss";
 
-export default function ImportForm({
-  handleAddRecipe,
-  visible,
-  setValid,
-  valid,
-  importString,
-  setImportString,
-}) {
+export default () => {
   const ref = useRef(null);
+  const {
+    importString,
+    setImportString,
+    importValid: valid,
+    setImportValid: setValid,
+    importVisible: visible,
+  } = useContext(ImportContext);
 
   const handleChange = ({ target: { value } }) => {
     setImportString(value);
@@ -25,23 +27,21 @@ export default function ImportForm({
     }
   };
 
-  const handleImport = () => {
-    const recipes = JSON.parse(importString);
-    recipes.forEach(recipe => handleAddRecipe(recipe));
-  };
-
   const handleBlur = () => {
     try {
       setImportString(JSON.stringify(JSON.parse(importString), null, 2));
-    } catch (SyntaxError) {}
+    } catch (SyntaxError) {
+      // Continue
+    }
   };
 
   useEffect(() => {
-    if (visible) {
-      setImportString("");
-      setValid(false);
-      // ref.current.focus();
+    if (!visible) {
+      return;
     }
+    setImportString("");
+    setValid(false);
+    setTimeout(() => ref.current.focus(), 100);
   }, [visible]);
 
   return (
@@ -53,8 +53,9 @@ export default function ImportForm({
         onChange={handleChange}
         onBlur={handleBlur}
         ref={ref}
-        className={`${importString !== "" && !valid ? "error" : ""}`}
+        className={`${importString !== "" ? (!valid ? "error" : "valid") : ""}`}
+        spellCheck={false}
       />
     </span>
   );
-}
+};

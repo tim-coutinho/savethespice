@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 import SidebarItem from "./SidebarItem";
 import TextInput from "./TextInput";
@@ -7,43 +7,26 @@ import "./Sidebar.scss";
 
 export default function Sidebar({
   categories,
-  changeSelectedItem,
+  changeSelectedCategoryId,
   classes,
   handleAddCategory,
   handleExport,
   handleImport,
   handleSignOut,
-  selectedItem,
+  selectedCategoryId,
 }) {
-  const animationDuration = useRef(2000);
-  const ref = useRef(null);
   const [addHover, setAddHover] = useState(false);
   const [floatingTextVisible, setFloatingTextVisible] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [shiftedLeft, setShiftedLeft] = useState(false);
 
   const triggerExport = () => {
-    setFloatingTextVisible(true);
-    setTimeout(() => {
-      setFloatingTextVisible(false);
-    }, animationDuration.current);
     handleExport();
-  };
-
-  const handleNewCategoryChange = e => {
-    if (e.key) {
-      if (e.key === "Escape") {
-        handleBlur();
-        return;
-      }
-      if (e.key === "Enter" && newCategory !== "") {
-        handleAddCategory(newCategory);
-        setNewCategory("");
-        handleBlur();
-        return;
-      }
+    if (floatingTextVisible) {
+      return;
     }
-    setNewCategory(e.target.value);
+    setFloatingTextVisible(true);
+    setTimeout(() => setFloatingTextVisible(false), 2000);
   };
 
   const handleBlur = () => {
@@ -51,8 +34,20 @@ export default function Sidebar({
     setTimeout(() => setNewCategory(""), 100);
   };
 
+  const handleNewCategoryChange = e => {
+    if (!e.key) {
+      setNewCategory(e.target.value);
+    } else if (e.key === "Escape") {
+      handleBlur();
+    } else if (e.key === "Enter" && newCategory !== "") {
+      handleAddCategory(newCategory);
+      setNewCategory("");
+      handleBlur();
+    }
+  };
+
   return (
-    <div id="sidebar" className={classes}>
+    <aside id="sidebar" className={classes}>
       <span
         id="categories-header"
         className={`sidebar-item sidebar-section ${shiftedLeft ? "shifted-left" : ""}`}
@@ -63,29 +58,40 @@ export default function Sidebar({
             className={`fa${addHover ? "" : "r"} fa-plus-square`}
             onClick={() => {
               setShiftedLeft(true);
-              // ref.current.focus();
             }}
             onMouseEnter={() => setAddHover(true)}
             onMouseLeave={() => setAddHover(false)}
           />
         </div>
-        <TextInput
-          placeholder="Category Name"
-          // ref={ref}
-          setValue={handleNewCategoryChange}
-          value={newCategory}
-        />
+        {shiftedLeft && (
+          <TextInput
+            placeholder="Category Name"
+            setValue={handleNewCategoryChange}
+            value={newCategory}
+            autofocus
+            autofocusDelay={200}
+          />
+        )}
       </span>
       <ul id="sidebar-list">
-        {categories.map(category => (
-          <SidebarItem
-            key={category}
-            category={category}
-            classes="sidebar-item sidebar-category"
-            handleClick={() => changeSelectedItem(category)}
-            selected={selectedItem === category}
-          />
-        ))}
+        <SidebarItem
+          key="All Recipes"
+          category="All Recipes"
+          classes="sidebar-item sidebar-category"
+          handleClick={() => changeSelectedCategoryId("All Recipes")}
+          selected={selectedCategoryId === "All Recipes"}
+        />
+        {Object.entries(categories)
+          .sort(([, { name: name1 }], [, { name: name2 }]) => (name1 <= name2 ? 1 : -1))
+          .map(([categoryId, { name }]) => (
+            <SidebarItem
+              key={categoryId}
+              category={name}
+              classes="sidebar-item sidebar-category"
+              handleClick={() => changeSelectedCategoryId(categoryId)}
+              selected={selectedCategoryId === categoryId}
+            />
+          ))}
         <hr />
         <SidebarItem
           key="Import Recipes"
@@ -93,15 +99,7 @@ export default function Sidebar({
           classes="sidebar-item import"
           handleClick={handleImport}
         />
-        <span style={{ position: "relative" }}>
-          {floatingTextVisible && (
-            <div
-              id="floating-export-text"
-              style={{ animationDuration: `${animationDuration.current}ms` }}
-            >
-              Copied to Clipboard!
-            </div>
-          )}
+        <span className={`${floatingTextVisible ? "float" : ""}`} style={{ position: "relative" }}>
           <SidebarItem
             key="Export Recipes"
             category="Export Recipes"
@@ -116,6 +114,6 @@ export default function Sidebar({
           handleClick={handleSignOut}
         />
       </ul>
-    </div>
+    </aside>
   );
 }

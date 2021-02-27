@@ -1,17 +1,20 @@
-@use "vars";
+@use "_vars";
 
 #delete-form {
   @include vars.card;
   left: 50%;
   position: absolute;
   top: 50%;
+  opacity: 0;
   transform: translate(-50%, calc(-100vh - 50%));
-  transition: transform vars.$standard-transition-duration ease-in;
+  transition: transform vars.$standard-transition-duration ease-in,
+    opacity 0s vars.$standard-transition-duration;
   width: 300px;
 
   &.visible {
+    opacity: 1;
     transform: translate(-50%, -50%);
-    transition-timing-function: ease-out;
+    transition: transform vars.$standard-transition-duration ease-out, opacity 0s 0s;
   }
 
   #buttons {
@@ -24,19 +27,10 @@
   #delete-form-cancel {
     background-color: vars.$btn-secondary-color;
     color: vars.$btn-primary-color;
-    margin-right: 10px;
-
-    @media (hover: hover) and (pointer: fine) {
-      &:hover {
-        background-color: vars.$btn-primary-color;
-        color: vars.$btn-secondary-color;
-      }
-    }
   }
 
   .primary-btn {
     font-size: 18px;
     padding: 5px;
-    width: min-content;
   }
 }

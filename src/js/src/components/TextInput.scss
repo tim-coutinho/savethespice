@@ -1,4 +1,4 @@
-@use "vars";
+@use "_vars";
 
 $input-border-width: 2px;
 $input-height: 1.5em;
@@ -43,7 +43,7 @@ $padding-left: 5px;
     transition: opacity vars.$standard-transition-duration / 2;
     visibility: hidden;
 
-    &:hover {
+    @include vars.on-hover {
       opacity: 1;
     }
   }

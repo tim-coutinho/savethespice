@@ -1,42 +1,41 @@
-@use "vars";
+@use "_vars";
 
 #add-form-card {
   @include vars.card;
   color: vars.$od-black;
   height: 95vh;
   left: 50%;
+  opacity: 0;
   position: absolute;
   top: 50%;
   transform: translate(calc(75vw - 50%), -50%);
-  transition: transform vars.$standard-transition-duration ease-in;
+  transition: transform vars.$standard-transition-duration ease-in,
+    opacity 0s vars.$standard-transition-duration;
   width: 45vw;
+  overflow-y: auto;
 
   &.visible {
+    opacity: 1;
     transform: translate(-50%, -50%);
-    transition-timing-function: ease-out;
+    transition: transform vars.$standard-transition-duration ease-out, opacity 0s 0s;
   }
 
   #add-form {
+    display: flex;
+    flex-direction: column;
     height: 100%;
-    width: 100%;
+    row-gap: 10px;
 
-    .form-btn {
+    button {
       padding: 5px;
       font-size: 18px;
+      width: max-content;
     }
   }
 
   #add-form-cancel {
     background-color: vars.$btn-secondary-color;
     color: vars.$btn-primary-color;
-    margin-right: 10px;
-
-    @media (hover: hover) and (pointer: fine) {
-      &:hover {
-        background-color: vars.$btn-primary-color;
-        color: vars.$btn-secondary-color;
-      }
-    }
   }
 
   #add-form-submit.error {
@@ -44,20 +43,22 @@
     opacity: 0.5;
     pointer-events: none;
 
-    @media (hover: hover) and (pointer: fine) {
-      &:hover {
-        cursor: default;
-      }
+    @include vars.on-hover {
+      cursor: default;
     }
   }
 
   ul,
   ol {
     background-color: white;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.5em;
     border-radius: 4px;
     border: 2px solid vars.$od-comment-grey;
-    padding: 0 1em 0 1.5em;
-    transition: vars.$standard-transition-duration / 2;
+    margin: 0;
+    padding: 0.5em 1em 0.5em 3ch;
+    transition: border-color vars.$standard-transition-duration / 2;
     width: 15em;
 
     &:focus-within {
@@ -66,16 +67,6 @@
 
     &.error {
       border-color: vars.$od-red;
-    }
-
-    li {
-      &:first-child input {
-        padding-top: 0.5em;
-      }
-
-      &:last-child input {
-        padding-bottom: 0.5em;
-      }
     }
 
     input[type="text"] {

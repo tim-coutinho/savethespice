@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
-import colors from "../utils/colors";
-
 import "./Button.scss";
+import { colors } from "../utils/common";
 
 export default function Button({
   children,
-  classes,
+  classes = "",
+  disabled = false,
   id,
   onClick,
   primaryColor = colors.OD_PURPLE,
@@ -16,27 +16,31 @@ export default function Button({
   const [hover, setHover] = useState(false);
 
   return (
-    <div
+    <button
+      type="button"
       className={`primary-btn ${classes}`}
       id={id}
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onFocus={() => setHover(true)}
+      onBlur={() => setHover(false)}
+      disabled={disabled}
       style={
         !hover
           ? {
-              backgroundColor: primaryColor,
-              borderColor: secondary ? secondaryColor : primaryColor,
-              color: secondaryColor,
+              backgroundColor: secondary ? secondaryColor : primaryColor,
+              borderColor: primaryColor,
+              color: secondary ? primaryColor : secondaryColor,
             }
           : {
-              backgroundColor: secondaryColor,
-              borderColor: secondary ? secondaryColor : primaryColor,
-              color: primaryColor,
+              backgroundColor: secondary ? primaryColor : secondaryColor,
+              borderColor: primaryColor,
+              color: secondary ? secondaryColor : primaryColor,
             }
       }
     >
       {children}
-    </div>
+    </button>
   );
 }

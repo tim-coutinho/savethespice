@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
-import TextInput from "./TextInput";
+import { ViewContext } from "../utils/context";
+import { Views } from "../utils/common";
 
 import "./AddFormList.scss";
 
-export default function AddFormList({ name, items, setItems, visible, ordered = false }) {
+export default function AddFormList({ name, items, setItems, ordered = false }) {
   const listRef = useRef(null);
   const tagName = useRef(ordered ? "ol" : "ul");
   const [currentInput, setCurrentInput] = useState(0);
   const [caretPosition, setCaretPosition] = useState(0);
+  const currentView = useContext(ViewContext);
 
   const handleSetItems = newItems => {
     setItems({ preventDefault: () => {}, target: { name, value: newItems } });
@@ -41,6 +43,8 @@ export default function AddFormList({ name, items, setItems, visible, ordered = 
           handleSetItems(newItems);
         }
         break;
+      default:
+        break;
       case "Enter":
         if (items[currentInput] !== "") {
           const newItems = [...items];
@@ -55,10 +59,10 @@ export default function AddFormList({ name, items, setItems, visible, ordered = 
   };
 
   useEffect(() => {
-    if (!visible) {
+    if (currentView !== Views.ADD) {
       return;
     }
-    listRef.current.children[currentInput]?.firstChild.focus();
+    // listRef.current.children[currentInput]?.firstChild.focus();
     listRef.current.children[currentInput]?.firstChild.setSelectionRange(
       caretPosition,
       caretPosition

@@ -1,4 +1,4 @@
-@use "vars";
+@use "_vars";
 
 #recipe-list {
   @include vars.default-list;
@@ -7,27 +7,33 @@
   overflow-y: scroll;
 
   .recipe-img {
+    border: none;
+    filter: blur(3px);
     height: 80px;
     object-fit: cover;
+    transition: filter vars.$standard-transition-duration * 2;
     width: 120px;
+
+    &[src] {
+      filter: none;
+    }
   }
 
   .recipe {
     margin: 0 20px;
-    padding: 20px 0;
     transition: color 100ms;
     width: 100%;
 
     &:not(.loading) {
       align-items: center;
       display: flex;
+      column-gap: 10px;
       justify-content: space-between;
     }
   }
 
   .recipe-text {
     text-align: start;
-    width: 50%;
     word-break: break-word;
   }
 
@@ -36,16 +42,16 @@
     display: flex;
     margin: -1px 0;
     min-height: 120px;
-    transition: background-color 100ms;
+    transition: background-color 500ms;
 
     &:not(:first-child) .recipe {
       border-top: 1px solid vars.$od-comment-grey;
+      transition: border-color 100ms;
     }
 
     &.selected-recipe {
       background-color: vars.$sidebar-item-active-background-color;
-
-      .recipe {
+      z .recipe {
         border-color: transparent;
         color: lighten(vars.$text-color, 30%);
       }
@@ -55,8 +61,8 @@
       }
     }
 
-    @media (hover: hover) and (pointer: fine) {
-      &:hover:not(.selected-recipe) {
+    @include vars.on-hover {
+      &:not(.selected-recipe) {
         background-color: rgba(vars.$sidebar-item-active-background-color, 0.5);
 
         .recipe {

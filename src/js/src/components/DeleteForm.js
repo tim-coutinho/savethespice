@@ -1,25 +1,23 @@
-import React from "react";
+import React, { useContext } from "react";
+
+import { ViewContext } from "../utils/context";
+import { colors, Views } from "../utils/common";
 
 import Button from "./Button";
-import colors from "../utils/colors";
 
 import "./DeleteForm.scss";
 
-export default function DeleteForm({ handleDeleteRecipe, visible }) {
+export default function DeleteForm({ handleDeleteRecipe }) {
+  const currentView = useContext(ViewContext);
+
   return (
-    <div id="delete-form" className={`${visible ? "visible" : ""} card`}>
+    <div id="delete-form" className={`${currentView === Views.DELETE ? "visible" : ""} card`}>
       <span style={{ fontSize: "18px" }}>Permanently delete recipe?</span>
       <br />
       <span style={{ fontWeight: "initial" }}>This cannot be undone.</span>
       <hr />
       <div id="buttons">
-        <Button
-          id="delete-form-cancel"
-          onClick={() => handleDeleteRecipe(false)}
-          primaryColor={colors.WHITE}
-          secondaryColor={colors.OD_PURPLE}
-          secondary
-        >
+        <Button id="delete-form-cancel" onClick={() => handleDeleteRecipe(false)} secondary>
           Cancel
         </Button>
         <Button onClick={() => handleDeleteRecipe(true)} primaryColor={colors.OD_DARK_RED}>

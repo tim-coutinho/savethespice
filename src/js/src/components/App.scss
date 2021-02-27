@@ -1,4 +1,4 @@
-@use "vars";
+@use "_vars";
 
 #main-content {
   background-color: vars.$background-color;
@@ -27,8 +27,7 @@
   }
 
   #right {
-    display: flex;
     flex-grow: 1;
-    max-width: calc(100vw - #{vars.$left-max-length});
+    height: 100vh;
   }
 }

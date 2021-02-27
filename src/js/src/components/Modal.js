@@ -1,9 +1,9 @@
 import React from "react";
 
 import Button from "./Button";
-import colors from "../utils/colors";
 
 import "./Modal.scss";
+// import { colors } from "../utils/common";
 
 export default function Modal({
   children,
@@ -11,8 +11,8 @@ export default function Modal({
   handleModalSubmit,
   modalCancelText = "Cancel",
   modalSubmitText = "Submit",
-  primaryButtonColor = colors.OD_PURPLE,
-  secondaryButtonColor = colors.WHITE,
+  // primaryButtonColor = colors.OD_PURPLE,
+  // secondaryButtonColor = colors.WHITE,
   style,
   title,
   valid,
@@ -27,19 +27,13 @@ export default function Modal({
           id="modal-cancel"
           classes="modal-btn"
           onClick={handleModalCancel}
-          primaryColor={secondaryButtonColor}
-          secondaryColor={primaryButtonColor}
+          // primaryColor={secondaryButtonColor}
+          // secondaryColor={primaryButtonColor}
           secondary
         >
           {modalCancelText}
         </Button>
-        <Button
-          id="modal-submit"
-          classes={`${valid ? "" : "error"} modal-btn`}
-          onClick={handleModalSubmit}
-          primaryColor={primaryButtonColor}
-          secondaryColor={secondaryButtonColor}
-        >
+        <Button id="modal-submit" classes="modal-btn" onClick={handleModalSubmit} disabled={!valid}>
           {modalSubmitText}
         </Button>
       </div>

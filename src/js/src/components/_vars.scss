@@ -43,7 +43,7 @@ $text-color: $od-white;
 }
 
 @mixin default-list {
-  list-style-type: none;
+  list-style: none;
   margin: 0;
   padding: 0;
 }
@@ -53,4 +53,12 @@ $text-color: $od-white;
   border-radius: 10px;
   box-shadow: 0 1pt 5pt 0 #0000004d;
   padding: 10px;
+}
+
+@mixin on-hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:not([disabled]):hover {
+      @content;
+    }
+  }
 }

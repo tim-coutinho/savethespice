@@ -1,22 +1,31 @@
-import React from "react";
+/* eslint-disable */
+import React, { useContext, useEffect, useState } from "react";
+
+import { RecipesContext } from "../utils/context";
+import { colors } from "../utils/common";
 
 import Button from "./Button";
-import colors from "../utils/colors";
 
 import "./Details.scss";
 
 export default function Details({
-  recipe,
   handleDeleteRecipe,
   editRecipe,
   shoppingList,
   handleAddToShoppingList,
   handleRemoveFromShoppingList,
 }) {
+  const { recipes, selectedRecipeId } = useContext(RecipesContext);
+  const [recipe, setRecipe] = useState(null);
+
+  useEffect(() => {
+    const selectedRecipe = recipes.find(([id]) => id === selectedRecipeId)?.[1];
+    selectedRecipe && setRecipe(selectedRecipe);
+  }, [recipes, selectedRecipeId]);
+
   return recipe ? (
-    <div id="details" className="card">
-      {recipe.imgSrc && <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name} />}
-      <div id="detail-btns">
+    <div id="details-card">
+      <div id="header">
         <Button id="edit-btn" onClick={editRecipe}>
           <i className="fa fa-pencil-alt" />
         </Button>
@@ -24,37 +33,65 @@ export default function Details({
           <i className="fa fa-trash" />
         </Button>
       </div>
-      <div id="recipe-name">{recipe.name}</div>
-      <div id="recipe-desc">{recipe.desc}</div>
-      <ul id="ingredient-list">
-        {recipe.ingredients?.map((ingredient, i) => {
-          const ingredientInList = shoppingList.includes(ingredient);
-          return (
+      <div id="details">
+        {recipe.imgSrc && <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name} />}
+        <div id="info">
+          <h2 id="recipe-name">{recipe.name}</h2>
+          {recipe.desc && <p id="recipe-desc">{recipe.desc}</p>}
+          <br />
+          {recipe.cookTime && (
+            <div id="cook-time">
+              <span className="info-field">Cook time</span>: {recipe.cookTime} min
+            </div>
+          )}
+          {recipe.yield && (
+            <div id="recipe-yield">
+              <span className="info-field">Yield</span>: {recipe.yield} serving
+              {recipe.yield === 1 ? "" : "s"}
+            </div>
+          )}
+          {recipe.adaptedFrom && (
+            <div id="adapted-from">
+              <span className="info-field">Adapted from</span>{" "}
+              <a href={recipe.url} title="View original recipe">
+                {recipe.adaptedFrom}
+              </a>
+            </div>
+          )}
+        </div>
+        <ul id="ingredient-list">
+          {recipe.ingredients?.map((ingredient, i) => (
             <li key={`${ingredient + i}`} className="ingredient">
-              <span
-                className="ingredient-span"
-                onClick={() =>
-                  ingredientInList
-                    ? handleRemoveFromShoppingList(ingredient)
-                    : handleAddToShoppingList(ingredient)
-                }
-              >
-                {ingredientInList ? "X" : "O"}
-              </span>{" "}
               {ingredient}
             </li>
-          );
-        })}
-      </ul>
-      <ol id="instruction-list">
-        {recipe.instructions?.map((instruction, i) => {
-          return (
+          ))}
+          {/*{recipe.ingredients.map((ingredient, i) => {*/}
+          {/*  const ingredientInList = shoppingList.includes(ingredient);*/}
+          {/*  return (*/}
+          {/*    <li key={`${ingredient + i}`} className="ingredient">*/}
+          {/*      <span*/}
+          {/*        className="ingredient-span"*/}
+          {/*        onClick={() =>*/}
+          {/*          ingredientInList*/}
+          {/*            ? handleRemoveFromShoppingList(ingredient)*/}
+          {/*            : handleAddToShoppingList(ingredient)*/}
+          {/*        }*/}
+          {/*      >*/}
+          {/*        {ingredientInList ? "X" : "O"}*/}
+          {/*      </span>{" "}*/}
+          {/*      {ingredient}*/}
+          {/*    </li>*/}
+          {/*  );*/}
+          {/*})}*/}
+        </ul>
+        <ol id="instruction-list">
+          {recipe.instructions?.map((instruction, i) => (
             <li key={`${instruction + i}`} className="instruction">
               {instruction}
             </li>
-          );
-        })}
-      </ol>
+          ))}
+        </ol>
+      </div>
     </div>
   ) : null;
 }
