@@ -1,7 +1,7 @@
 import React from "react";
 import ContentLoader from "react-content-loader";
 
-import { colors } from "../utils/common";
+import { colors } from "../lib/common";
 
 export default function RecipeLoader() {
   return (

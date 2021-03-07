@@ -20,5 +20,5 @@ yarn-debug.log*
 yarn-error.log*
 .idea
 *.sublime*
-src/py/handlers/requirements.txt
+src/py/requirements.txt
 .eslintcache

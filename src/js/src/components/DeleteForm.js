@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 
-import { ViewContext } from "../utils/context";
-import { colors, Views } from "../utils/common";
+import { ViewContext } from "../lib/context";
+import { colors, Views } from "../lib/common";
 
 import Button from "./Button";
 

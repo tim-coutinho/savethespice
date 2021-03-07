@@ -5,7 +5,8 @@
   display: flex;
   float: right;
   position: relative;
-  transition: vars.$standard-transition-duration;
+  transition-duration: vars.$standard-transition-duration;
+  transition-property: width, filter;
   width: 100%;
 
   &.shifted-right {

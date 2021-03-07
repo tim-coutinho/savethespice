@@ -1,40 +1,20 @@
 /* eslint-disable */
-import { prefix, wrapFetch } from "../utils/common";
-
-export const signUp = (email, password) => {
-  const body = JSON.stringify({ email, password });
-
-  return wrapFetch("auth", {
-    options: {
-      method: "POST",
-      body,
-    },
-    params: { operation: "SIGN_UP" },
-  })
-    .then(res => {
-      if (res.error) {
-        throw new Error(res.message);
-      }
-      return res.message;
-    })
-    .catch(res => {
-      console.error(res);
-      return res.message;
-    });
-};
+import { prefix, wrapFetch } from "../lib/common";
 
 export const refreshIdToken = () => {
   const refreshToken = localStorage.getItem(`${prefix}refreshToken`);
-  const body = JSON.stringify({ refreshToken });
+  if (!refreshToken) {
+    return;
+  }
+  const body = { refreshToken };
 
-  return wrapFetch("auth", {
+  return wrapFetch("auth/refreshidtoken", {
     options: {
       method: "POST",
       body,
     },
-    params: { operation: "REFRESH_ID_TOKEN" },
-  }).then(res => {
-    if (res.error) {
+  }).then(([res, status]) => {
+    if (status >= 400) {
       if (res.data?.refreshTokenExpired) {
         localStorage.removeItem(`${prefix}refreshToken`);
         return null;
@@ -47,17 +27,32 @@ export const refreshIdToken = () => {
   });
 };
 
-export const signIn = (email, password) => {
+export const signUp = (email, password) => {
   const body = { email, password };
 
-  return wrapFetch("auth", {
+  return wrapFetch("auth/signup", {
     options: {
       method: "POST",
       body,
     },
-    params: { operation: "SIGN_IN" },
-  }).then(res => {
-    if (res.error) {
+  }).then(([res, status]) => {
+    if (status >= 400) {
+      throw new Error(res.message);
+    }
+    return res.message;
+  });
+};
+
+export const signIn = (email, password) => {
+  const body = { email, password };
+
+  return wrapFetch("auth/signin", {
+    options: {
+      method: "POST",
+      body,
+    },
+  }).then(([res, status]) => {
+    if (status >= 400) {
       throw new Error(res.message);
     }
     const { idToken, refreshToken, user } = res.data;
@@ -76,57 +71,62 @@ export const signOut = () => {
 };
 
 export const scrape = url => {
-  return wrapFetch("scrape", { params: { url } })
-    .then(res => res.data)
-    .catch(console.error);
+  return wrapFetch("scrape", { params: { url } }).then(([res]) => res.data);
 };
 
 export const getAllRecipes = () => {
-  return wrapFetch("recipes")
-    .then(res => res.data)
-    .catch(console.error);
+  return wrapFetch("recipes").then(([res]) => res.data);
 };
 
 export const getAllCategories = () => {
-  return wrapFetch("categories")
-    .then(res => res.data)
-    .catch(console.error);
+  return wrapFetch("categories").then(([res]) => res.data);
 };
 
 export const addRecipe = (values, recipeId) => {
   return (recipeId
     ? wrapFetch(`recipes/${recipeId}`, {
-        options: { method: "PATCH", body: JSON.stringify(values) },
+        options: { method: "PATCH", body: { update: values } },
       })
     : wrapFetch("recipes", {
-        options: { method: "POST", body: JSON.stringify(values) },
+        options: { method: "POST", body: values },
       })
   )
-    .then(res => res.data)
+    .then(([res, status]) => {
+      if (status !== 200 && status !== 201) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    })
     .catch(console.error);
 };
 
 export const deleteRecipe = recipeId => {
   return wrapFetch(`recipes/${recipeId}`, {
     options: { method: "DELETE" },
-  }).catch(console.error);
+  }).then(([res, status]) => {
+    if (status !== 204) {
+      throw new Error(res.message);
+    }
+  });
 };
 
 export const addCategory = (category, categoryId) => {
   return (categoryId
     ? wrapFetch(`categories/${categoryId}`, {
-        options: { method: "PATCH", body: JSON.stringify({ name: category }) },
+        options: { method: "PATCH", body: { name: category } },
       })
     : wrapFetch("categories", {
-        options: { method: "POST", body: JSON.stringify({ name: category }) },
+        options: { method: "POST", body: { name: category } },
       })
-  )
-    .then(res => res.data)
-    .catch(console.error);
+  ).then(([res]) => res.data);
 };
 
 export const deleteCategory = category => {
   return wrapFetch(`categories/${category}`, {
     options: { method: "DELETE" },
-  }).catch(console.error);
+  }).then(([res, status]) => {
+    if (status !== 204) {
+      throw new Error(res.message);
+    }
+  });
 };

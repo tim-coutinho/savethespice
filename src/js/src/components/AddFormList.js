@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 
-import { ViewContext } from "../utils/context";
-import { Views } from "../utils/common";
+import { ViewContext } from "../lib/context";
+import { Views } from "../lib/common";
 
 import "./AddFormList.scss";
 

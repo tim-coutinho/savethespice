@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import "./Button.scss";
-import { colors } from "../utils/common";
+import { colors } from "../lib/common";
 
 export default function Button({
   children,

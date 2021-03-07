@@ -46,14 +46,16 @@ export const wrapFetch = (resource, options = { options: { method: "GET" }, para
       "Content-Type": "application/json",
     },
     ...options.options,
+    body: JSON.stringify(options.options?.body) ?? null,
   })
-    .then(res => res.json())
-    .then(res => {
-      if (res.error) {
-        throw new Error(res.message);
+    .then(async res => {
+      let body = {};
+      if (res.status !== 204) {
+        body = await res.json();
       }
-      return res;
-    });
+      return [body, res.status];
+    })
+    .catch(console.error); // Only rejects on network errors
 
 export const getById = elementId => {
   const elem = document.getElementById(elementId);

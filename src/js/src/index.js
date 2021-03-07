@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "react-dom";
 
-import { getById } from "./utils/common";
+import { getById } from "./lib/common";
 import App from "./components/App";
 import "./components/index.scss";
 

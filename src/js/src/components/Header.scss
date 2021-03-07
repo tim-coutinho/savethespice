@@ -4,7 +4,7 @@ header {
   align-items: center;
   border-bottom: 1px solid vars.$od-comment-grey;
   display: grid;
-  grid-column-gap: 10px;
+  column-gap: 10px;
   grid-template-columns: vars.$standard-btn-length 1fr vars.$standard-btn-length;
   padding: 10px;
 

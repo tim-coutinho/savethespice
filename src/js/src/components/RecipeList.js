@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef } from "react";
 import RecipeLoader from "./RecipeLoader";
-import { RecipesContext } from "../utils/context";
+import { RecipesContext } from "../lib/context";
 
 import "./RecipeList.scss";
 
@@ -12,16 +12,16 @@ export default function RecipeList() {
     if (!recipes || !ref.current) {
       return;
     }
-    ref.current.querySelectorAll("img").forEach(target =>
+    ref.current.querySelectorAll("[data-src]").forEach(image =>
       new IntersectionObserver((entries, observer) => {
         entries
-          .filter(({ target, isIntersecting }) => !target.hasAttribute("src") && isIntersecting)
+          .filter(({ isIntersecting }) => isIntersecting)
           .forEach(({ target }) => {
             target.setAttribute("src", target.getAttribute("data-src"));
             target.removeAttribute("data-src");
-            observer.disconnect();
+            observer.unobserve(target);
           });
-      }).observe(target)
+      }).observe(image)
     );
   }, [recipes]);
 

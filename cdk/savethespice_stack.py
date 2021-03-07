@@ -1,14 +1,10 @@
-from itertools import product
-
 from aws_cdk.aws_apigateway import (
     AuthorizationType,
     CfnAuthorizer,
+    Cors,
     CorsOptions,
-    IntegrationResponse,
     LambdaIntegration,
     LambdaRestApi,
-    MockIntegration,
-    PassthroughBehavior,
 )
 from aws_cdk.aws_cloudfront import BehaviorOptions, Distribution
 from aws_cdk.aws_cloudfront_origins import S3Origin
@@ -133,8 +129,8 @@ class SaveTheSpiceStack(Stack):
             self,
             auth_lambda_name.lower(),
             function_name=auth_lambda_name,
-            entry="src/py/handlers",
-            index="auth.py",
+            entry="src/py",
+            handler="app",
             runtime=Runtime.PYTHON_3_8,
             timeout=Duration.minutes(1),
             environment={
@@ -157,8 +153,8 @@ class SaveTheSpiceStack(Stack):
             self,
             main_lambda_name.lower(),
             function_name=main_lambda_name,
-            entry="src/py/handlers",
-            index="main.py",
+            entry="src/py",
+            handler="app",
             runtime=Runtime.PYTHON_3_8,
             timeout=Duration.minutes(1),
             environment={
@@ -185,25 +181,13 @@ class SaveTheSpiceStack(Stack):
             ],
         )
 
-        # Endpoint url is created by hashing the model (methods, resources, etc.)
-        # When updating the model, make sure to update `apiGatewayUrl` in src/js/utils/secrets.js
         root_endpoint = LambdaRestApi(
             self,
             endpoint_name.lower(),
             rest_api_name=endpoint_name,
-            handler=MockIntegration(
-                integration_responses=[IntegrationResponse(status_code="200")],
-                passthrough_behavior=PassthroughBehavior.NEVER,
-                request_templates={"application/json": '{"status_code" : "200"}'},
-            ),
-            default_cors_preflight_options=CorsOptions(allow_origins=["*"]),
-            proxy=False,
+            handler=main_lambda,
+            default_cors_preflight_options=CorsOptions(allow_origins=Cors.ALL_ORIGINS),
         )
-        recipes_resource = root_endpoint.root.add_resource("recipes")
-        categories_resource = root_endpoint.root.add_resource("categories")
-        scrape_resource = root_endpoint.root.add_resource("scrape")
-        individual_recipe_resource = recipes_resource.add_resource("{recipe}")
-        individual_category_resource = categories_resource.add_resource("{category}")
 
         authorizer = CfnAuthorizer(
             self,
@@ -215,38 +199,40 @@ class SaveTheSpiceStack(Stack):
             provider_arns=[user_pool.user_pool_arn],
         )
 
-        root_endpoint.root.add_resource("auth").add_method("POST", LambdaIntegration(auth_lambda))
+        auth_resource = root_endpoint.root.add_resource("auth")
+        recipes_resource = root_endpoint.root.add_resource("recipes")
+        categories_resource = root_endpoint.root.add_resource("categories")
+        shopping_list_resource = root_endpoint.root.add_resource("shoppinglist")
+        scrape_resource = root_endpoint.root.add_resource("scrape")
+        recipe_resource = recipes_resource.add_resource("{recipe}")
+        category_resource = categories_resource.add_resource("{category}")
+        shopping_list_item_resource = shopping_list_resource.add_resource("{item}")
 
-        scrape_resource.add_method(
-            "GET",
-            LambdaIntegration(main_lambda),
-            authorization_type=AuthorizationType.COGNITO,
-            # authorizer=authorizer.ref,
-        ).node.find_child("Resource").add_property_override(
-            "AuthorizerId", {"Ref": authorizer.logical_id}
-        )
+        for operation in (
+            "signup",
+            "confirmsignup",
+            "signin",
+            "refreshidtoken",
+            "resendcode",
+            "forgotpassword",
+            "confirmforgotpassword",
+        ):
+            auth_resource.add_resource(operation).add_method("ANY", LambdaIntegration(auth_lambda))
 
         # POST: Create, send back identifier
         # PATCH: Update resource's specified fields, exception if identifier not found
         # PUT: Update, replacing resource with specified fields, create if identifier not found
-        for resource, method in product(
-            (individual_recipe_resource, individual_category_resource),
-            ("DELETE", "GET", "PATCH", "PUT"),
+        for resource in (
+            scrape_resource,
+            recipes_resource,
+            recipe_resource,
+            categories_resource,
+            category_resource,
+            shopping_list_resource,
+            shopping_list_item_resource,
         ):
             resource.add_method(
-                method,
-                LambdaIntegration(main_lambda),
-                authorization_type=AuthorizationType.COGNITO,
-                # authorizer=authorizer.ref,
-            ).node.find_child("Resource").add_property_override(
-                "AuthorizerId", {"Ref": authorizer.logical_id}
-            )
-
-        for resource, method in product(
-            (recipes_resource, categories_resource), ("DELETE", "GET", "PATCH", "POST")
-        ):
-            resource.add_method(
-                method,
+                "ANY",
                 LambdaIntegration(main_lambda),
                 authorization_type=AuthorizationType.COGNITO,
                 # authorizer=authorizer.ref,

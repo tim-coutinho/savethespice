@@ -1,8 +1,8 @@
 /* eslint-disable */
 import React, { useContext, useEffect, useState } from "react";
 
-import { RecipesContext } from "../utils/context";
-import { colors } from "../utils/common";
+import { RecipesContext } from "../lib/context";
+import { colors } from "../lib/common";
 
 import Button from "./Button";
 

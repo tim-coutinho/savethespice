@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef } from "react";
 
-import { ImportContext } from "../utils/context";
+import { ImportContext } from "../lib/context";
 
 // import Button from "./Button";
-// import { colors } from "../utils/colors";
+// import { colors } from "../lib/colors";
 
 import "./ImportForm.scss";
 

@@ -5,13 +5,13 @@ import TextInput from "./TextInput";
 
 import "./SignInForm.scss";
 
-export default ({ handleSignIn, handleSignUp }) => {
+export default ({ handleSignIn, handleSignUp, pending }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [signUp, setSignUp] = useState(false);
   const [signUpState, setSignUpState] = useState("");
-  const [pending, setPending] = useState(false);
+  // const [pending, setPending] = useState(false);
 
   useEffect(() => {
     setSignUpState("");
@@ -21,17 +21,16 @@ export default ({ handleSignIn, handleSignUp }) => {
     <Modal
       handleModalCancel={() => setSignUp(!signUp)}
       handleModalSubmit={() => {
-        setPending(true);
+        // setPending(true);
         signUp
           ? handleSignUp(email, password)
               .then(res => {
                 setSignUpState(res);
               })
               .catch(setSignUpState)
-              .finally(() => setPending(false))
-          : handleSignIn(email, password)
-              .catch(({ message }) => setSignUpState(message))
-              .finally(() => setPending(false));
+          : // .finally(() => setPending(false))
+            handleSignIn(email, password).catch(({ message }) => setSignUpState(message));
+        // .finally(() => setPending(false));
       }}
       modalCancelText={signUp ? "Sign in?" : "Sign up?"}
       modalSubmitText={signUp ? "Sign up" : "Sign in"}

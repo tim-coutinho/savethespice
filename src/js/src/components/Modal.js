@@ -3,7 +3,7 @@ import React from "react";
 import Button from "./Button";
 
 import "./Modal.scss";
-// import { colors } from "../utils/common";
+// import { colors } from "../lib/common";
 
 export default function Modal({
   children,

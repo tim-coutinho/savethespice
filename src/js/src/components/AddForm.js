@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { scrape } from "../backend/operations";
 
-import { colors, Views } from "../utils/common";
-import { ViewContext } from "../utils/context";
+import { colors, Views } from "../lib/common";
+import { ViewContext } from "../lib/context";
 
 import AddFormList from "./AddFormList";
 import Button from "./Button";

@@ -51,7 +51,7 @@
 
     &.selected-recipe {
       background-color: vars.$sidebar-item-active-background-color;
-      z .recipe {
+      .recipe {
         border-color: transparent;
         color: lighten(vars.$text-color, 30%);
       }

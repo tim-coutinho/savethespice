@@ -2,8 +2,8 @@ import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
 import Database from "../backend/database";
-import { ImportContext, RecipesContext, ViewContext } from "../utils/context";
-import { Views, copyToClipboard, SignedInStates } from "../utils/common";
+import { ImportContext, RecipesContext, ViewContext } from "../lib/context";
+import { Views, copyToClipboard, SignedInStates } from "../lib/common";
 import { refreshIdToken, signIn, signOut, signUp } from "../backend/operations";
 
 // import ShoppingList from "./ShoppingList";
@@ -107,6 +107,7 @@ export default hot(() => {
     if (signedIn !== SignedInStates.SIGNED_IN) {
       setCurrentView(Views.HOME);
       setIsLoading(true);
+      setDatabase(null);
     }
   }, [signedIn]);
 
@@ -124,15 +125,16 @@ export default hot(() => {
 
   useEffect(() => {
     setFilteredRecipes(
-      Object.entries(allRecipes)
-        .filter(
-          ([, recipe]) =>
-            recipe.name.toLowerCase().includes(filter.toLowerCase()) &&
-            (selectedCategoryId === "All Recipes" || recipe.categories.includes(selectedCategoryId))
-        )
-        .sort(([, { originalSubmitTime: time1 }], [, { originalSubmitTime: time2 }]) =>
-          time1 <= time2 ? 1 : -1
-        )
+      (selectedCategoryId === "All Recipes"
+        ? Object.entries(allRecipes)
+        : Object.entries(allRecipes).filter(
+            ([, recipe]) =>
+              recipe.name.toLowerCase().includes(filter.toLowerCase()) &&
+              recipe.categories.includes(+selectedCategoryId)
+          )
+      ).sort(([, { originalSubmitTime: time1 }], [, { originalSubmitTime: time2 }]) =>
+        time1 <= time2 ? 1 : -1
+      )
     );
   }, [filter, allRecipes, selectedCategoryId]);
 
@@ -156,7 +158,7 @@ export default hot(() => {
       <SignInForm
         handleSignIn={(email, password) => {
           setSignedIn(SignedInStates.PENDING);
-          signIn(email, password)
+          return signIn(email, password)
             .then(user => {
               if (!user) {
                 setSignedIn(SignedInStates.SIGNED_OUT);
@@ -169,6 +171,7 @@ export default hot(() => {
             .catch(() => setSignedIn(SignedInStates.SIGNED_OUT));
         }}
         handleSignUp={(email, password) => signUp(email, password)}
+        pending={signedIn === SignedInStates.PENDING}
       />
     </div>
   ) : (
@@ -186,7 +189,7 @@ export default hot(() => {
             categories={categories}
             changeSelectedCategoryId={categoryId => {
               setSelectedCategoryId(categoryId);
-              handleViewChange(Views.SIDEBAR);
+              // handleViewChange(Views.SIDEBAR);
             }}
             classes={modalActive ? "disabled" : ""}
             handleAddCategory={handleAddCategory}
