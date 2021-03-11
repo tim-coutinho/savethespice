@@ -34,14 +34,16 @@ export default hot(() => {
   const [modalActive, setModalActive] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState("All Recipes");
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
-  const [shoppingList, setShoppingList] = useState([]);
+  // const [shoppingList, setShoppingList] = useState([]);
   const [signedIn, setSignedIn] = useState(SignedInStates.REFRESHING_ID_TOKEN);
 
   const handleViewChange = source => {
     setCurrentView(() => {
       switch (source) {
-        case Views.DELETE:
-          return currentView === Views.DELETE ? Views.HOME : Views.DELETE;
+        case Views.DELETE_CATEGORY:
+          return currentView === Views.DELETE_CATEGORY ? Views.HOME : Views.DELETE_CATEGORY;
+        case Views.DELETE_RECIPE:
+          return currentView === Views.DELETE_RECIPE ? Views.HOME : Views.DELETE_RECIPE;
         case Views.EDIT:
           setEditMode(true);
           return currentView === Views.ADD ? Views.HOME : Views.ADD;
@@ -60,6 +62,16 @@ export default hot(() => {
     database.addCategory(category);
   };
 
+  const handleDeleteCategory = confirm => {
+    if (!confirm) {
+      setCurrentView(Views.HOME);
+      return;
+    }
+    database.deleteCategory(selectedCategoryId);
+    setSelectedCategoryId("All Recipes");
+    handleViewChange(Views.DELETE_CATEGORY);
+  };
+
   const handleAddRecipe = values => {
     values && database.addRecipe(values, editMode ? selectedRecipeId : null);
     handleViewChange(Views.ADD);
@@ -72,16 +84,16 @@ export default hot(() => {
     }
     database.deleteRecipe(selectedRecipeId);
     setSelectedRecipeId(null);
-    handleViewChange(Views.DELETE);
+    handleViewChange(Views.DELETE_RECIPE);
   };
 
-  const handleAddToShoppingList = ingredient => {
-    setShoppingList(Array.from(new Set(shoppingList).add(ingredient)));
-  };
-
-  const handleRemoveFromShoppingList = ingredient => {
-    setShoppingList(shoppingList.filter(other => other !== ingredient));
-  };
+  // const handleAddToShoppingList = ingredient => {
+  //   setShoppingList(Array.from(new Set(shoppingList).add(ingredient)));
+  // };
+  //
+  // const handleRemoveFromShoppingList = ingredient => {
+  //   setShoppingList(shoppingList.filter(other => other !== ingredient));
+  // };
 
   const handleRecipeListChange = newRecipes => {
     setAllRecipes({ ...newRecipes });
@@ -120,7 +132,12 @@ export default hot(() => {
   }, [database]);
 
   useEffect(() => {
-    setModalActive(currentView === Views.DELETE || currentView === Views.ADD || importVisible);
+    setModalActive(
+      currentView === Views.DELETE_RECIPE ||
+        currentView === Views.DELETE_CATEGORY ||
+        currentView === Views.ADD ||
+        importVisible
+    );
   }, [currentView, importVisible]);
 
   useEffect(() => {
@@ -194,6 +211,7 @@ export default hot(() => {
               handleExport={handleExport}
               handleImport={handleImport}
               handleSignOut={() => signOut().then(() => setSignedIn(SignedInStates.SIGNED_OUT))}
+              handleDeleteCategory={() => handleViewChange(Views.DELETE_CATEGORY)}
             />
             <div
               id="main-content"
@@ -213,11 +231,11 @@ export default hot(() => {
               <div id="right">
                 {selectedRecipeId && (
                   <Details
-                    handleDeleteRecipe={() => handleViewChange(Views.DELETE)}
+                    handleDeleteRecipe={() => handleViewChange(Views.DELETE_RECIPE)}
                     editRecipe={() => handleViewChange(Views.EDIT)}
-                    shoppingList={shoppingList}
-                    handleAddToShoppingList={handleAddToShoppingList}
-                    handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+                    // shoppingList={shoppingList}
+                    // handleAddToShoppingList={handleAddToShoppingList}
+                    // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
                   />
                 )}
               </div>
@@ -227,7 +245,11 @@ export default hot(() => {
                 handleAddRecipe={handleAddRecipe}
                 initialValues={editMode ? allRecipes[selectedRecipeId] : {}}
               />
-              <DeleteForm handleDeleteRecipe={handleDeleteRecipe} />
+              <DeleteForm
+                handleDelete={
+                  currentView === Views.DELETE_CATEGORY ? handleDeleteCategory : handleDeleteRecipe
+                }
+              />
               <ImportContext.Provider
                 value={{
                   importString,

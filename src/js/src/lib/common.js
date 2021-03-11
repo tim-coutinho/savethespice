@@ -13,7 +13,8 @@ export const prefix = "SaveTheSpice-";
 
 export const Views = {
   ADD: "Add",
-  DELETE: "Delete",
+  DELETE_CATEGORY: "Delete Category",
+  DELETE_RECIPE: "Delete Recipe",
   EDIT: "Edit",
   HOME: "Home",
   SIDEBAR: "Sidebar",

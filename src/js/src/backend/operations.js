@@ -90,14 +90,12 @@ export const addRecipe = (values, recipeId) => {
     : wrapFetch("recipes", {
         options: { method: "POST", body: values },
       })
-  )
-    .then(([res, status]) => {
-      if (status !== 200 && status !== 201) {
-        throw new Error(res.message);
-      }
-      return res.data;
-    })
-    .catch(console.error);
+  ).then(([res, status]) => {
+    if (status !== 200 && status !== 201) {
+      throw new Error(res.message);
+    }
+    return res.data;
+  });
 };
 
 export const deleteRecipe = recipeId => {
@@ -125,8 +123,9 @@ export const deleteCategory = category => {
   return wrapFetch(`categories/${category}`, {
     options: { method: "DELETE" },
   }).then(([res, status]) => {
-    if (status !== 204) {
+    if (status > 204) {
       throw new Error(res.message);
     }
+    return res.data;
   });
 };

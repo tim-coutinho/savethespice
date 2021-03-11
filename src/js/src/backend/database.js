@@ -41,7 +41,7 @@ export default class Database {
     if (!res) {
       return;
     }
-    this.recipes[res.recipeId] = { ...this.recipes[res.recipeId], ...values };
+    this.recipes[res.recipeId] = { ...this.recipes[res.recipeId], ...values, categories: [] };
     res.originalSubmitTime &&
       (this.recipes[res.recipeId].originalSubmitTime = res.originalSubmitTime);
     res.existingCategories &&
@@ -75,12 +75,13 @@ export default class Database {
   }
 
   async deleteCategory(categoryId) {
-    const [res, status] = await deleteCategory(categoryId);
-    if (!res) {
-      return;
-    }
+    const res = await deleteCategory(categoryId);
     delete this.categories[categoryId];
-    res.updatedRecipes?.forEach(recipeId => delete this.recipes[recipeId].categories[categoryId]);
+    res?.updatedRecipes?.forEach(recipeId =>
+      this.recipes[recipeId].categories.splice(
+        this.recipes[recipeId].categories.findIndex(c => c === categoryId, 1)
+      )
+    );
     this.updateLocalDatabase();
   }
 }

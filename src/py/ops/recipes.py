@@ -508,7 +508,7 @@ def remove_categories_from_recipes(user_id: str, category_ids: Iterable[int]) ->
     recipes_table, resource = get_recipes_table()
     kwargs = format_query_fields(["recipeId", "categories"])
     recipes_to_update = [
-        recipe["recipeId"]
+        int(recipe["recipeId"])
         for recipe in recipes_table.query(
             KeyConditionExpression=Key("userId").eq(user_id),
             **kwargs,

@@ -9,6 +9,7 @@ import "./Sidebar.scss";
 export default function Sidebar({
   classes,
   handleAddCategory,
+  handleDeleteCategory,
   handleExport,
   handleImport,
   handleSignOut,
@@ -89,6 +90,7 @@ export default function Sidebar({
               classes="sidebar-item sidebar-category"
               handleClick={() => setSelectedCategoryId(categoryId)}
               selected={selectedCategoryId === categoryId}
+              handleDelete={handleDeleteCategory}
             />
           ))}
         <hr />

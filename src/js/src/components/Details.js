@@ -11,9 +11,9 @@ import "./Details.scss";
 export default function Details({
   handleDeleteRecipe,
   editRecipe,
-  shoppingList,
-  handleAddToShoppingList,
-  handleRemoveFromShoppingList,
+  // shoppingList,
+  // handleAddToShoppingList,
+  // handleRemoveFromShoppingList,
 }) {
   const { recipes, selectedRecipeId } = useContext(RecipesContext);
   const [recipe, setRecipe] = useState(null);
