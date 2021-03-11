@@ -124,7 +124,7 @@ def format_query_fields(
 
 
 @format_query_fields.register(list)
-def format_query_fields_str(
+def format_query_fields_list(
     fields: Iterable[str], *, projection_expression: bool = True, attribute_names: bool = True
 ) -> Dict[str, Union[str, Dict[str, str]]]:
     kwargs = {}

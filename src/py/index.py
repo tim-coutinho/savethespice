@@ -101,26 +101,14 @@ def log_environment():
     )
 
 
-if os.environ["FLASK_ENV"] == "development":
-    @app.before_request
-    def before_request():
-        request.environ["USER_ID"] = "16e09fc0-89a7-4aff-946c-02771482576f"
-        os.environ.update(
-            {
-                "recipes_table_name": "SaveTheSpice-Recipes",
-                "categories_table_name": "SaveTheSpice-Categories",
-                "meta_table_name": "SaveTheSpice-Meta",
-            }
-        )
-
-
 @app.after_request
 def wrap_response(res: FlaskResponse) -> FlaskResponse:
     """
     Handles adding necessary response headers and logging.
     """
     if res.json:
-        if res.json.pop("exception", None):  # Don't return to client, and don't log if already logged
+        # Don't return to client, and don't log if already logged
+        if res.json.pop("exception", None):
             res.data = json.dumps(res.json)
         elif res.status_code >= 400:
             logging.error(res.json["message"])
@@ -255,6 +243,8 @@ def route_patch_recipes() -> Response:
 @recipes_bp.route("", methods=("DELETE",))
 def route_delete_recipes() -> Response:
     recipe_ids = request.json
+    if not isinstance(recipe_ids, list):
+        raise AssertionError("Body provided is not a list.")
     user_id = request.environ["USER_ID"]
     return recipes.delete_recipes(user_id, recipe_ids)
 
@@ -318,10 +308,27 @@ def route_patch_categories() -> Response:
 @categories_bp.route("", methods=("DELETE",))
 def route_delete_categories() -> Response:
     category_ids = request.json
+    if not isinstance(category_ids, list):
+        raise AssertionError("Body provided is not a list.")
     user_id = request.environ["USER_ID"]
-    res1, status_code1 = recipes.remove_categories_from_recipes(user_id, category_ids)
-    res2, status_code2 = categories.delete_categories(user_id, category_ids)
-    return ResponseData(data={**res1["data"], **res2["data"]}), max(status_code1, status_code2)
+    res_data = {}
+
+    res, status_code = categories.delete_categories(user_id, category_ids)
+    if status_code != 204:
+        res_data.update(res["data"])
+        category_ids = [
+            category_id
+            for category_id in category_ids
+            if category_id not in res_data["failedDeletions"]
+        ]
+
+    res, status_code = recipes.remove_categories_from_recipes(user_id, category_ids)
+    if status_code != 204:
+        res_data.update(res["data"])
+
+    if not res_data:
+        return {}, 204
+    return ResponseData(data=res_data), 200
 
 
 ##############################
@@ -359,9 +366,16 @@ def route_put_category(category_id: int) -> Response:
 @categories_bp.route("/<int:category_id>", methods=("DELETE",))
 def route_delete_category(category_id: int) -> Response:
     user_id = request.environ["USER_ID"]
-    res1, status_code1 = recipes.remove_categories_from_recipes(user_id, [category_id])
-    res2, status_code2 = categories.delete_category(user_id, category_id)
-    return ResponseData(data={**res1["data"], **res2["data"]}), max(status_code1, status_code2)
+
+    res, status_code = categories.delete_category(user_id, category_id)
+    if status_code != 204:
+        return ResponseData(message=res["message"]), status_code
+
+    res, status_code = recipes.remove_categories_from_recipes(user_id, [category_id])
+    if status_code != 204:
+        return ResponseData(data=res["data"]), status_code
+
+    return {}, 204
 
 
 ##################################

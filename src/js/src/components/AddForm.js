@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { scrape } from "../backend/operations";
 
 import { colors, Views } from "../lib/common";
-import { ViewContext } from "../lib/context";
+import { CategoriesContext, ViewContext } from "../lib/context";
 
 import AddFormList from "./AddFormList";
 import Button from "./Button";
@@ -22,11 +22,15 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
     imgSrc: "",
   });
   const currentView = useContext(ViewContext);
+  const { categories } = useContext(CategoriesContext);
   // const [submitHover, setSubmitHover] = useState(false);
   const [form, setForm] = useState({
     ...initialForm.current,
     ...initialValues,
-    categories: initialValues.categories?.length > 0 ? initialValues.categories : [""],
+    categories:
+      initialValues.categories?.length > 0
+        ? initialValues.categories.map(c => categories[c].name)
+        : [""],
     ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
     instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
   });
@@ -45,7 +49,10 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
     setForm({
       ...initialForm.current,
       ...initialValues,
-      categories: initialValues.categories?.length > 0 ? initialValues.categories : [""],
+      categories:
+        initialValues.categories?.length > 0
+          ? initialValues.categories.map(c => categories[c].name)
+          : [""],
       ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
       instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
     });
@@ -80,9 +87,9 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
     if (valid()[0]) {
       return;
     }
-    const categories = form.categories.map(item => item.trim()).filter(item => item !== "");
-    const ingredients = form.ingredients.map(item => item.trim()).filter(item => item !== "");
-    const instructions = form.instructions.map(item => item.trim()).filter(item => item !== "");
+    const categories = form.categories.map(c => c.trim()).filter(item => item !== "");
+    const ingredients = form.ingredients.map(i => i.trim()).filter(item => item !== "");
+    const instructions = form.instructions.map(i => i.trim()).filter(item => item !== "");
 
     handleAddRecipe({
       ...form,

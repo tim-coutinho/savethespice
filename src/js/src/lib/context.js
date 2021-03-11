@@ -17,3 +17,9 @@ export const RecipesContext = createContext({
   selectedRecipeId: null,
   setSelectedRecipeId: () => {},
 });
+
+export const CategoriesContext = createContext({
+  categories: {},
+  selectedCategoryId: null,
+  setSelectedCategoryId: () => {},
+});

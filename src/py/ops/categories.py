@@ -233,10 +233,10 @@ def patch_categories(user_id: str, body: Mapping[str, Mapping[str, Mapping[str, 
             category_id = int(category_id)
         except ValueError:
             logging.exception(f"{category_id} is not a valid category ID.")
-            res_data.setdefault("failed", []).append(category_id)
+            res_data.setdefault("failedUpdates", []).append(category_id)
             continue
         _, status_code = patch_category(user_id, category, category_id, batch=True)
-        status_code != 200 and res_data.setdefault("failed", []).append(category_id)
+        status_code != 200 and res_data.setdefault("failedUpdates", []).append(category_id)
     return ResponseData(data=res_data), 200
 
 
@@ -306,5 +306,8 @@ def delete_categories(user_id: str, category_ids: Iterable[int]):
     res_data = {}
     for category_id in category_ids:
         _, status_code = delete_category(user_id, category_id)
-        status_code != 200 and res_data.setdefault("failed", []).append(category_id)
-    return ResponseData(data=res_data), 204
+        status_code != 204 and res_data.setdefault("failedDeletions", []).append(category_id)
+
+    if not res_data:
+        return {}, 204
+    return ResponseData(data=res_data), 200

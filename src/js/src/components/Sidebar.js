@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { CategoriesContext } from "../lib/context";
 
 import SidebarItem from "./SidebarItem";
 import TextInput from "./TextInput";
@@ -6,15 +7,13 @@ import TextInput from "./TextInput";
 import "./Sidebar.scss";
 
 export default function Sidebar({
-  categories,
-  changeSelectedCategoryId,
   classes,
   handleAddCategory,
   handleExport,
   handleImport,
   handleSignOut,
-  selectedCategoryId,
 }) {
+  const { categories, selectedCategoryId, setSelectedCategoryId } = useContext(CategoriesContext);
   const [addHover, setAddHover] = useState(false);
   const [floatingTextVisible, setFloatingTextVisible] = useState(false);
   const [newCategory, setNewCategory] = useState("");
@@ -78,7 +77,7 @@ export default function Sidebar({
           key="All Recipes"
           category="All Recipes"
           classes="sidebar-item sidebar-category"
-          handleClick={() => changeSelectedCategoryId("All Recipes")}
+          handleClick={() => setSelectedCategoryId("All Recipes")}
           selected={selectedCategoryId === "All Recipes"}
         />
         {Object.entries(categories)
@@ -88,7 +87,7 @@ export default function Sidebar({
               key={categoryId}
               category={name}
               classes="sidebar-item sidebar-category"
-              handleClick={() => changeSelectedCategoryId(categoryId)}
+              handleClick={() => setSelectedCategoryId(categoryId)}
               selected={selectedCategoryId === categoryId}
             />
           ))}

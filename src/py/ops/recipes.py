@@ -1,6 +1,6 @@
 from math import floor
 from time import time
-from typing import Iterable, List, Mapping, Optional, Tuple, Union, cast
+from typing import Iterable, List, Mapping, MutableMapping, Optional, Tuple, Union, cast
 
 from boto3.dynamodb.conditions import Attr, Key
 from botocore.exceptions import ClientError
@@ -146,12 +146,14 @@ def post_recipe(
         valid_parameters=editable_recipe_fields,
         parameter_types=editable_recipe_fields,
     )
+    verify_parameters(body.get("ingredients", []), list_type=str)
+    verify_parameters(body.get("instructions", []), list_type=str)
     body = {k: v for k, v in body.items() if v}
 
     res_data = {}
     categories_to_add = body.get("categories", [])
 
-    if "categories" in body:
+    if categories_to_add:
         existing_categories, new_categories, failed_adds = add_categories_from_recipe(
             user_id, categories_to_add
         )
@@ -214,13 +216,15 @@ def post_recipe(
 
 def patch_recipe(
     user_id: str,
-    body: Mapping[str, Mapping[str, Union[str, Union[Iterable[int], Iterable[str]]]]],
+    body: Mapping[str, MutableMapping[str, Union[str, Union[Iterable[int], Iterable[str]]]]],
     recipe_id: int,
     *,
     batch: bool = False,
 ) -> Response:
     """
     PATCH a recipe in the database, updating the specified entry.
+
+    For categories: if being added or updated, specify by name. If being removed, specify by ID.
 
     :param user_id: ID of the user
     :param body: Mapping of PATCH operations to recipe data. Currently supports 'add', 'remove', and
@@ -234,7 +238,12 @@ def patch_recipe(
         "ExpressionAttributeNames": {},
         "ExpressionAttributeValues": {},
     }
-    remove_kwargs = kwargs.copy()
+    remove_kwargs = {
+        "UpdateExpression": "",
+        "ExpressionAttributeNames": {},
+        "ExpressionAttributeValues": {},
+    }
+    res_data = {"recipeId": recipe_id}
 
     try:
         validation = {
@@ -243,72 +252,92 @@ def patch_recipe(
             "update": dict,
         }
         verify_parameters(body, valid_parameters=validation.keys(), parameter_types=validation)
-        adds, removes, updates = (body.get(parameter) for parameter in validation)
+        adds, removes, updates = (body.get(parameter, {}) for parameter in validation)
         c = "categories"
+        if c in updates and (c in adds or c in removes):
+            raise AssertionError("Categories cannot be updated and added/removed simultaneously.")
+
         if adds:
-            (categories_to_add,) = verify_parameters(adds, "categories", valid_parameters=[c])
-            verify_parameters(categories_to_add, list_type=int)
-            kwargs["UpdateExpression"] += f"ADD #{c} :{c}ToAdd"
-            kwargs["ExpressionAttributeNames"][f"#{c}"] = c
-            kwargs["ExpressionAttributeValues"][f":{c}ToAdd"] = set(categories_to_add)
+            (categories_to_add,) = verify_parameters(adds, c, valid_parameters=[c])
+            verify_parameters(categories_to_add, list_type=str)
+
+            existing_categories, new_categories, failed_adds = add_categories_from_recipe(
+                user_id, categories_to_add
+            )
+            if existing_categories:
+                res_data["existingCategories"] = existing_categories
+            if new_categories:
+                res_data["newCategories"] = new_categories
+                kwargs["UpdateExpression"] += f"ADD #{c} :{c}"
+                kwargs["ExpressionAttributeNames"][f"#{c}"] = c
+                kwargs["ExpressionAttributeValues"][f":{c}"] = {
+                    category["categoryId"] for category in new_categories
+                }
+            if failed_adds:
+                res_data["categoryFailedAdds"] = failed_adds
 
         if removes:
             # Can't add to and remove from a set in the same call, need separate kwargs
             (categories_to_remove,) = verify_parameters(removes, c, valid_parameters=[c])
             verify_parameters(categories_to_remove, list_type=int)
-            remove_kwargs["UpdateExpression"] = f"DELETE #{c} :{c}ToRemove"
+            remove_kwargs["UpdateExpression"] = f"DELETE #{c} :{c}"
             remove_kwargs["ExpressionAttributeNames"][f"#{c}"] = c
-            remove_kwargs["ExpressionAttributeValues"][f":{c}ToRemove"] = set(categories_to_remove)
+            remove_kwargs["ExpressionAttributeValues"][f":{c}"] = set(categories_to_remove)
 
-        verify_parameters(updates, valid_parameters=editable_recipe_fields.keys(), parameter_types=editable_recipe_fields)
-        verify_parameters(updates["ingredients"], list_type=str)
-        verify_parameters(updates["instructions"], list_type=str)
+        if updates:
+            verify_parameters(
+                updates,
+                valid_parameters=editable_recipe_fields.keys(),
+                parameter_types=editable_recipe_fields,
+            )
+            verify_parameters(updates.get("ingredients", []), list_type=str)
+            verify_parameters(updates.get("instructions", []), list_type=str)
 
-        edit_time = floor(time() * 1000)
-        updates["lastEditedTime"] = edit_time
+            categories = updates.get(c)
+            if categories:
+                verify_parameters(categories, list_type=str)
 
-        kwargs["UpdateExpression"] += f" SET {', '.join(f'#{k} = :{k}' for k in updates)}"
-        kwargs["ExpressionAttributeNames"].update({f"#{k}": k for k in updates})
-        kwargs["ExpressionAttributeValues"].update({f":{k}": v for k, v in updates.items()})
-        kwargs["UpdateExpression"] = kwargs["UpdateExpression"].replace("  ", " ")
+                existing_categories, new_categories, failed_adds = add_categories_from_recipe(
+                    user_id, categories_to_add
+                )
+                if existing_categories:
+                    res_data["existingCategories"] = existing_categories
+                if new_categories:
+                    res_data["newCategories"] = new_categories
+                    updates[c] = {
+                        category["categoryId"]
+                        for category in (*existing_categories, *new_categories)
+                    }
+                if failed_adds:
+                    res_data["categoryFailedAdds"] = failed_adds
     except AssertionError:
         if batch:  # Continue with the rest of the batch
             return {}, 400
         raise
 
-    res_data = {"recipeId": recipe_id}
-    categories_to_add = body.get("add", {}).get("categories", [])
+    edit_time = floor(time() * 1000)
+    updates["lastEditedTime"] = edit_time
 
-    if "categories" in updates:
-        existing_categories, new_categories, failed_adds = add_categories_from_recipe(
-            user_id, categories_to_add
-        )
-        updates["categories"] = {
-            category["categoryId"] for category in (*existing_categories, *new_categories)
-        }
-        logging.info(existing_categories, new_categories, failed_adds)
-        if existing_categories:
-            res_data["existingCategories"] = existing_categories
-        if new_categories:
-            res_data["newCategories"] = new_categories
-        if failed_adds:
-            res_data["categoryFailedAdds"] = failed_adds
+    kwargs["UpdateExpression"] += f" SET {', '.join(f'#{k} = :{k}' for k in updates)}"
+    kwargs["ExpressionAttributeNames"].update({f"#{k}": k for k in updates})
+    kwargs["ExpressionAttributeValues"].update({f":{k}": v for k, v in updates.items()})
+    kwargs["UpdateExpression"] = kwargs["UpdateExpression"].replace("  ", " ")
 
     recipes_table, resource = get_recipes_table()
 
     logging.info(f"Updating recipe with ID {recipe_id} for user with ID {user_id} and body {body}.")
     try:
-        recipes_table.update_item(
-            Key={"userId": user_id, "recipeId": recipe_id},
-            ConditionExpression=Attr("userId").exists() & Attr("recipeId").exists(),
-            **kwargs,
-        )
         if removes:
             recipes_table.update_item(
                 Key={"userId": user_id, "recipeId": recipe_id},
                 ConditionExpression=Attr("userId").exists() & Attr("recipeId").exists(),
                 **remove_kwargs,
             )
+        recipes_table.update_item(
+            Key={"userId": user_id, "recipeId": recipe_id},
+            ConditionExpression=Attr("userId").exists() & Attr("recipeId").exists(),
+            **kwargs,
+        )
     except resource.meta.client.exceptions.ConditionalCheckFailedException:
         return (
             ResponseData(
@@ -322,7 +351,7 @@ def patch_recipe(
 
 def patch_recipes(
     user_id: str,
-    body: Mapping[str, Mapping[str, Mapping[str, Union[str, Union[List[int], List[str]]]]]],
+    body: Mapping[str, Mapping[str, MutableMapping[str, Union[str, Union[List[int], List[str]]]]]],
 ) -> Response:
     """
     Batch update a set of recipe IDs.
@@ -343,10 +372,10 @@ def patch_recipes(
             recipe_id = int(recipe_id)
         except ValueError:
             logging.exception(f"{recipe_id} is not a valid recipe ID.")
-            res_data.setdefault("failed", []).append(recipe_id)
+            res_data.setdefault("failedUpdates", []).append(recipe_id)
             continue
         _, status_code = patch_recipe(user_id, operations, recipe_id)
-        status_code != 200 and res_data.setdefault("failed", []).append(recipe_id)
+        status_code != 200 and res_data.setdefault("failedUpdates", []).append(recipe_id)
 
     return ResponseData(data=res_data), 200
 
@@ -416,9 +445,15 @@ def delete_recipes(user_id: str, recipe_ids: Iterable[int]):
 
     res_data = {}
     for recipe_id in recipe_ids:
+        if not isinstance(recipe_id, int):
+            res_data.setdefault("failedDeletions", []).append(recipe_id)
+            continue
         _, status_code = delete_recipe(user_id, recipe_id)
-        status_code != 200 and res_data.setdefault("failed", []).append(recipe_id)
-    return ResponseData(data=res_data), 204
+        status_code != 204 and res_data.setdefault("failedDeletions", []).append(recipe_id)
+
+    if not res_data:
+        return {}, 204
+    return ResponseData(data=res_data), 200
 
 
 def add_categories_from_recipe(
@@ -450,7 +485,8 @@ def add_categories_from_recipe(
         category["name"] for category in existing_categories
     )
 
-    logging.info(f"Adding categories {categories_to_add} to user with ID {user_id}.")
+    if categories_to_add:
+        logging.info(f"Adding categories {categories_to_add} to user with ID {user_id}.")
     new_categories, failed_adds = [], []
     for name in categories_to_add:
         res, status_code = post_category(user_id, body={"name": name}, batch=True)
@@ -469,26 +505,30 @@ def remove_categories_from_recipes(user_id: str, category_ids: Iterable[int]) ->
     :param category_ids: IDs of the categories to remove
     :return: (Response specifics, status code)
     """
-    logging.info(
-        f"Removing references to categories with IDs {category_ids} "
-        f"for user with ID {user_id} from all recipes."
-    )
     recipes_table, resource = get_recipes_table()
-    kwargs = format_query_fields(["recipeId"])
+    kwargs = format_query_fields(["recipeId", "categories"])
     recipes_to_update = [
         recipe["recipeId"]
         for recipe in recipes_table.query(
             KeyConditionExpression=Key("userId").eq(user_id),
-            FilterExpression=Attr("categories").contains(category_ids),
             **kwargs,
         ).get("Items", [])
+        # Check if it shares any categories with category_ids. Can't be done with
+        # FilterExpression due to it not supporting checking for multiple items in sets
+        if not recipe.get("categories", set()).isdisjoint(category_ids)
     ]
+    if not recipes_to_update:
+        return {}, 204
 
+    logging.info(
+        f"Removing references to categories with IDs {category_ids} from "
+        f"recipes with IDs {recipes_to_update} for user with ID {user_id}."
+    )
     updated_recipes, failed_updates = [], []
     for recipe_id in recipes_to_update:
         _, status_code = patch_recipe(
             user_id,
-            body={"removes": {"categories": category_ids}},
+            body={"remove": {"categories": category_ids}},
             recipe_id=recipe_id,
             batch=True,
         )
@@ -500,5 +540,5 @@ def remove_categories_from_recipes(user_id: str, category_ids: Iterable[int]) ->
         ResponseData(
             data={"updatedRecipes": updated_recipes, "failedUpdatedRecipes": failed_updates}
         ),
-        204,
+        200,
     )

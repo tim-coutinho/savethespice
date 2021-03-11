@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { endpoint } from "./secrets";
 
 const serialize = obj =>
@@ -55,7 +56,7 @@ export const wrapFetch = (resource, options = { options: { method: "GET" }, para
       }
       return [body, res.status];
     })
-    .catch(console.error); // Only rejects on network errors
+    .catch(console.error); // Fetch only rejects on network errors
 
 export const getById = elementId => {
   const elem = document.getElementById(elementId);

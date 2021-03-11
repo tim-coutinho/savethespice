@@ -2,7 +2,7 @@ import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
 import Database from "../backend/database";
-import { ImportContext, RecipesContext, ViewContext } from "../lib/context";
+import { CategoriesContext, ImportContext, RecipesContext, ViewContext } from "../lib/context";
 import { Views, copyToClipboard, SignedInStates } from "../lib/common";
 import { refreshIdToken, signIn, signOut, signUp } from "../backend/operations";
 
@@ -184,81 +184,79 @@ export default hot(() => {
           setSelectedRecipeId,
         }}
       >
-        <ViewContext.Provider value={currentView}>
-          <Sidebar
-            categories={categories}
-            changeSelectedCategoryId={categoryId => {
-              setSelectedCategoryId(categoryId);
-              // handleViewChange(Views.SIDEBAR);
-            }}
-            classes={modalActive ? "disabled" : ""}
-            handleAddCategory={handleAddCategory}
-            handleExport={handleExport}
-            handleImport={handleImport}
-            handleSignOut={() => signOut().then(() => setSignedIn(SignedInStates.SIGNED_OUT))}
-            selectedCategoryId={selectedCategoryId}
-          />
-          <div
-            id="main-content"
-            className={
-              currentView === Views.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
-            }
-          >
-            <div id="left">
-              <Header
-                filter={filter}
-                category={categories[selectedCategoryId]?.name ?? "All Recipes"}
-                handleFilterChange={handleFilterChange}
-                handleViewChange={source => () => handleViewChange(source)}
-              />
-              <RecipeList />
-            </div>
-            <div id="right">
-              {selectedRecipeId && (
-                <Details
-                  handleDeleteRecipe={() => handleViewChange(Views.DELETE)}
-                  editRecipe={() => handleViewChange(Views.EDIT)}
-                  shoppingList={shoppingList}
-                  handleAddToShoppingList={handleAddToShoppingList}
-                  handleRemoveFromShoppingList={handleRemoveFromShoppingList}
-                />
-              )}
-            </div>
-          </div>
-          <div id="modals">
-            <AddForm
-              handleAddRecipe={handleAddRecipe}
-              initialValues={editMode ? allRecipes[selectedRecipeId] : {}}
+        <CategoriesContext.Provider
+          value={{ categories, selectedCategoryId, setSelectedCategoryId }}
+        >
+          <ViewContext.Provider value={currentView}>
+            <Sidebar
+              classes={modalActive ? "disabled" : ""}
+              handleAddCategory={handleAddCategory}
+              handleExport={handleExport}
+              handleImport={handleImport}
+              handleSignOut={() => signOut().then(() => setSignedIn(SignedInStates.SIGNED_OUT))}
             />
-            <DeleteForm handleDeleteRecipe={handleDeleteRecipe} />
-            <ImportContext.Provider
-              value={{
-                importString,
-                setImportString,
-                importValid,
-                setImportValid,
-                importVisible,
-                setImportVisible,
-              }}
+            <div
+              id="main-content"
+              className={
+                currentView === Views.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
+              }
             >
-              <Modal
-                handleModalCancel={() => setImportVisible(false)}
-                handleModalSubmit={() => {
-                  const recipes = JSON.parse(importString);
-                  recipes.forEach(recipe => database.addRecipe(recipe));
-                  setImportVisible(false);
+              <div id="left">
+                <Header
+                  filter={filter}
+                  category={categories[selectedCategoryId]?.name ?? "All Recipes"}
+                  handleFilterChange={handleFilterChange}
+                  handleViewChange={source => () => handleViewChange(source)}
+                />
+                <RecipeList />
+              </div>
+              <div id="right">
+                {selectedRecipeId && (
+                  <Details
+                    handleDeleteRecipe={() => handleViewChange(Views.DELETE)}
+                    editRecipe={() => handleViewChange(Views.EDIT)}
+                    shoppingList={shoppingList}
+                    handleAddToShoppingList={handleAddToShoppingList}
+                    handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+                  />
+                )}
+              </div>
+            </div>
+            <div id="modals">
+              <AddForm
+                handleAddRecipe={handleAddRecipe}
+                initialValues={editMode ? allRecipes[selectedRecipeId] : {}}
+              />
+              <DeleteForm handleDeleteRecipe={handleDeleteRecipe} />
+              <ImportContext.Provider
+                value={{
+                  importString,
+                  setImportString,
+                  importValid,
+                  setImportValid,
+                  importVisible,
+                  setImportVisible,
                 }}
-                modalCancelText="Cancel"
-                modalSubmitText="Import"
-                title="Paste JSON:"
-                valid={importValid}
-                visible={importVisible}
               >
-                <ImportForm handleAddRecipe={recipe => database.addRecipe(recipe)} />
-              </Modal>
-            </ImportContext.Provider>
-          </div>
-        </ViewContext.Provider>
+                <Modal
+                  handleModalCancel={() => setImportVisible(false)}
+                  handleModalSubmit={() => {
+                    const recipes = JSON.parse(importString);
+                    recipes.forEach(recipe => database.addRecipe(recipe));
+                    setImportVisible(false);
+                  }}
+                  modalCancelText="Cancel"
+                  modalSubmitText="Import"
+                  title="Paste JSON:"
+                  valid={importValid}
+                  visible={importVisible}
+                >
+                  <ImportForm handleAddRecipe={recipe => database.addRecipe(recipe)} />
+                </Modal>
+              </ImportContext.Provider>
+            </div>
+          </ViewContext.Provider>
+        </CategoriesContext.Provider>
       </RecipesContext.Provider>
     </div>
   );

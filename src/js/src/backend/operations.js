@@ -85,7 +85,7 @@ export const getAllCategories = () => {
 export const addRecipe = (values, recipeId) => {
   return (recipeId
     ? wrapFetch(`recipes/${recipeId}`, {
-        options: { method: "PATCH", body: { update: values } },
+        options: { method: "PUT", body: values },
       })
     : wrapFetch("recipes", {
         options: { method: "POST", body: values },
@@ -113,7 +113,7 @@ export const deleteRecipe = recipeId => {
 export const addCategory = (category, categoryId) => {
   return (categoryId
     ? wrapFetch(`categories/${categoryId}`, {
-        options: { method: "PATCH", body: { name: category } },
+        options: { method: "PUT", body: { name: category } },
       })
     : wrapFetch("categories", {
         options: { method: "POST", body: { name: category } },
