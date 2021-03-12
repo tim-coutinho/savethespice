@@ -1,0 +1,176 @@
+@use "_vars";
+
+#sidebar {
+  background-color: #1f252d;
+  height: 100vh;
+  position: absolute;
+  width: vars.$sidebar-width;
+  z-index: -1;
+
+  &.disabled {
+    filter: brightness(0.7);
+    pointer-events: none;
+    transition: vars.$standard-transition-duration;
+  }
+
+  .sidebar-item {
+    align-items: center;
+    background-color: inherit;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-start;
+    padding: 10px 0 10px 20px;
+    position: relative;
+    transition: 50ms;
+
+    //&:first-child:not(.sidebar-section) {
+    //  background-color: #1f252d;
+    //  opacity: 1;
+    //  position: sticky;
+    //  top: 0;
+    //  z-index: 1;
+    //
+    //  &.selected-item {
+    //    background-color: vars.$sidebar-item-active-background-color;
+    //    color: lighten(vars.$text-color, 30%);
+    //  }
+    //}
+
+    &.import::after {
+      content: "\f0ea";
+      font-family: FontAwesome;
+      position: absolute;
+      right: 15px;
+    }
+
+    &.export::after {
+      content: "\f0c5";
+      font-family: FontAwesome;
+      position: absolute;
+      right: 15px;
+    }
+
+    &.signout {
+      color: vars.$od-red;
+
+      @include vars.on-hover {
+        color: vars.$od-dark-red;
+      }
+    }
+
+    &.sidebar-category::before {
+      color: vars.$btn-primary-color;
+      content: "\f0da";
+      font-family: FontAwesome;
+      font-size: 30px;
+      left: 0;
+      opacity: 0;
+      position: absolute;
+      transition: inherit;
+    }
+
+    &.selected-item {
+      background-color: vars.$sidebar-item-active-background-color;
+      color: lighten(vars.$text-color, 30%);
+
+      &::before {
+        opacity: 1;
+      }
+
+      .category-delete-btn {
+        opacity: 1;
+      }
+    }
+
+    &:not(.sidebar-section):not(.selected-item) {
+      @include vars.on-hover {
+        background-color: darken(vars.$sidebar-item-active-background-color, 5%);
+        color: lighten(vars.$text-color, 15%);
+
+        &::before {
+          opacity: 0.25;
+        }
+
+        .category-delete-btn {
+          opacity: 1;
+        }
+      }
+    }
+
+    .category-delete-btn {
+      opacity: 0;
+      position: absolute;
+      padding: 5px;
+      right: 10px;
+      height: initial;
+      font-size: initial;
+      box-shadow: initial;
+      width: initial;
+      transition: opacity 50ms, color 150ms, background-color 150ms;
+    }
+  }
+
+  .sidebar-section {
+    color: vars.$od-blue;
+    cursor: default;
+  }
+
+  #categories-header {
+    display: flex;
+    font-size: 1.2em;
+    height: vars.$standard-btn-length + 20px;
+    justify-content: space-between;
+    transition: vars.$standard-transition-duration;
+    width: vars.$sidebar-width * 2;
+
+    &.shifted-left {
+      transform: translate(-50%);
+    }
+
+    #categories-header-left {
+      display: flex;
+      justify-content: space-between;
+      width: calc(50% - 20px);
+
+      i {
+        cursor: pointer;
+        font-size: 1.3em;
+      }
+    }
+
+    #categories-header-right {
+      color: vars.$od-black;
+      font-size: 15px;
+      width: 50%;
+    }
+  }
+
+  #sidebar-list {
+    @include vars.default-list;
+    height: calc(100vh - (#{vars.$standard-btn-length} + 20px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: vars.$sidebar-width;
+
+    span.float::after {
+      animation: 2s cubic-bezier(0.35, 1, 0.5, 1) 1 forwards floatup;
+      bottom: 0;
+      content: "Copied to clipboard!";
+      left: vars.$sidebar-width / 2;
+      pointer-events: none;
+      position: absolute;
+      z-index: 2;
+    }
+
+    @keyframes floatup {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+    }
+  }
+}

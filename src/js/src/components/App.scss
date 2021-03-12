@@ -1,0 +1,34 @@
+@use "_vars";
+
+#main-content {
+  background-color: vars.$background-color;
+  display: flex;
+  float: right;
+  position: relative;
+  transition-duration: vars.$standard-transition-duration;
+  transition-property: width, filter;
+  width: 100%;
+
+  &.shifted-right {
+    width: calc(100vw - #{vars.$sidebar-width});
+  }
+
+  &.disabled {
+    filter: brightness(0.7);
+    pointer-events: none;
+  }
+
+  #left {
+    border-right: 1px solid vars.$od-comment-grey;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: vars.$left-max-length;
+    min-width: vars.$left-min-length;
+  }
+
+  #right {
+    flex-grow: 1;
+    height: 100vh;
+  }
+}

@@ -1,0 +1,97 @@
+@use "_vars";
+
+header {
+  align-items: center;
+  border-bottom: 1px solid vars.$od-comment-grey;
+  display: grid;
+  column-gap: 10px;
+  grid-template-columns: vars.$standard-btn-length 1fr vars.$standard-btn-length;
+  padding: 10px;
+
+  & > span:nth-child(2) {
+    position: relative;
+
+    &:focus-within {
+      #category-label {
+        opacity: 0;
+      }
+
+      #filter-wrapper {
+        width: 100%;
+      }
+    }
+  }
+
+  #category-label {
+    color: vars.$od-blue;
+    font-size: revert;
+    margin: 0;
+    overflow: hidden;
+    padding-left: 1em;
+    position: absolute;
+    text-overflow: ellipsis;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity vars.$standard-transition-duration;
+    white-space: nowrap;
+    width: calc(100% - #{vars.$standard-btn-length + 10px});
+  }
+
+  #filter-wrapper {
+    @include vars.btn-primary-nohover;
+    border-radius: 4px;
+    border: 2px solid vars.$btn-primary-color;
+    display: flex;
+    height: vars.$standard-btn-length;
+    margin-left: auto;
+    position: relative;
+    transition-duration: vars.$standard-transition-duration;
+    transition-property: background-color, color, width;
+    transition-timing-function: ease;
+    width: vars.$standard-btn-length;
+
+    @include vars.on-hover {
+      background-color: vars.$btn-secondary-color;
+      color: vars.$btn-primary-color;
+    }
+
+    &:focus-within {
+      background-color: vars.$btn-secondary-color;
+      color: vars.$btn-primary-color;
+
+      #filter-btn {
+        cursor: default;
+        pointer-events: none;
+      }
+    }
+
+    #filter {
+      background-color: transparent;
+      border-radius: inherit;
+      border: none;
+      color: vars.$od-black;
+      cursor: pointer;
+      font-size: 15px;
+      height: 100%;
+      outline: none;
+      position: absolute;
+      right: 0;
+      width: vars.$standard-btn-length;
+
+      &:focus,
+      &:not([value=""]) {
+        cursor: initial;
+        width: calc(100% - #{vars.$standard-btn-length});
+      }
+    }
+
+    #filter-btn {
+      background: 0;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5em;
+      outline: none;
+      padding-left: 7px;
+    }
+  }
+}

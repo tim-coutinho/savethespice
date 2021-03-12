@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    cdk.out,
+    build,
+    node_modules
+ignore = D203, F841, W503, E203
+max-complexity = 10
+max-line-length = 100
