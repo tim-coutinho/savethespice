@@ -1,6 +1,6 @@
 [tool.isort]
 combine_as_imports = true
-known_first_party = "lib, ops"
+known_first_party = "apis, lib, models, core"
 line_length = 100
 multi_line_output = 3
 profile = "black"
@@ -10,14 +10,14 @@ skip_gitignore = true
 line-length = 100
 
 [tool.taskipy.tasks]
-deploy = "poetry export -f requirements.txt --without-hashes > src/py/requirements.txt && task format && (cd src/js && npm run build) && cdk deploy --require-approval never"
-format = "echo 'isort:' && isort .; echo 'black:' && black .; echo 'flake8:' && flake8; echo 'prettier:' && (cd src/js && npm run lint)"
+deploy = "poetry export -f requirements.txt --without-hashes > src/backend/requirements.txt && task format && (cd src/frontend && npm run build) && cdk deploy --require-approval never"
+format = "echo 'isort:' && isort .; echo 'black:' && black .; echo 'flake8:' && flake8; echo 'prettier:' && (cd src/frontend && npm run lint)"
 lint = "task format"
 release = "task format && task test"
 synth = "task format && cdk synth"
-clean = "rm -r cdk.out src/js/build"
-server = "client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm FLASK_APP=src/py/index:app FLASK_ENV=development FLASK_RUN_PORT=5000 flask run"
-shell = "client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm FLASK_APP=src/py/index:app FLASK_ENV=development FLASK_RUN_PORT=5000 flask shell"
+clean = "rm -r cdk.out src/frontend/build"
+server = "images_bucket_name=savethespice-images recipes_table_name=SaveTheSpice-Recipes categories_table_name=SaveTheSpice-Categories meta_table_name=SaveTheSpice-Meta client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm FLASK_APP=src/backend/index:app FLASK_ENV=development FLASK_RUN_PORT=5000 flask run"
+shell = "client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm FLASK_APP=src/backend/index:app FLASK_ENV=development FLASK_RUN_PORT=5000 flask shell"
 
 [tool.poetry]
 name = "SaveTheSpice"
@@ -28,24 +28,26 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
+Flask = "^1.1.2"
 boto3 = "^1.16.56"
 boto3-type-annotations = "^0.3.1"
+flask-restx = "^0.2.0"
 python = "~3.8"
 recipe-scrapers = "^12.1.5"
 requests = "^2.25.1"
-Flask = "^1.1.2"
+simplejson = "^3.17.2"
 
 [tool.poetry.dev-dependencies]
-"aws-cdk.aws-apigateway" = "^1.90.1"
-"aws-cdk.aws-cloudfront" = "^1.90.1"
-"aws-cdk.aws-cloudfront-origins" = "^1.90.1"
-"aws-cdk.aws-cognito" = "^1.90.1"
-"aws-cdk.aws-dynamodb" = "^1.90.1"
-"aws-cdk.aws-lambda" = "^1.90.1"
-"aws-cdk.aws-lambda-python" = "^1.90.1"
-"aws-cdk.aws-s3" = "^1.90.1"
-"aws-cdk.aws-s3-deployment" = "^1.90.1"
-"aws-cdk.core" = "^1.90.1"
+"aws-cdk.aws-apigateway" = "^1.95.0"
+"aws-cdk.aws-cloudfront" = "^1.95.0"
+"aws-cdk.aws-cloudfront-origins" = "^1.95.0"
+"aws-cdk.aws-cognito" = "^1.95.0"
+"aws-cdk.aws-dynamodb" = "^1.95.0"
+"aws-cdk.aws-lambda" = "^1.95.0"
+"aws-cdk.aws-lambda-python" = "^1.95.0"
+"aws-cdk.aws-s3" = "^1.95.0"
+"aws-cdk.aws-s3-deployment" = "^1.95.0"
+"aws-cdk.core" = "^1.95.0"
 awscli = "^1.18.216"
 black = "^20.8b1"
 boto3-type-annotations-with-docs = "^0.3.1"

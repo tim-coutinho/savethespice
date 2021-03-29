@@ -1,0 +1,100 @@
+@use "_vars";
+
+$input-border-width: 2px;
+$input-height: 1.5em;
+$padding-left: 5px;
+
+@mixin default-input($transition-duration, $border-width) {
+  border-radius: 4px;
+  border: $border-width solid vars.$od-comment-grey;
+  color: vars.$od-black;
+  //font-size: initial;
+  height: 100%;
+  outline: none;
+  padding-left: $padding-left;
+  padding-right: 4 * $padding-left;
+  transition: $transition-duration;
+  width: inherit;
+}
+
+.text-input {
+  align-items: flex-end;
+  display: flex;
+  height: calc(#{$input-height} + 1em + #{$input-border-width} * 4);
+  position: relative;
+
+  &.invalid {
+    label {
+      color: vars.$od-dark-red;
+
+      i {
+        cursor: help;
+      }
+    }
+  }
+
+  .fa-close {
+    bottom: 0.5em;
+    color: vars.$od-dark-red;
+    cursor: pointer;
+    opacity: 0.75;
+    position: absolute;
+    right: $input-border-width + 5px;
+    transition: opacity vars.$standard-transition-duration / 2;
+    visibility: hidden;
+
+    @include vars.on-hover {
+      opacity: 1;
+    }
+  }
+
+  input {
+    @include default-input(vars.$standard-transition-duration / 2, $input-border-width);
+
+    &:focus {
+      border-color: vars.$od-blue;
+
+      ~ label {
+        color: vars.$od-blue;
+      }
+    }
+
+    &:focus,
+    &:not([value=""]) {
+      height: calc(#{$input-height} + #{$input-border-width} * 2);
+
+      ~ label {
+        cursor: default;
+        left: $input-border-width;
+        top: calc(-#{$input-height} - #{$input-border-width} * 3);
+      }
+    }
+
+    &:not([value=""]) ~ .fa-close {
+      visibility: visible;
+    }
+  }
+
+  label {
+    align-items: center;
+    bottom: 0;
+    color: vars.$od-white;
+    cursor: text;
+    display: flex;
+    //font-size: initial;
+    height: 50%;
+    left: $input-border-width + $padding-left;
+    margin: auto;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transition: vars.$standard-transition-duration / 2;
+    user-select: none;
+
+    i {
+      opacity: 0;
+      transition: opacity vars.$standard-transition-duration;
+      margin-left: 0.5em;
+    }
+  }
+}

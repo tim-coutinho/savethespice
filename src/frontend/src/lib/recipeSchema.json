@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "updateTime": {
+      "type": "string"
+    },
+    "createTime": {
+      "type": "string"
+    },
+    "desc": {
+      "type": "string"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cookTime": {
+      "type": "string"
+    }
+  },
+  "required": ["name", "updateTime", "createTime"]
+}

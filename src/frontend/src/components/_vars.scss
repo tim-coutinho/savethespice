@@ -1,0 +1,78 @@
+$od-red: #e06c75;
+$od-dark-red: #be5046;
+$od-green: #98c379;
+$od-yellow: #e5c07b;
+$od-dark-yellow: #d19a66;
+$od-blue: #61afef;
+$od-purple: #c678dd;
+$od-cyan: #56b6c2;
+$od-white: #abb2bf;
+$od-black: #282c34;
+
+$od-comment-grey: #5c6370;
+$od-gutter-fg-grey: #4b5263;
+$od-cursor-grey: #2c323c;
+$od-visual-grey: #3e4452;
+$od-menu-grey: $od-visual-grey;
+$od-special-grey: #3b4048;
+$od-vertsplit: #181a1f;
+
+$background-color: $od-black;
+$btn-primary-color: $od-purple;
+$btn-secondary-color: #ffffff;
+$left-max-length: 15vw;
+$left-min-length: 320px;
+$sidebar-item-active-background-color: $od-visual-grey;
+$sidebar-width: 250px;
+$standard-box-shadow: -4px 4px 4px 0 #0006;
+$standard-btn-length: 40px;
+$standard-transition-duration: 300ms;
+$text-color: $od-white;
+// $background-color: #ECEDEE;
+
+@mixin btn-primary-nohover {
+  background-color: $btn-primary-color;
+  box-shadow: -2px 2px 4px 0 #0006;
+  color: $btn-secondary-color;
+}
+
+@mixin btn-primary-hover {
+  background-color: $btn-secondary-color;
+  box-shadow: $standard-box-shadow;
+  color: $btn-primary-color;
+}
+
+@mixin default-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@mixin card {
+  background-color: $background-color;
+  border-radius: 10px;
+  box-shadow: 0 1pt 5pt 0 #0000004d;
+  padding: 10px;
+}
+
+@mixin on-hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:not([disabled]):hover {
+      @content;
+    }
+  }
+}
+
+$breakpoints: (
+  small: 360px,
+  medium: 720px,
+  large: 1000px,
+);
+
+@mixin mq($key) {
+  $size: map-get($breakpoints, $key);
+
+  @media only screen and (min-width: $size) {
+    @content;
+  }
+}

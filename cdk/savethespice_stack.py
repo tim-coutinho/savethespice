@@ -6,7 +6,7 @@ from aws_cdk.aws_apigateway import (
     LambdaIntegration,
     LambdaRestApi,
 )
-from aws_cdk.aws_cloudfront import BehaviorOptions, Distribution
+from aws_cdk.aws_cloudfront import BehaviorOptions, Distribution, ViewerProtocolPolicy
 from aws_cdk.aws_cloudfront_origins import S3Origin
 from aws_cdk.aws_cognito import (
     AccountRecovery,
@@ -19,7 +19,7 @@ from aws_cdk.aws_cognito import (
     UserVerificationConfig,
     VerificationEmailStyle,
 )
-from aws_cdk.aws_dynamodb import Attribute, AttributeType, Table
+from aws_cdk.aws_dynamodb import Attribute, AttributeType, BillingMode, Table
 from aws_cdk.aws_iam import PolicyStatement
 from aws_cdk.aws_lambda import Runtime
 from aws_cdk.aws_lambda_python import PythonFunction
@@ -34,7 +34,8 @@ class SaveTheSpiceStack(Stack):
 
         prefix = f"{construct_id}-"
 
-        bucket_name = f"{prefix}Bucket"
+        deployment_bucket_name = f"{prefix}Bucket"
+        images_bucket_name = f"{prefix}Images"
         cloudfront_name = f"{prefix}Distribution"
         auth_lambda_name = f"{prefix}AuthLambda"
         main_lambda_name = f"{prefix}Lambda"
@@ -45,25 +46,36 @@ class SaveTheSpiceStack(Stack):
         endpoint_name = f"{prefix}Endpoint"
         authorizer_name = f"{prefix}APIAuthorizer"
 
-        bucket = Bucket(
+        deployment_bucket = Bucket(
             self,
-            bucket_name.lower(),
-            bucket_name=bucket_name.lower(),
+            deployment_bucket_name.lower(),
+            bucket_name=deployment_bucket_name.lower(),
             website_index_document="index.html",
             removal_policy=RemovalPolicy.DESTROY,
             public_read_access=True,
         )
 
+        Bucket(
+            self,
+            images_bucket_name.lower(),
+            bucket_name=images_bucket_name.lower(),
+            removal_policy=RemovalPolicy.DESTROY,
+            # public_read_access=True,
+        )
+
         # noinspection PyTypeChecker
         BucketDeployment(
             self,
-            f"{bucket_name}deployment".lower(),
-            destination_bucket=bucket,
-            sources=[Source.asset("src/js/build")],
+            f"{deployment_bucket_name}deployment".lower(),
+            destination_bucket=deployment_bucket,
+            sources=[Source.asset("src/frontend/build")],
             distribution=Distribution(
                 self,
                 cloudfront_name.lower(),
-                default_behavior=BehaviorOptions(origin=S3Origin(bucket)),
+                default_behavior=BehaviorOptions(
+                    origin=S3Origin(deployment_bucket),
+                    viewer_protocol_policy=ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                ),
             ),
         )
 
@@ -74,21 +86,21 @@ class SaveTheSpiceStack(Stack):
             self_sign_up_enabled=True,
             sign_in_aliases=SignInAliases(email=True),
             user_verification=UserVerificationConfig(
-                email_subject="SaveTheSpice Verification",
+                email_subject=f"{construct_id} Verification",
                 email_body=(
-                    "Verify your SaveTheSpice account by clicking "
+                    f"Verify your {construct_id} account by clicking "
                     "on the following link: {##Verify Email##}"
                 ),
                 email_style=VerificationEmailStyle.LINK,
             ),
             user_invitation=UserInvitationConfig(
-                email_subject="SaveTheSpice Invitation",
+                email_subject=f"{construct_id} Invitation",
                 email_body=(
-                    "You've been invited to SaveTheSpice! "
+                    "You've been invited to {construct_id}! "
                     "Your username is {username} and temporary password is {####}."
                 ),
                 sms_message=(
-                    "You've been invited to SaveTheSpice! "
+                    f"You've been invited to {construct_id}! "
                     "Your username is {username} and temporary password is {####}."
                 ),
             ),
@@ -115,6 +127,9 @@ class SaveTheSpiceStack(Stack):
             table_name=recipes_table_name,
             partition_key=Attribute(name="userId", type=AttributeType.STRING),
             sort_key=Attribute(name="recipeId", type=AttributeType.NUMBER),
+            billing_mode=BillingMode.PROVISIONED,
+            read_capacity=25,
+            write_capacity=25,
         )
 
         categories_table = Table(
@@ -123,13 +138,16 @@ class SaveTheSpiceStack(Stack):
             table_name=categories_table_name,
             partition_key=Attribute(name="userId", type=AttributeType.STRING),
             sort_key=Attribute(name="categoryId", type=AttributeType.NUMBER),
+            billing_mode=BillingMode.PROVISIONED,
+            read_capacity=25,
+            write_capacity=25,
         )
 
         auth_lambda = PythonFunction(
             self,
             auth_lambda_name.lower(),
             function_name=auth_lambda_name,
-            entry="src/py",
+            entry="src/backend",
             handler="app",
             runtime=Runtime.PYTHON_3_8,
             timeout=Duration.minutes(1),
@@ -153,11 +171,12 @@ class SaveTheSpiceStack(Stack):
             self,
             main_lambda_name.lower(),
             function_name=main_lambda_name,
-            entry="src/py",
+            entry="src/backend",
             handler="app",
             runtime=Runtime.PYTHON_3_8,
             timeout=Duration.minutes(1),
             environment={
+                "images_bucket_name": images_bucket_name,
                 "meta_table_name": meta_table_name,
                 "recipes_table_name": recipes_table_name,
                 "categories_table_name": categories_table_name,

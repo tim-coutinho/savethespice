@@ -14,11 +14,11 @@ cdk.out
 __pycache__
 secrets.*
 .DS_Store
-src/js/.env
+src/frontend/.env
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .idea
 *.sublime*
-src/py/requirements.txt
+src/backend/requirements.txt
 .eslintcache
