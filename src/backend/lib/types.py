@@ -1,8 +1,10 @@
 from decimal import Decimal
-from typing import Iterable, List, Mapping, Optional, Set, Tuple, TypedDict, Union
+from typing import Iterable, List, MutableMapping, Optional, Set, Tuple, TypedDict, Union
 
 Hashable = Union[None, bool, float, int, str]
-Serializable = Union[Hashable, Decimal, Mapping[str, "Serializable"], Iterable["Serializable"]]
+Serializable = Union[
+    Hashable, Decimal, MutableMapping[str, "Serializable"], Iterable["Serializable"]
+]
 
 
 class CategoryEntry(TypedDict, total=False):
@@ -21,10 +23,10 @@ class RecipeEntry(TypedDict, total=False):
     name: str
     desc: str
     cookTime: str
+    imgSrc: str
     ingredients: List[str]
     instructions: List[str]
     categories: Set[int]
-    categoryId: Optional[int]  # Only when deleting categories
 
 
 class ResponseData(TypedDict, total=False):

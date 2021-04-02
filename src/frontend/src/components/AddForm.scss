@@ -1,26 +1,23 @@
 @use "_vars";
 
-#add-form-card {
+#add-form {
   @include vars.card;
   color: vars.$od-black;
   height: 95vh;
   left: 50%;
-  opacity: 0;
   position: absolute;
   top: 50%;
   transform: translate(calc(75vw - 50%), -50%);
-  transition: transform vars.$standard-transition-duration ease-in,
-    opacity 0s vars.$standard-transition-duration;
+  transition: transform ease-in;
   width: 45vw;
   overflow-y: auto;
 
   &.visible {
-    opacity: 1;
     transform: translate(-50%, -50%);
-    transition: transform vars.$standard-transition-duration ease-out, opacity 0s 0s;
+    transition: transform ease-out;
   }
 
-  #add-form {
+  #add-form-form {
     display: flex;
     flex-direction: column;
     height: 100%;

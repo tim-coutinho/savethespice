@@ -1,6 +1,35 @@
 @use "_vars";
 
 #import-form {
+  @include vars.card;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(calc(75vw - 50%), -50%);
+  transition: transform ease-in;
+
+  &.visible {
+    transform: translate(-50%, -50%);
+    transition: transform ease-out;
+  }
+
+  #import-form-buttons {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    margin: 40px 10px 10px auto;
+  }
+
+  #import-form-cancel {
+    background-color: vars.$btn-secondary-color;
+    color: vars.$btn-primary-color;
+  }
+
+  .primary-btn {
+    font-size: 1.125em;
+    padding: 5px;
+  }
+
   textarea {
     font-size: 14px;
     color: vars.$od-black;

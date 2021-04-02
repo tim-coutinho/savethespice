@@ -45,9 +45,10 @@ export default function Sidebar({
     } else if (e.key === "Escape") {
       handleBlur();
     } else if (e.key === "Enter" && newCategory !== "") {
-      handleAddCategory(newCategory);
-      setNewCategory("");
-      handleBlur();
+      handleAddCategory(newCategory).finally(() => {
+        setNewCategory("");
+        handleBlur();
+      });
     }
   };
 

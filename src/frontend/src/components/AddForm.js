@@ -1,38 +1,38 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { scrape } from "../backend/operations";
 
-import { colors, Views } from "../lib/common";
+import { colors, useRenderTimeout, Views } from "../lib/common";
 import { CategoriesContext, ViewContext } from "../lib/context";
+
+import "./AddForm.scss";
 
 import AddFormList from "./AddFormList";
 import Button from "./Button";
 import TextInput from "./TextInput";
 
-import "./AddForm.scss";
+const baseForm = {
+  name: "",
+  desc: "",
+  cookTime: "",
+  yield: "",
+  categories: [""],
+  ingredients: [""],
+  instructions: [""],
+  imgSrc: "",
+};
+
+const transitionDuration = 300;
 
 export default function AddForm({ handleAddRecipe, initialValues }) {
-  const initialForm = useRef({
-    name: "",
-    desc: "",
-    cookTime: "",
-    yield: "",
-    categories: [""],
-    ingredients: [""],
-    instructions: [""],
-    imgSrc: "",
-  });
   const { currentView, setCurrentView } = useContext(ViewContext);
   const { categories } = useContext(CategoriesContext);
   // const [submitHover, setSubmitHover] = useState(false);
   const [form, setForm] = useState({
-    ...initialForm.current,
+    ...baseForm,
     ...initialValues,
-    categories:
-      initialValues.categories?.length > 0
-        ? initialValues.categories.map(c => categories[c].name)
-        : [""],
-    ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
-    instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
+    categories: initialValues.categories?.map(c => categories[c].name),
+    ingredients: initialValues.ingredients,
+    instructions: initialValues.instructions,
   });
   const [pending, setPending] = useState(false);
   const [urlToScrape, setUrlToScrape] = useState("");
@@ -41,21 +41,18 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
     inProgress: false,
     success: false,
   });
-  const [visible, setVisible] = useState(false);
+  const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
 
   useEffect(() => {
     if (!visible) {
       return;
     }
     setForm({
-      ...initialForm.current,
+      ...baseForm,
       ...initialValues,
-      categories:
-        initialValues.categories?.length > 0
-          ? initialValues.categories.map(c => categories[c].name)
-          : [""],
-      ingredients: initialValues.ingredients?.length > 0 ? initialValues.ingredients : [""],
-      instructions: initialValues.instructions?.length > 0 ? initialValues.instructions : [""],
+      categories: initialValues.categories?.map(c => categories[c].name),
+      ingredients: initialValues.ingredients,
+      instructions: initialValues.instructions,
     });
     setUrlToScrape("");
     setScrapeStatus({
@@ -63,7 +60,7 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
       inProgress: false,
       success: false,
     });
-  }, [visible, initialValues]);
+  }, [visible]);
 
   useEffect(() => {
     setVisible(currentView === Views.ADD);
@@ -74,6 +71,17 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
       name: form.name.length === 0,
     };
     return [Object.keys(errors).some(x => errors[x]), errors];
+  };
+
+  const valueChanged = (initialValue, newValue) => {
+    return (
+      // Value is list, new value altered
+      (typeof newValue === "object" && JSON.stringify(newValue) !== JSON.stringify(initialValue)) ||
+      // Value initially present, new value altered
+      (initialValue && newValue !== initialValue) ||
+      // Value not initially present, new value present
+      (initialValue === undefined && newValue)
+    );
   };
 
   const handleFormChange = e => {
@@ -88,20 +96,29 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
     if (valid()[0]) {
       return;
     }
-    const categories = form.categories.map(c => c.trim()).filter(item => item !== "");
-    const ingredients = form.ingredients.map(i => i.trim()).filter(item => item !== "");
-    const instructions = form.instructions.map(i => i.trim()).filter(item => item !== "");
-
-    setPending(true);
-    handleAddRecipe({
+    const recipe = {
       ...form,
-      categories,
-      ingredients,
-      instructions,
-    }).finally(() => {
-      setPending(false);
-      setCurrentView(Views.HOME);
-    });
+      categories: form.categories?.map(c => c.trim()).filter(item => item !== ""),
+      ingredients: form.ingredients?.map(i => i.trim()).filter(item => item !== ""),
+      instructions: form.instructions?.map(i => i.trim()).filter(item => item !== ""),
+    };
+
+    for (let [k, v] of Object.entries(recipe)) {
+      // No op if nothing to update
+      let initialValue = initialValues[k];
+      if (k === "categories" && initialValue !== undefined) {
+        // Categories holds IDs, map to category names
+        initialValue = initialValue.map(c => categories[c].name);
+      }
+      if (valueChanged(initialValue, v)) {
+        setPending(true);
+        handleAddRecipe(recipe).finally(() => {
+          setPending(false);
+        });
+        break;
+      }
+    }
+    setCurrentView(Views.HOME);
   };
 
   const scrapeUrl = () => {
@@ -124,9 +141,13 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
   // const [invalid, errors] = valid();
 
   return (
-    <div id="add-form-card" className={`${visible ? "visible" : ""} card`}>
-      {visible && (
-        <form id="add-form">
+    <div
+      id="add-form"
+      className={`${visible ? "visible" : ""} card`}
+      style={{ transitionDuration: `${transitionDuration}ms` }}
+    >
+      {rendered && (
+        <form id="add-form-form">
           <TextInput
             placeholder="Recipe Name"
             name="name"
@@ -161,21 +182,21 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
           />
           <AddFormList
             name="categories"
-            items={form.categories}
+            items={form.categories ?? [""]}
             setItems={handleFormChange}
-            visible={visible}
+            // visible={visible}
           />
           <AddFormList
             name="ingredients"
-            items={form.ingredients}
+            items={form.ingredients ?? [""]}
             setItems={handleFormChange}
-            visible={visible}
+            // visible={visible}
           />
           <AddFormList
-            items={form.instructions}
+            items={form.instructions ?? [""]}
             name="instructions"
             setItems={handleFormChange}
-            visible={visible}
+            // visible={visible}
             ordered
           />
           <h1 style={{ color: colors.OD_WHITE }}>OR</h1>
@@ -186,7 +207,7 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
             value={urlToScrape}
           />
           <span style={{ display: "flex" }}>
-            <Button id="add-form-cancel" onClick={() => handleAddRecipe()} secondary>
+            <Button id="add-form-cancel" onClick={() => setCurrentView(Views.HOME)} secondary>
               Cancel
             </Button>
             <Button

@@ -205,7 +205,9 @@ class SaveTheSpiceStack(Stack):
             endpoint_name.lower(),
             rest_api_name=endpoint_name,
             handler=main_lambda,
-            default_cors_preflight_options=CorsOptions(allow_origins=Cors.ALL_ORIGINS),
+            default_cors_preflight_options=CorsOptions(
+                allow_origins=Cors.ALL_ORIGINS, max_age=86400
+            ),
         )
 
         authorizer = CfnAuthorizer(

@@ -60,3 +60,6 @@ _batch_recipe_update = {
     "recipeIdToUpdate2": Nested(recipe_update_model),
 }
 batch_recipe_update_model = Model("BatchRecipeUpdate", _batch_recipe_update)
+
+_batch_recipe_add = {"recipes": List(Nested(recipe_model))}
+batch_recipe_add_model = Model("BatchRecipeAdd", _batch_recipe_add)

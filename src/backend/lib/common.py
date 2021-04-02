@@ -3,8 +3,19 @@ import os
 from functools import lru_cache as cache, singledispatch
 from itertools import zip_longest
 from pprint import pformat
-from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Tuple, Type, Union, \
-    Literal
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import boto3
 from boto3_type_annotations.dynamodb import ServiceResource as DynamoDB, Table
@@ -70,7 +81,9 @@ def get_next_id(user_id: str, type_: Literal["recipe", "category"]) -> int:
             UpdateExpression=f"ADD #{field_name} :{field_name}",
             ReturnValues="UPDATED_OLD",
             **kwargs,
-        ).get("Attributes", {}).get(field_name, 0)
+        )
+        .get("Attributes", {})
+        .get(field_name, 0)
     )
 
     return next_id

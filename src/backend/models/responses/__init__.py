@@ -20,6 +20,8 @@ from models.responses.categories import (
     db_category_response_model,
 )
 from models.responses.recipes import (
+    batch_recipe_add_response_data,
+    batch_recipe_add_response_model,
     batch_recipe_delete_response_data,
     batch_recipe_delete_response_model,
     batch_recipe_get_response_data,
@@ -42,19 +44,21 @@ default_response_model = Model("DefaultResponse", {"message": String(), "data": 
 
 def register_recipe_response_models(api: Namespace) -> None:
     for model in (
+        batch_recipe_add_response_data,
+        batch_recipe_add_response_model,
         batch_recipe_delete_response_data,
         batch_recipe_delete_response_model,
         batch_recipe_get_response_data,
-        recipe_update_response_data,
-        recipe_update_response_model,
         batch_recipe_get_response_model,
         batch_recipe_update_response_data,
         batch_recipe_update_response_model,
-        recipe_delete_response_data,
-        recipe_delete_response_model,
+        db_recipe_response_model,
         recipe_add_response_data,
         recipe_add_response_model,
-        db_recipe_response_model,
+        recipe_delete_response_data,
+        recipe_delete_response_model,
+        recipe_update_response_data,
+        recipe_update_response_model,
     ):
         api.models[model.name] = model
 

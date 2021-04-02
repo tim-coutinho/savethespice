@@ -11,17 +11,18 @@ from boto3.dynamodb.conditions import Attr, Key
 from boto3_type_annotations.dynamodb import Client as DynamoDBClient, Table
 from boto3_type_annotations.s3 import Object
 from botocore.exceptions import ClientError
+from requests.exceptions import ConnectionError, InvalidURL
+from requests.utils import prepend_scheme_if_needed
 
-from core.categories import post_category
 from lib.common import (
     UNEXPECTED_EXCEPTION,
     chunks,
     format_query_fields,
     get_categories_table,
-    get_meta_table,
+    get_next_id,
     get_recipes_table,
     root_logger,
-    verify_parameters, get_next_id,
+    verify_parameters,
 )
 from lib.types import CategoryEntry, RecipeEntry, Response, ResponseData
 
@@ -137,6 +138,9 @@ def post_recipe(
     user_id: str,
     body: RecipeEntry,
     recipe_id: Optional[int] = None,
+    *,
+    batch: Optional[bool] = False,
+    recipes_table: Optional[Table] = None,
 ) -> Response:
     """
     POST a recipe to the database, adding a new entry. If 'recipe_id' is specified, instead replace
@@ -145,22 +149,29 @@ def post_recipe(
     :param user_id: ID of the user
     :param body: Recipe data to replace with
     :param recipe_id: ID of the recipe being replaced
+    :param batch: Whether or not this is part of a batch operation
+    :param recipes_table: Different DynamoDB table to use. Used for batch writing
     :return: (Response specifics, status code)
     """
     # If not updating an existing recipe, name must be present
     # TODO: Verify types
-    verify_parameters(
-        body,
-        "name" if not recipe_id else None,
-        valid_parameters=editable_recipe_fields,
-        parameter_types=editable_recipe_fields,
-    )
-    verify_parameters(body.get("ingredients", []), list_type=str)
-    verify_parameters(body.get("instructions", []), list_type=str)
+    try:
+        verify_parameters(
+            body,
+            "name" if not recipe_id else None,
+            valid_parameters=editable_recipe_fields,
+            parameter_types=editable_recipe_fields,
+        )
+        verify_parameters(body.get("ingredients", []), list_type=str)
+        verify_parameters(body.get("instructions", []), list_type=str)
+    except AssertionError:
+        if batch:  # Continue with the rest of the batch
+            return {}, 400
+        raise
     body = {k: v for k, v in body.items() if v}
 
     res_data = {}
-    categories_to_add = body.get("categories", [])
+    categories_to_add = body.pop("categories", [])
 
     if categories_to_add:
         existing_categories, new_categories, failed_adds = add_categories_from_recipe(
@@ -178,11 +189,7 @@ def post_recipe(
 
     edit_time = datetime.utcnow().replace(microsecond=0).isoformat()
     body["updateTime"] = edit_time
-    image_source = body.pop("imgSrc", None)
-    if image_source:
-        image_source = add_image_from_recipe(image_source)
-        if image_source:
-            body["imgSrc"] = image_source
+    body = add_image_from_recipe(body)
     if recipe_id is None:  # POST
         status_code = 201
         body["createTime"] = edit_time
@@ -205,7 +212,8 @@ def post_recipe(
         )
 
     body["recipeId"] = recipe_id
-    recipes_table, _ = get_recipes_table()
+    if not recipes_table:
+        recipes_table, _ = get_recipes_table()
     recipes_table.put_item(
         Item={
             **body,
@@ -214,7 +222,6 @@ def post_recipe(
     )
 
     res_data.update(body)
-    res_data.pop("categories", None)
     return ResponseData(data=res_data), status_code
 
 
@@ -298,12 +305,9 @@ def patch_recipe(
             )
             verify_parameters(updates.get("ingredients", []), list_type=str)
             verify_parameters(updates.get("instructions", []), list_type=str)
-            image_source = updates.pop("imgSrc", None)
-            if image_source:
-                image_source = add_image_from_recipe(image_source)
-                if image_source:
-                    updates["imgSrc"] = image_source
-                    res_data["imgSrc"] = image_source
+            updates = add_image_from_recipe(updates)
+            if "imgSrc" in updates:
+                res_data["imgSrc"] = updates["imgSrc"]
 
             categories = updates.get(c)
             if categories:
@@ -419,6 +423,44 @@ def put_recipe(user_id: str, body: RecipeEntry, recipe_id: int) -> Response:
     return post_recipe(user_id, recipe_id=recipe_id, body=body)
 
 
+def put_recipes(user_id: str, body: Iterable[RecipeEntry]) -> Response:
+    """
+    PUT a list of recipes to the database.
+
+    :param user_id: ID of the user
+    :param body: Recipe data to replace with
+    :return: (Response specifics, status code)
+    """
+    table, _ = get_recipes_table()
+    recipes, failed_adds = [], []
+    existing_categories, new_categories, category_failed_adds = [], [], []
+
+    logging.info(f"Batch adding recipes from body {body}")
+    with table.batch_writer() as batch:
+        for recipe in body:
+            res, status_code = post_recipe(user_id, recipe, recipes_table=batch)
+            if status_code == 400:
+                failed_adds.append(recipe)
+                continue
+            data = res["data"]
+            for list_, name in zip(
+                (existing_categories, new_categories, category_failed_adds),
+                ("existingCategories", "newCategories", "categoryFailedAdds"),
+            ):
+                list_.extend(data.pop(name, []))
+
+            recipes.append(data)
+
+    res_data = {
+        "recipes": recipes,
+        "failedAdds": failed_adds,
+        "existingCategories": existing_categories,
+        "newCategories": new_categories,
+        "categoryFailedAdds": category_failed_adds,
+    }
+    return ResponseData(data=res_data), 200
+
+
 def delete_recipe(user_id: str, recipe_id: int) -> Response:
     """
     DELETE the specified recipe from the database.
@@ -528,7 +570,12 @@ def add_categories_from_recipe(
     with table.batch_writer() as batch:
         edit_time = datetime.utcnow().replace(microsecond=0).isoformat()
         for name, category_id in zip(categories_to_add, count(next_category_id)):
-            body = {"categoryId": category_id, "name": name, "createTime": edit_time, "updateTime": edit_time}
+            body = {
+                "categoryId": category_id,
+                "name": name,
+                "createTime": edit_time,
+                "updateTime": edit_time,
+            }
             try:
                 batch.put_item(Item={**body, "userId": user_id})
             except Exception:
@@ -591,15 +638,26 @@ def remove_categories_from_recipes(user_id: str, category_ids: Iterable[int]) ->
     )
 
 
-def add_image_from_recipe(image_source: str) -> Optional[str]:
+def add_image_from_recipe(body: RecipeEntry) -> RecipeEntry:
+    image_source = body.pop("imgSrc", None)
+    if not image_source:
+        return body
+    if image_source.startswith(IMAGE_PREFIX):  # Already self-hosted
+        body["imgSrc"] = image_source
+        return body
+
     key = str(uuid4())
-    with requests.get(image_source, stream=True) as res:
-        content_type = res.headers["Content-Type"]
-        file_type, extension = content_type.rsplit("/")
-        if not res.ok or file_type != "image":
-            return None
-        image: Object = boto3.resource("s3").Object(
-            os.environ["images_bucket_name"], f"{key}.{extension}"
-        )
-        image.put(Body=res.content, ContentType=content_type, ACL="public-read")
-    return f"{IMAGE_PREFIX}{key}.{extension}"
+    try:
+        with requests.get(prepend_scheme_if_needed(image_source, "http"), stream=True) as res:
+            content_type = res.headers["Content-Type"]
+            file_type, extension = content_type.rsplit("/")
+            if res.ok and file_type == "image":
+                image: Object = boto3.resource("s3").Object(
+                    os.environ["images_bucket_name"], f"{key}.{extension}"
+                )
+                image.put(Body=res.content, ContentType=content_type, ACL="public-read")
+                body["imgSrc"] = f"{IMAGE_PREFIX}{key}.{extension}"
+    except (ConnectionError, InvalidURL):
+        pass
+
+    return body

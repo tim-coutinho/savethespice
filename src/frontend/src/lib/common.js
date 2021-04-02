@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { endpoint } from "./secrets";
 
 const serialize = obj =>
@@ -10,12 +11,31 @@ const serialize = obj =>
 
 export const prefix = "SaveTheSpice-";
 
+export const useRenderTimeout = timeout => {
+  const inFlight = useRef(false);
+  const [visible, setVisible] = useState(false);
+  const [rendered, setRendered] = useState(false);
+
+  const setInView = inView => {
+    setVisible(inView);
+    if (inView) {
+      inFlight.current = false;
+      setRendered(true);
+    } else {
+      inFlight.current = true;
+      setTimeout(() => inFlight.current && setRendered(false), timeout);
+    }
+  };
+  return [visible, rendered, setInView];
+};
+
 export const Views = {
   ADD: "Add",
   DELETE_CATEGORY: "Delete Category",
   DELETE_RECIPE: "Delete Recipe",
   EDIT: "Edit",
   HOME: "Home",
+  IMPORT: "Import",
   SIDEBAR: "Sidebar",
 };
 

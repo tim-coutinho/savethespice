@@ -2,7 +2,7 @@ import { hot } from "react-hot-loader/root"; // Enable live component reloading
 import React, { useEffect, useState } from "react";
 
 import Database from "../backend/database";
-import { CategoriesContext, ImportContext, RecipesContext, ViewContext } from "../lib/context";
+import { CategoriesContext, RecipesContext, ViewContext } from "../lib/context";
 import { Views, copyToClipboard, SignedInStates } from "../lib/common";
 import { forgotPassword, refreshIdToken, signIn, signOut, signUp } from "../backend/operations";
 
@@ -12,7 +12,6 @@ import DeleteForm from "./DeleteForm";
 import Details from "./Details";
 import Header from "./Header";
 import ImportForm from "./ImportForm";
-import Modal from "./Modal";
 import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
 
@@ -28,9 +27,6 @@ export default hot(() => {
   const [editMode, setEditMode] = useState(false);
   const [filter, setFilter] = useState("");
   const [filteredRecipes, setFilteredRecipes] = useState([]);
-  const [importString, setImportString] = useState("");
-  const [importValid, setImportValid] = useState(false);
-  const [importVisible, setImportVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [modalActive, setModalActive] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState("All Recipes");
@@ -53,6 +49,8 @@ export default hot(() => {
           return currentView === Views.ADD ? Views.HOME : Views.ADD;
         case Views.SIDEBAR:
           return currentView === Views.HOME ? Views.SIDEBAR : Views.HOME;
+        case Views.IMPORT:
+          return currentView === Views.HOME ? Views.IMPORT : Views.HOME;
         default:
           return Views.HOME;
       }
@@ -60,7 +58,7 @@ export default hot(() => {
   };
 
   const handleAddCategory = category => {
-    database.addCategory(category);
+    return database.addCategory(category);
   };
 
   const handleDeleteCategory = () => {
@@ -78,9 +76,7 @@ export default hot(() => {
   };
 
   const handleDeleteRecipe = () => {
-    database.deleteRecipe(selectedRecipeId);
-    setSelectedRecipeId(null);
-    handleViewChange(Views.DELETE_RECIPE);
+    return database.deleteRecipe(selectedRecipeId).then(() => setSelectedRecipeId(null));
   };
 
   // const handleAddToShoppingList = ingredient => {
@@ -117,9 +113,10 @@ export default hot(() => {
       )
     );
 
-  const handleImport = () => {
-    handleViewChange(Views.SIDEBAR);
-    setImportVisible(true);
+  const handleImport = async importString => {
+    const recipes = JSON.parse(importString);
+    await database.addRecipes(recipes);
+    handleViewChange(Views.IMPORT);
   };
 
   useEffect(() => {
@@ -140,23 +137,20 @@ export default hot(() => {
 
   useEffect(() => {
     setModalActive(
-      currentView === Views.DELETE_RECIPE ||
-        currentView === Views.DELETE_CATEGORY ||
-        currentView === Views.ADD ||
-        importVisible
+      [Views.DELETE_RECIPE, Views.DELETE_CATEGORY, Views.ADD, Views.IMPORT].includes(currentView)
     );
-  }, [currentView, importVisible]);
+  }, [currentView]);
 
   useEffect(() => {
     setFilteredRecipes(
-      (selectedCategoryId === "All Recipes"
-        ? Object.entries(allRecipes)
-        : Object.entries(allRecipes).filter(
-            ([, recipe]) =>
-              recipe.name.toLowerCase().includes(filter.toLowerCase()) &&
-              recipe.categories?.includes(+selectedCategoryId)
-          )
-      ).sort(([, { createTime: time1 }], [, { createTime: time2 }]) => (time1 <= time2 ? 1 : -1))
+      Object.entries(allRecipes)
+        .filter(
+          ([, recipe]) =>
+            recipe.name.toLowerCase().includes(filter.toLowerCase()) &&
+            (selectedCategoryId === "All Recipes" ||
+              recipe.categories?.includes(+selectedCategoryId))
+        )
+        .sort(([, { createTime: time1 }], [, { createTime: time2 }]) => (time1 <= time2 ? 1 : -1))
     );
   }, [filter, allRecipes, selectedCategoryId]);
 
@@ -246,7 +240,7 @@ export default hot(() => {
               classes={modalActive ? "disabled" : ""}
               handleAddCategory={handleAddCategory}
               handleExport={handleExport}
-              handleImport={handleImport}
+              handleImport={() => setCurrentView(Views.IMPORT)}
               handleSignOut={() => signOut().then(() => setSignedIn(SignedInStates.SIGNED_OUT))}
               handleDeleteCategory={() => handleViewChange(Views.DELETE_CATEGORY)}
             />
@@ -284,36 +278,10 @@ export default hot(() => {
               />
               <DeleteForm
                 handleDelete={
-                  currentView === Views.DELETE_CATEGORY ? handleDeleteCategory : handleDeleteRecipe
+                  currentView === Views.DELETE_RECIPE ? handleDeleteRecipe : handleDeleteCategory
                 }
               />
-              <ImportContext.Provider
-                value={{
-                  importString,
-                  setImportString,
-                  importValid,
-                  setImportValid,
-                  importVisible,
-                  setImportVisible,
-                }}
-              >
-                <Modal
-                  handleModalCancel={() => setImportVisible(false)}
-                  handleModalSubmit={async () => {
-                    const recipes = JSON.parse(importString);
-                    await database.addRecipes(recipes);
-                    // recipes.forEach(recipe => database.addRecipe(recipe));
-                    setImportVisible(false);
-                  }}
-                  modalCancelText="Cancel"
-                  modalSubmitText="Import"
-                  title="Paste JSON:"
-                  valid={importValid}
-                  visible={importVisible}
-                >
-                  <ImportForm />
-                </Modal>
-              </ImportContext.Provider>
+              <ImportForm handleImport={handleImport} />
             </div>
           </ViewContext.Provider>
         </CategoriesContext.Provider>

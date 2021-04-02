@@ -5,19 +5,16 @@
   left: 50%;
   position: absolute;
   top: 50%;
-  opacity: 0;
   transform: translate(-50%, calc(-100vh - 50%));
-  transition: transform vars.$standard-transition-duration ease-in,
-    opacity 0s vars.$standard-transition-duration;
+  transition: transform ease-in;
   width: 300px;
 
   &.visible {
-    opacity: 1;
     transform: translate(-50%, -50%);
-    transition: transform vars.$standard-transition-duration ease-out, opacity 0s 0s;
+    transition: transform ease-out;
   }
 
-  #buttons {
+  #delete-form-buttons {
     align-items: center;
     display: flex;
     justify-content: flex-end;

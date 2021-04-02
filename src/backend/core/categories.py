@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Iterable, Mapping, Optional, List, MutableMapping, Union
+from typing import Iterable, List, Mapping, MutableMapping, Optional, Union
 
 from boto3.dynamodb.conditions import Attr, Key
 from botocore.exceptions import ClientError
@@ -8,9 +8,9 @@ from lib.common import (
     UNEXPECTED_EXCEPTION,
     format_query_fields,
     get_categories_table,
-    get_meta_table,
+    get_next_id,
     root_logger,
-    verify_parameters, get_next_id,
+    verify_parameters,
 )
 from lib.types import CategoryEntry, Response, ResponseData
 

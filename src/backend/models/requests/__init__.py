@@ -20,6 +20,7 @@ from models.requests.categories import (
     db_category_data,
 )
 from models.requests.recipes import (
+    batch_recipe_add_model,
     batch_recipe_delete_model,
     batch_recipe_update_model,
     db_recipe_data,
@@ -35,14 +36,15 @@ not_found_model = Model("NotFound", {"message": String()})
 
 def register_recipe_request_models(api: Namespace) -> None:
     for model in (
-        recipe_model,
-        recipe_with_id_model,
-        db_recipe_data,
-        recipe_update_model,
+        batch_recipe_add_model,
         batch_recipe_delete_model,
         batch_recipe_update_model,
+        db_recipe_data,
         invalid_input_model,
         not_found_model,
+        recipe_model,
+        recipe_update_model,
+        recipe_with_id_model,
     ):
         api.models[model.name] = model
 
@@ -63,9 +65,9 @@ def register_category_request_models(api: Namespace) -> None:
 
 def register_user_request_models(api: Namespace) -> None:
     for model in (
-        shopping_list_data,
         invalid_input_model,
         not_found_model,
+        shopping_list_data,
     ):
         api.models[model.name] = model
 
@@ -75,11 +77,11 @@ def register_auth_request_models(api: Namespace) -> None:
         confirm_forgot_password_model,
         confirm_sign_up_model,
         forgot_password_model,
+        invalid_input_model,
+        not_found_model,
         refresh_id_token_model,
         resend_code_model,
         sign_in_model,
         sign_up_model,
-        invalid_input_model,
-        not_found_model,
     ):
         api.models[model.name] = model

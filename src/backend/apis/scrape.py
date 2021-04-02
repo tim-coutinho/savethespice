@@ -4,7 +4,7 @@ from typing import List, Union
 from flask import request
 from flask_restx import Namespace, Resource
 from recipe_scrapers import NoSchemaFoundInWildMode, scrape_me
-from requests.exceptions import InvalidURL
+from requests.exceptions import ConnectionError, InvalidURL
 from requests.utils import prepend_scheme_if_needed
 
 from lib.common import pformat_ as pformat, root_logger
@@ -38,7 +38,7 @@ class Scrape(Resource):
             return ResponseData(message="No url provided."), 400
         logging.info(f"Scraping url: {url}")
         try:
-            scraped = scrape_me(prepend_scheme_if_needed(url, "https"), wild_mode=True)
+            scraped = scrape_me(prepend_scheme_if_needed(url, "http"), wild_mode=True)
         except NoSchemaFoundInWildMode:
             return ResponseData(message=f"No recipe schema found at {url}"), 200
         except (ConnectionError, InvalidURL):

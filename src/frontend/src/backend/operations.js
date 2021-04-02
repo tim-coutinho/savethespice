@@ -128,6 +128,17 @@ export const addRecipe = (body, recipeId) => {
   });
 };
 
+export const addRecipes = recipes => {
+  return wrapFetch("recipes", {
+    options: { method: "PUT", body: { recipes } },
+  }).then(([res, status]) => {
+    if (status !== 200) {
+      throw new Error(res.message);
+    }
+    return res.data;
+  });
+};
+
 export const deleteRecipe = recipeId => {
   return wrapFetch(`recipes/${recipeId}`, {
     options: { method: "DELETE" },

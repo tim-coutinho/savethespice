@@ -10,8 +10,11 @@ from core.recipes import (
     patch_recipes,
     post_recipe,
     put_recipe,
+    put_recipes,
 )
 from models import (
+    batch_recipe_add_model,
+    batch_recipe_add_response_model,
     batch_recipe_delete_model,
     batch_recipe_delete_response_model,
     batch_recipe_get_response_model,
@@ -68,6 +71,14 @@ class Recipes(Resource):
         body = api.payload
         user_id = request.environ["USER_ID"]
         return post_recipe(user_id, body)
+
+    @api.expect(batch_recipe_add_model)
+    @api.marshal_with(batch_recipe_add_response_model)
+    def put(self):
+        """Batch put recipes."""
+        recipes = api.payload.get("recipes")
+        user_id = request.environ["USER_ID"]
+        return put_recipes(user_id, recipes)
 
 
 @api.route("/<int:recipeId>")

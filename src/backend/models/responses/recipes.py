@@ -7,6 +7,7 @@ from models.requests.recipes import (
     _db_recipe,
     _db_recipe_response_model as db_recipe_response_model,
     db_recipe_data,
+    recipe_model,
 )
 
 recipe_update_response_data, recipe_update_response_model = _make_response_data_model(
@@ -51,4 +52,15 @@ batch_recipe_get_response_data, batch_recipe_get_response_model = _make_response
     batch_recipe_delete_response_model,
 ) = _make_response_data_model(
     "BatchDeleteRecipe", {"failedDeletions": List(Integer)}, skip_none=True
+)
+
+batch_recipe_add_response_data, batch_recipe_add_response_model = _make_response_data_model(
+    "BatchAddRecipe",
+    {
+        "recipes": List(Nested(db_recipe_data), skip_none=True),
+        "failedAdds": List(Nested(recipe_model), skip_none=True),
+        "existingCategories": List(Nested(db_category_data, skip_none=True)),
+        "newCategories": List(Nested(db_category_data, skip_none=True)),
+        "categoryFailedAdds": List(String),
+    },
 )

@@ -99,6 +99,7 @@ def wrap_response(res: FlaskResponse) -> FlaskResponse:
             ),
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+            "Access-Control-Max-Age": 86400,
         }
     )
     logging.debug(f"\nResponse: {pformat({'statusCode': res.status_code, 'body': res.json})}")
