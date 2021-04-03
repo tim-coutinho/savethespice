@@ -1,13 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import { ViewContext } from "../lib/context";
-import { colors, useRenderTimeout, Views } from "../lib/common";
+import { colors, transitionDuration, useRenderTimeout, Views } from "../lib/common";
 
 import Button from "./Button";
 
 import "./DeleteForm.scss";
-
-const transitionDuration = 300;
 
 export default function DeleteForm({ handleDelete }) {
   const { currentView, setCurrentView } = useContext(ViewContext);
@@ -25,7 +23,7 @@ export default function DeleteForm({ handleDelete }) {
   return (
     <div
       id="delete-form"
-      className={`${visible ? "visible" : ""} card`}
+      className={visible ? "visible" : ""}
       style={{ transitionDuration: `${transitionDuration}ms` }}
     >
       {rendered && (
@@ -33,14 +31,14 @@ export default function DeleteForm({ handleDelete }) {
           <div style={{ fontSize: "1.125em" }}>Permanently delete {type}?</div>
           <span style={{ fontWeight: "initial" }}>This cannot be undone.</span>
           <hr />
-          <div id="delete-form-buttons">
+          <div id="delete-form-btns">
             <Button id="delete-form-cancel" onClick={() => setCurrentView(Views.HOME)} secondary>
               Cancel
             </Button>
             <Button
               onClick={() => {
                 setPending(true);
-                handleDelete().finally(() => {
+                handleDelete(currentView.itemId).finally(() => {
                   setPending(false);
                   setCurrentView(Views.HOME);
                 });

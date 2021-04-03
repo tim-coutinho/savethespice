@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { scrape } from "../backend/operations";
 
-import { colors, useRenderTimeout, Views } from "../lib/common";
+import { colors, transitionDuration, useRenderTimeout, Views } from "../lib/common";
 import { CategoriesContext, ViewContext } from "../lib/context";
 
 import "./AddForm.scss";
@@ -20,8 +20,6 @@ const baseForm = {
   instructions: [""],
   imgSrc: "",
 };
-
-const transitionDuration = 300;
 
 export default function AddForm({ handleAddRecipe, initialValues }) {
   const { currentView, setCurrentView } = useContext(ViewContext);
@@ -143,7 +141,7 @@ export default function AddForm({ handleAddRecipe, initialValues }) {
   return (
     <div
       id="add-form"
-      className={`${visible ? "visible" : ""} card`}
+      className={visible ? "visible" : ""}
       style={{ transitionDuration: `${transitionDuration}ms` }}
     >
       {rendered && (

@@ -11,7 +11,9 @@ const serialize = obj =>
 
 export const prefix = "SaveTheSpice-";
 
-export const useRenderTimeout = timeout => {
+export const transitionDuration = 300;
+
+export const useRenderTimeout = (timeout = 300) => {
   const inFlight = useRef(false);
   const [visible, setVisible] = useState(false);
   const [rendered, setRendered] = useState(false);
@@ -30,13 +32,14 @@ export const useRenderTimeout = timeout => {
 };
 
 export const Views = {
-  ADD: "Add",
-  DELETE_CATEGORY: "Delete Category",
-  DELETE_RECIPE: "Delete Recipe",
-  EDIT: "Edit",
-  HOME: "Home",
-  IMPORT: "Import",
-  SIDEBAR: "Sidebar",
+  ADD: { id: 0, modal: true },
+  DELETE_CATEGORY: { id: 1, modal: true, categoryId: null },
+  DELETE_RECIPE: { id: 2, modal: true, recipeId: null },
+  EDIT: { id: 3, modal: true },
+  HOME: { id: 4 },
+  IMPORT: { id: 5, modal: true },
+  SIDEBAR: { id: 6 },
+  SIGN_IN: { id: 7 },
 };
 
 export const SignedInStates = {

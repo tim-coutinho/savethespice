@@ -3,7 +3,13 @@ import React, { useEffect, useState } from "react";
 
 import Database from "../backend/database";
 import { CategoriesContext, RecipesContext, ViewContext } from "../lib/context";
-import { Views, copyToClipboard, SignedInStates } from "../lib/common";
+import {
+  Views,
+  copyToClipboard,
+  SignedInStates,
+  useRenderTimeout,
+  transitionDuration,
+} from "../lib/common";
 import { forgotPassword, refreshIdToken, signIn, signOut, signUp } from "../backend/operations";
 
 // import ShoppingList from "./ShoppingList";
@@ -21,17 +27,17 @@ import SignInForm from "./SignInForm";
 export default hot(() => {
   const [allRecipes, setAllRecipes] = useState({});
   const [categories, setCategories] = useState({});
-  const [categoryIdToDelete, setCategoryIdToDelete] = useState(null);
   const [currentView, setCurrentView] = useState(Views.HOME);
   const [database, setDatabase] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [filter, setFilter] = useState("");
   const [filteredRecipes, setFilteredRecipes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [recipesLoading, setRecipesLoading] = useState(true);
   const [modalActive, setModalActive] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState("All Recipes");
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
   const [signedIn, setSignedIn] = useState(SignedInStates.REFRESHING_ID_TOKEN);
+  const [visible, rendered, setVisible] = useRenderTimeout();
   // const [shoppingList, setShoppingList] = useState([]);
 
   const handleViewChange = source => {
@@ -61,22 +67,26 @@ export default hot(() => {
     return database.addCategory(category);
   };
 
-  const handleDeleteCategory = () => {
-    if (!categoryIdToDelete) {
+  const handleDeleteCategory = categoryId => {
+    if (categoryId === null) {
       return;
     }
-    return database.deleteCategory(categoryIdToDelete).then(() => {
-      categoryIdToDelete === selectedCategoryId && setSelectedCategoryId("All Recipes");
-      setCategoryIdToDelete(null);
-    });
+    return database
+      .deleteCategory(categoryId)
+      .then(() => categoryId === selectedCategoryId && setSelectedCategoryId("All Recipes"));
   };
 
   const handleAddRecipe = async values => {
     return database.addRecipe(values, editMode ? selectedRecipeId : null);
   };
 
-  const handleDeleteRecipe = () => {
-    return database.deleteRecipe(selectedRecipeId).then(() => setSelectedRecipeId(null));
+  const handleDeleteRecipe = recipeId => {
+    if (recipeId === null) {
+      return;
+    }
+    return database
+      .deleteRecipe(recipeId)
+      .then(() => recipeId === selectedRecipeId && setSelectedRecipeId(null));
   };
 
   // const handleAddToShoppingList = ingredient => {
@@ -89,7 +99,7 @@ export default hot(() => {
 
   const handleRecipeListChange = newRecipes => {
     setAllRecipes({ ...newRecipes });
-    setIsLoading(false);
+    setRecipesLoading(false);
   };
 
   const handleCategoryListChange = newCategories => {
@@ -103,12 +113,12 @@ export default hot(() => {
   const handleExport = () =>
     copyToClipboard(
       JSON.stringify(
-        Object.values(allRecipes).map(r => {
-          delete r.recipeId;
-          delete r.createTime;
-          delete r.updateTime;
-          r.categories && (r.categories = r.categories.map(c => categories[c].name));
-          return r;
+        Object.values(allRecipes).map(recipe => {
+          delete recipe.recipeId;
+          delete recipe.createTime;
+          delete recipe.updateTime;
+          recipe.categories && (recipe.categories = recipe.categories.map(c => categories[c].name));
+          return recipe;
         })
       )
     );
@@ -120,25 +130,29 @@ export default hot(() => {
   };
 
   useEffect(() => {
+    if (signedIn === SignedInStates.REFRESHING_ID_TOKEN) {
+      return;
+    }
     if (signedIn !== SignedInStates.SIGNED_IN) {
-      setCurrentView(Views.HOME);
-      setIsLoading(true);
+      setVisible(false);
+      setCurrentView(Views.SIGN_IN);
       setDatabase(null);
+    } else {
+      setVisible(true);
+      setCurrentView(Views.HOME);
     }
   }, [signedIn]);
 
   useEffect(() => {
-    if (database) {
+    if (rendered) {
       return;
     }
     setAllRecipes({});
     setCategories({});
-  }, [database]);
+  }, [rendered]);
 
   useEffect(() => {
-    setModalActive(
-      [Views.DELETE_RECIPE, Views.DELETE_CATEGORY, Views.ADD, Views.IMPORT].includes(currentView)
-    );
+    setModalActive(!!currentView.modal);
   }, [currentView]);
 
   useEffect(() => {
@@ -161,66 +175,18 @@ export default hot(() => {
           setSignedIn(SignedInStates.SIGNED_OUT);
           return;
         }
-        setDatabase(new Database(user, handleRecipeListChange, handleCategoryListChange));
+        setRecipesLoading(true);
         setSignedIn(SignedInStates.SIGNED_IN);
+        setDatabase(new Database(user, handleRecipeListChange, handleCategoryListChange));
       })
       .catch(() => setSignedIn(SignedInStates.SIGNED_OUT));
   }, []);
 
-  return signedIn === SignedInStates.REFRESHING_ID_TOKEN ? (
-    <div />
-  ) : signedIn === SignedInStates.SIGNED_OUT || signedIn === SignedInStates.PENDING ? (
-    <div id="app">
-      <SignInForm
-        handleSignIn={(email, password) => {
-          setSignedIn(SignedInStates.PENDING);
-          return signIn(email, password)
-            .then(user => {
-              if (!user) {
-                setSignedIn(SignedInStates.SIGNED_OUT);
-                setDatabase(null);
-                return;
-              }
-              setDatabase(new Database(user, handleRecipeListChange, handleCategoryListChange));
-              setSignedIn(SignedInStates.SIGNED_IN);
-            })
-            .catch(e => {
-              setSignedIn(SignedInStates.SIGNED_OUT);
-              throw e;
-            });
-        }}
-        handleSignUp={(email, password) => {
-          setSignedIn(SignedInStates.PENDING);
-          return signUp(email, password)
-            .then(res => {
-              setSignedIn(SignedInStates.SIGNED_OUT);
-              return res;
-            })
-            .catch(e => {
-              setSignedIn(SignedInStates.SIGNED_OUT);
-              throw e;
-            });
-        }}
-        handleForgotPassword={email => {
-          setSignedIn(SignedInStates.PENDING);
-          return forgotPassword(email)
-            .then(res => {
-              setSignedIn(SignedInStates.SIGNED_OUT);
-              return res;
-            })
-            .catch(e => {
-              setSignedIn(SignedInStates.SIGNED_OUT);
-              throw e;
-            });
-        }}
-        pending={signedIn === SignedInStates.PENDING}
-      />
-    </div>
-  ) : (
+  return (
     <div id="app">
       <RecipesContext.Provider
         value={{
-          isLoading,
+          recipesLoading,
           recipes: filteredRecipes,
           selectedRecipeId,
           setSelectedRecipeId,
@@ -231,45 +197,59 @@ export default hot(() => {
             categories,
             selectedCategoryId,
             setSelectedCategoryId,
-            categoryIdToDelete,
-            setCategoryIdToDelete,
           }}
         >
           <ViewContext.Provider value={{ currentView, setCurrentView }}>
-            <Sidebar
-              classes={modalActive ? "disabled" : ""}
-              handleAddCategory={handleAddCategory}
-              handleExport={handleExport}
-              handleImport={() => setCurrentView(Views.IMPORT)}
-              handleSignOut={() => signOut().then(() => setSignedIn(SignedInStates.SIGNED_OUT))}
-              handleDeleteCategory={() => handleViewChange(Views.DELETE_CATEGORY)}
-            />
             <div
-              id="main-content"
-              className={
-                currentView === Views.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
-              }
+              id="non-modals"
+              className={visible ? "visible" : ""}
+              style={{ transitionDuration: `${transitionDuration}ms` }}
             >
-              <div id="left">
-                <Header
-                  filter={filter}
-                  category={categories[selectedCategoryId]?.name ?? "All Recipes"}
-                  handleFilterChange={handleFilterChange}
-                  handleViewChange={source => () => handleViewChange(source)}
-                />
-                <RecipeList />
-              </div>
-              <div id="right">
-                {selectedRecipeId && (
-                  <Details
-                    handleDeleteRecipe={() => handleViewChange(Views.DELETE_RECIPE)}
-                    editRecipe={() => handleViewChange(Views.EDIT)}
-                    // shoppingList={shoppingList}
-                    // handleAddToShoppingList={handleAddToShoppingList}
-                    // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+              {rendered && (
+                <>
+                  <Sidebar
+                    classes={modalActive ? "disabled" : ""}
+                    handleAddCategory={handleAddCategory}
+                    handleExport={handleExport}
+                    handleImport={() => setCurrentView(Views.IMPORT)}
+                    handleSignOut={() =>
+                      signOut().then(() => setSignedIn(SignedInStates.SIGNED_OUT))
+                    }
+                    handleDeleteCategory={() => handleViewChange(Views.DELETE_CATEGORY)}
                   />
-                )}
-              </div>
+                  <div
+                    id="main-content"
+                    className={
+                      currentView === Views.SIDEBAR
+                        ? "shifted-right"
+                        : modalActive
+                        ? "disabled"
+                        : ""
+                    }
+                  >
+                    <div id="left">
+                      <Header
+                        filter={filter}
+                        category={categories[selectedCategoryId]?.name ?? "All Recipes"}
+                        handleFilterChange={handleFilterChange}
+                        handleViewChange={source => () => handleViewChange(source)}
+                      />
+                      <RecipeList />
+                    </div>
+                    <div id="right">
+                      {selectedRecipeId && (
+                        <Details
+                          handleDeleteRecipe={() => handleViewChange(Views.DELETE_RECIPE)}
+                          editRecipe={() => handleViewChange(Views.EDIT)}
+                          // shoppingList={shoppingList}
+                          // handleAddToShoppingList={handleAddToShoppingList}
+                          // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             <div id="modals">
               <AddForm
@@ -282,6 +262,52 @@ export default hot(() => {
                 }
               />
               <ImportForm handleImport={handleImport} />
+              <SignInForm
+                handleSignIn={(email, password) => {
+                  setSignedIn(SignedInStates.PENDING);
+                  return signIn(email, password)
+                    .then(user => {
+                      if (!user) {
+                        setSignedIn(SignedInStates.SIGNED_OUT);
+                        setDatabase(null);
+                        return;
+                      }
+                      setDatabase(
+                        new Database(user, handleRecipeListChange, handleCategoryListChange)
+                      );
+                      setSignedIn(SignedInStates.SIGNED_IN);
+                    })
+                    .catch(e => {
+                      setSignedIn(SignedInStates.SIGNED_OUT);
+                      throw e;
+                    });
+                }}
+                handleSignUp={(email, password) => {
+                  setSignedIn(SignedInStates.PENDING);
+                  return signUp(email, password)
+                    .then(res => {
+                      setSignedIn(SignedInStates.SIGNED_OUT);
+                      return res;
+                    })
+                    .catch(e => {
+                      setSignedIn(SignedInStates.SIGNED_OUT);
+                      throw e;
+                    });
+                }}
+                handleForgotPassword={email => {
+                  setSignedIn(SignedInStates.PENDING);
+                  return forgotPassword(email)
+                    .then(res => {
+                      setSignedIn(SignedInStates.SIGNED_OUT);
+                      return res;
+                    })
+                    .catch(e => {
+                      setSignedIn(SignedInStates.SIGNED_OUT);
+                      throw e;
+                    });
+                }}
+                pending={signedIn === SignedInStates.PENDING}
+              />
             </div>
           </ViewContext.Provider>
         </CategoriesContext.Provider>

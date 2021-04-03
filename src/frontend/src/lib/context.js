@@ -4,7 +4,7 @@ import { Views } from "./common";
 export const ViewContext = createContext({ currentView: Views.HOME, setCurrentView: () => {} });
 
 export const RecipesContext = createContext({
-  isLoading: true,
+  recipesLoading: true,
   recipes: {},
   selectedRecipeId: null,
   setSelectedRecipeId: () => {},
@@ -12,8 +12,6 @@ export const RecipesContext = createContext({
 
 export const CategoriesContext = createContext({
   categories: {},
-  categoryIdToDelete: null,
   selectedCategoryId: null,
-  setCategoryIdToDelete: () => {},
   setSelectedCategoryId: () => {},
 });

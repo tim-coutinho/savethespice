@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { Views } from "../lib/common";
 import { CategoriesContext } from "../lib/context";
 
 import SidebarItem from "./SidebarItem";
@@ -14,12 +15,7 @@ export default function Sidebar({
   handleImport,
   handleSignOut,
 }) {
-  const {
-    categories,
-    selectedCategoryId,
-    setSelectedCategoryId,
-    setCategoryIdToDelete,
-  } = useContext(CategoriesContext);
+  const { categories, selectedCategoryId, setSelectedCategoryId } = useContext(CategoriesContext);
   const [addHover, setAddHover] = useState(false);
   const [floatingTextVisible, setFloatingTextVisible] = useState(false);
   const [newCategory, setNewCategory] = useState("");
@@ -98,7 +94,7 @@ export default function Sidebar({
               selected={selectedCategoryId === categoryId}
               handleDelete={e => {
                 e.stopPropagation();
-                setCategoryIdToDelete(categoryId);
+                Views.DELETE_CATEGORY.itemId = categoryId;
                 handleDeleteCategory();
               }}
             />

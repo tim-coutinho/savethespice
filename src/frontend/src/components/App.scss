@@ -1,5 +1,19 @@
 @use "_vars";
 
+#app {
+  background-color: vars.$background-color;
+}
+
+#non-modals {
+  transform: translateX(-100%);
+  transition: transform ease-in;
+
+  &.visible {
+    transform: translate(0);
+    transition: transform ease-out;
+  }
+}
+
 #main-content {
   background-color: vars.$background-color;
   display: flex;

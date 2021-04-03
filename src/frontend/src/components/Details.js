@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import { RecipesContext } from "../lib/context";
-import { colors } from "../lib/common";
+import { colors, Views } from "../lib/common";
 
 import Button from "./Button";
 
@@ -28,7 +28,13 @@ export default function Details({
         <Button id="edit-btn" onClick={editRecipe}>
           <i className="fa fa-pencil-alt" />
         </Button>
-        <Button onClick={handleDeleteRecipe} primaryColor={colors.OD_DARK_RED}>
+        <Button
+          onClick={() => {
+            Views.DELETE_RECIPE.itemId = selectedRecipeId;
+            handleDeleteRecipe();
+          }}
+          primaryColor={colors.OD_DARK_RED}
+        >
           <i className="fa fa-trash" />
         </Button>
       </div>

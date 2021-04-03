@@ -1,6 +1,37 @@
+@use "_vars";
+
 #sign-in-form {
-  font-size: 1.125em;
-  display: flex;
-  flex-direction: column;
-  grid-gap: 0.2em;
+  @include vars.card;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(calc(75vw - 50%), -50%);
+  transition: transform ease-in;
+  min-width: 300px;
+
+  &.visible {
+    transform: translate(-50%, -50%);
+    transition: transform ease-out;
+  }
+
+  #sign-in-form-title {
+    font-size: 1.25em;
+  }
+
+  #sign-in-form-btns {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 10px 10px auto;
+
+    button {
+      font-size: 1.125em;
+      padding: 5px;
+    }
+  }
+
+  #sign-in-form-cancel {
+    background-color: vars.$btn-secondary-color;
+    color: vars.$btn-primary-color;
+  }
 }

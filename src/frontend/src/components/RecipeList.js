@@ -6,7 +6,9 @@ import "./RecipeList.scss";
 
 export default function RecipeList() {
   const ref = useRef(null);
-  const { isLoading, recipes, selectedRecipeId, setSelectedRecipeId } = useContext(RecipesContext);
+  const { recipesLoading, recipes, selectedRecipeId, setSelectedRecipeId } = useContext(
+    RecipesContext
+  );
 
   useEffect(() => {
     if (!recipes || !ref.current) {
@@ -25,7 +27,7 @@ export default function RecipeList() {
     );
   }, [recipes]);
 
-  if (isLoading) {
+  if (recipesLoading) {
     return (
       <ul id="recipe-list">
         {Array(7)

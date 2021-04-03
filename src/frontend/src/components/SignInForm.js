@@ -1,23 +1,26 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { getById } from "../lib/common";
+import React, { useContext, useEffect, useState, useCallback } from "react";
+import { transitionDuration, useRenderTimeout, Views } from "../lib/common";
+import { ViewContext } from "../lib/context";
+import Button from "./Button";
 
-import Modal from "./Modal";
 import TextInput from "./TextInput";
 
 import "./SignInForm.scss";
 
-export const Modes = {
+const Modes = {
   SIGN_UP: "Sign up",
   SIGN_IN: "Sign in",
   FORGOT_PASSWORD: "Forgot password",
 };
 
 export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) => {
+  const { currentView } = useContext(ViewContext);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState(Modes.SIGN_IN);
   const [authResponse, setAuthResponse] = useState("");
+  const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
 
   const handleSubmit = () => {
     switch (mode) {
@@ -53,41 +56,35 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
   );
 
   useEffect(() => {
+    setVisible(currentView === Views.SIGN_IN);
+  }, [currentView]);
+
+  useEffect(() => {
     setAuthResponse("");
   }, [mode]);
 
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+    setEmail("");
+    setConfirmPassword("");
+    setPassword("");
+    setAuthResponse("");
+  }, [visible]);
+
   return (
-    <Modal
-      handleModalThird={() => setMode(Modes.FORGOT_PASSWORD)}
-      handleModalCancel={() => setMode(mode === Modes.SIGN_IN ? Modes.SIGN_UP : Modes.SIGN_IN)}
-      handleModalSubmit={handleSubmit}
-      modalThirdText={`${Modes.FORGOT_PASSWORD}?`}
-      modalCancelText={`${mode === Modes.SIGN_IN ? Modes.SIGN_UP : Modes.SIGN_IN}?`}
-      modalSubmitText={mode === Modes.FORGOT_PASSWORD ? "Send" : mode}
-      title={mode}
-      valid={isValid()}
-      thirdValid={mode !== Modes.FORGOT_PASSWORD}
-      visible
+    <div
+      id="sign-in-form"
+      className={visible ? "visible" : ""}
+      style={{ transitionDuration: `${transitionDuration}ms` }}
     >
-      <div id="sign-in-form">
-        <TextInput
-          placeholder="Email"
-          name="email"
-          setValue={e => {
-            if (e.key === "Enter") {
-              if (isValid()) {
-                handleSubmit();
-              }
-              return;
-            }
-            setEmail(e.target.value);
-          }}
-          value={email}
-        />
-        {mode !== Modes.FORGOT_PASSWORD && (
+      {rendered && (
+        <>
+          <div id="sign-in-form-title">{mode}</div>
           <TextInput
-            placeholder="Password"
-            name="password"
+            placeholder="Email"
+            name="email"
             setValue={e => {
               if (e.key === "Enter") {
                 if (isValid()) {
@@ -95,31 +92,67 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
                 }
                 return;
               }
-              setPassword(e.target.value);
+              setEmail(e.target.value);
             }}
-            value={password}
-            type="password"
+            value={email}
           />
-        )}
-        {mode === Modes.SIGN_UP && (
-          <TextInput
-            placeholder="Confirm password"
-            name="confirmPassword"
-            setValue={e => {
-              if (e.key === "Enter") {
-                if (isValid()) {
-                  handleSubmit();
+          {mode !== Modes.FORGOT_PASSWORD && (
+            <TextInput
+              placeholder="Password"
+              name="password"
+              setValue={e => {
+                if (e.key === "Enter") {
+                  if (isValid()) {
+                    handleSubmit();
+                  }
+                  return;
                 }
-                return;
-              }
-              setConfirmPassword(e.target.value);
-            }}
-            value={confirmPassword}
-            type="password"
-          />
-        )}
-        {authResponse && <span>{authResponse}</span>}
-      </div>
-    </Modal>
+                setPassword(e.target.value);
+              }}
+              value={password}
+              type="password"
+            />
+          )}
+          {mode === Modes.SIGN_UP && (
+            <TextInput
+              placeholder="Confirm password"
+              name="confirmPassword"
+              setValue={e => {
+                if (e.key === "Enter") {
+                  if (isValid()) {
+                    handleSubmit();
+                  }
+                  return;
+                }
+                setConfirmPassword(e.target.value);
+              }}
+              value={confirmPassword}
+              type="password"
+            />
+          )}
+          {authResponse && <span>{authResponse}</span>}
+          <div id="sign-in-form-btns">
+            <Button
+              id="sign-in-form-btn-left"
+              onClick={() => setMode(Modes.FORGOT_PASSWORD)}
+              disabled={mode === Modes.FORGOT_PASSWORD}
+              secondary
+            >
+              {`${Modes.FORGOT_PASSWORD}?`}
+            </Button>
+            <Button
+              id="sign-in-form-btn-middle"
+              onClick={() => setMode(mode === Modes.SIGN_IN ? Modes.SIGN_UP : Modes.SIGN_IN)}
+              secondary
+            >
+              {`${mode === Modes.SIGN_IN ? Modes.SIGN_UP : Modes.SIGN_IN}?`}
+            </Button>
+            <Button id="sign-in-form-btn-right" onClick={handleSubmit} disabled={!isValid()}>
+              {mode === Modes.FORGOT_PASSWORD ? "Send" : mode}
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
   );
 };

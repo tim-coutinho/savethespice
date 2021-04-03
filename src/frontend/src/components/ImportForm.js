@@ -1,12 +1,10 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useRenderTimeout, Views } from "../lib/common";
+import { transitionDuration, useRenderTimeout, Views } from "../lib/common";
 
 import { ViewContext } from "../lib/context";
 
 import "./ImportForm.scss";
 import Button from "./Button";
-
-const transitionDuration = 300;
 
 export default ({ handleImport }) => {
   const ref = useRef(null);
@@ -49,7 +47,7 @@ export default ({ handleImport }) => {
   return (
     <div
       id="import-form"
-      className={`${visible ? "visible" : ""} card`}
+      className={visible ? "visible" : ""}
       style={{ transitionDuration: `${transitionDuration}ms` }}
     >
       {rendered && (
@@ -65,7 +63,7 @@ export default ({ handleImport }) => {
             className={`${value !== "" ? (!valid ? "error" : "valid") : ""}`}
             spellCheck={false}
           />
-          <div id="import-form-buttons">
+          <div id="import-form-btns">
             <Button id="import-form-cancel" onClick={() => setCurrentView(Views.HOME)} secondary>
               Cancel
             </Button>
