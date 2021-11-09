@@ -1,18 +1,29 @@
-import React, { useState } from "react";
+import { MouseEventHandler, ReactChild, ReactElement, useState } from "react";
+import { Color } from "../lib/common";
 
 import "./Button.scss";
-import { colors } from "../lib/common";
 
-export default function Button({
+interface ButtonProps {
+  children: ReactChild;
+  classes?: string;
+  disabled?: boolean;
+  id?: string;
+  onClick: MouseEventHandler;
+  primaryColor?: Color;
+  secondary?: boolean;
+  secondaryColor?: Color;
+}
+
+export default ({
   children,
   classes = "",
   disabled = false,
   id,
   onClick,
-  primaryColor = colors.OD_PURPLE,
+  primaryColor = Color.OD_PURPLE,
   secondary,
-  secondaryColor = colors.WHITE,
-}) {
+  secondaryColor = Color.WHITE,
+}: ButtonProps): ReactElement => {
   const [hover, setHover] = useState(false);
 
   return (
@@ -43,4 +54,4 @@ export default function Button({
       {children}
     </button>
   );
-}
+};

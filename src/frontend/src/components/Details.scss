@@ -1,3 +1,4 @@
+@use "sass:math";
 @use "_vars";
 
 #details-card {
@@ -34,7 +35,7 @@
         color: $color;
         font-weight: 700;
         text-decoration: none;
-        transition: color vars.$standard-transition-duration / 2;
+        transition: color math.div(vars.$standard-transition-duration, 2);
 
         @include vars.on-hover {
           color: lighten($color, 10%);

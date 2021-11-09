@@ -1,24 +1,29 @@
-import React, { useContext, useEffect, useState } from "react";
-
-import { RecipesContext } from "../lib/context";
-import { colors, Views } from "../lib/common";
+import { ReactElement, useEffect, useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { Color } from "../lib/common";
+import { filteredRecipesState, itemIdToDeleteState, selectedRecipeIdState } from "../store";
 
 import Button from "./Button";
 
 import "./Details.scss";
+import { Recipe } from "../types";
 
-export default function Details({
-  handleDeleteRecipe,
-  editRecipe,
+interface DetailsProps {
+  handleDeleteRecipe: () => void;
+  editRecipe: () => void;
   // shoppingList,
   // handleAddToShoppingList,
   // handleRemoveFromShoppingList,
-}) {
-  const { recipes, selectedRecipeId } = useContext(RecipesContext);
-  const [recipe, setRecipe] = useState(null);
+}
+
+export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement | null => {
+  const [recipe, setRecipe] = useState({} as Recipe);
+  const recipes = useRecoilValue(filteredRecipesState);
+  const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
+  const setRecipeIdToDelete = useSetRecoilState(itemIdToDeleteState);
 
   useEffect(() => {
-    const selectedRecipe = recipes.find(([id]) => id === selectedRecipeId)?.[1];
+    const selectedRecipe = recipes.find(([id]) => +id === selectedRecipeId)?.[1];
     selectedRecipe && setRecipe(selectedRecipe);
   }, [recipes, selectedRecipeId]);
 
@@ -30,10 +35,10 @@ export default function Details({
         </Button>
         <Button
           onClick={() => {
-            Views.DELETE_RECIPE.itemId = selectedRecipeId;
+            setRecipeIdToDelete(+selectedRecipeId);
             handleDeleteRecipe();
           }}
-          primaryColor={colors.OD_DARK_RED}
+          primaryColor={Color.OD_DARK_RED}
         >
           <i className="fa fa-trash" />
         </Button>
@@ -43,7 +48,7 @@ export default function Details({
         <div id="info">
           <h2 id="recipe-name">{recipe.name}</h2>
           {recipe.desc && <p id="recipe-desc">{recipe.desc}</p>}
-          <br />
+          <hr />
           {recipe.cookTime && (
             <div id="cook-time">
               <span className="info-field">Cook time</span>: {recipe.cookTime} min
@@ -99,4 +104,4 @@ export default function Details({
       </div>
     </div>
   ) : null;
-}
+};

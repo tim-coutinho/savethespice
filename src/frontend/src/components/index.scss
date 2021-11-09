@@ -1,18 +1,32 @@
 @use "_vars";
 
+:root {
+  --background-color: #{vars.$background-color-dark};
+  --recipe-list-active-background-color: #{vars.$sidebar-item-active-background-color-dark};
+  --text-color: #{vars.$od-white};
+
+  box-sizing: border-box;
+  color: var(--text-color);
+  font-family: "Roboto", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  transition-duration: vars.$standard-transition-duration;
+  transition-property: color, background-color;
+
+  &[data-theme="light"] {
+    --background-color: #{vars.$background-color-light};
+    --recipe-list-active-background-color: #{vars.$od-white};
+    --text-color: #{vars.$od-black};
+  }
+}
+
 body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: vars.$background-color;
-}
-
-html {
-  box-sizing: border-box;
-  font-family: "Roboto", sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  color: vars.$text-color;
+  transition-duration: vars.$standard-transition-duration;
+  transition-property: color, background-color;
+  background-color: var(--background-color);
 }
 
 *,

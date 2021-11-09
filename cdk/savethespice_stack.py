@@ -55,12 +55,12 @@ class SaveTheSpiceStack(Stack):
             public_read_access=True,
         )
 
-        Bucket(
+        images_bucket = Bucket(
             self,
             images_bucket_name.lower(),
             bucket_name=images_bucket_name.lower(),
             removal_policy=RemovalPolicy.DESTROY,
-            # public_read_access=True,
+            public_read_access=True,
         )
 
         # noinspection PyTypeChecker
@@ -176,7 +176,7 @@ class SaveTheSpiceStack(Stack):
             runtime=Runtime.PYTHON_3_8,
             timeout=Duration.minutes(1),
             environment={
-                "images_bucket_name": images_bucket_name,
+                "images_bucket_name": images_bucket_name.lower(),
                 "meta_table_name": meta_table_name,
                 "recipes_table_name": recipes_table_name,
                 "categories_table_name": categories_table_name,
@@ -186,6 +186,7 @@ class SaveTheSpiceStack(Stack):
                 PolicyStatement(
                     actions=[
                         "dynamodb:DeleteItem",
+                        "dynamodb:BatchWriteItem",
                         "dynamodb:GetItem",
                         "dynamodb:PutItem",
                         "dynamodb:Query",
@@ -196,9 +197,15 @@ class SaveTheSpiceStack(Stack):
                         recipes_table.table_arn,
                         categories_table.table_arn,
                     ],
-                )
+                ),
+                PolicyStatement(
+                    actions=["s3:PutObject"],
+                    resources=[images_bucket.bucket_arn],
+                ),
             ],
         )
+
+        images_bucket.grant_put(main_lambda.grant_principal)
 
         root_endpoint = LambdaRestApi(
             self,
@@ -206,7 +213,7 @@ class SaveTheSpiceStack(Stack):
             rest_api_name=endpoint_name,
             handler=main_lambda,
             default_cors_preflight_options=CorsOptions(
-                allow_origins=Cors.ALL_ORIGINS, max_age=86400
+                allow_origins=Cors.ALL_ORIGINS, max_age=Duration.days(1)
             ),
         )
 

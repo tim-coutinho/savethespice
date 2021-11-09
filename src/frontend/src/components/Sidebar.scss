@@ -1,11 +1,12 @@
+@use "sass:math";
 @use "_vars";
 
 #sidebar {
   background-color: #1f252d;
+  color: vars.$od-white;
   height: 100vh;
   position: absolute;
   width: vars.$sidebar-width;
-  z-index: -1;
 
   &.disabled {
     filter: brightness(0.7);
@@ -23,35 +24,53 @@
     position: relative;
     transition: 50ms;
 
-    //&:first-child:not(.sidebar-section) {
-    //  background-color: #1f252d;
-    //  opacity: 1;
-    //  position: sticky;
-    //  top: 0;
-    //  z-index: 1;
-    //
-    //  &.selected-item {
-    //    background-color: vars.$sidebar-item-active-background-color;
-    //    color: lighten(vars.$text-color, 30%);
-    //  }
-    //}
-
     &.import::after {
       content: "\f0ea";
       font-family: FontAwesome;
       position: absolute;
-      right: 15px;
+      right: 1em;
     }
 
     &.export::after {
       content: "\f0c5";
       font-family: FontAwesome;
       position: absolute;
-      right: 15px;
+      right: 1em;
+    }
+
+    &.theme {
+      &::after,
+      &::before {
+        font-family: FontAwesome;
+        position: absolute;
+        right: 1em;
+        transition: transform vars.$standard-transition-duration;
+        transform-origin: 50% 150%;
+      }
+
+      &::after {
+        content: "\f186";
+      }
+
+      &::before {
+        content: "\f185";
+        transform: rotate(180deg);
+      }
+
+      &.light {
+        &::after {
+          transform: rotate(-180deg);
+        }
+
+        &::before {
+          transform: rotate(0);
+        }
+      }
     }
 
     &.signout {
       color: vars.$od-red;
+      background-color: #1f252d;
 
       @include vars.on-hover {
         color: vars.$od-dark-red;
@@ -70,8 +89,8 @@
     }
 
     &.selected-item {
-      background-color: vars.$sidebar-item-active-background-color;
-      color: lighten(vars.$text-color, 30%);
+      background-color: vars.$sidebar-item-active-background-color-dark;
+      //color: lighten(var(--text-color), 30%);
 
       &::before {
         opacity: 1;
@@ -84,10 +103,10 @@
 
     &:not(.sidebar-section):not(.selected-item) {
       @include vars.on-hover {
-        background-color: darken(vars.$sidebar-item-active-background-color, 5%);
-        color: lighten(vars.$text-color, 15%);
+        background-color: darken(vars.$sidebar-item-active-background-color-dark, 5%);
+        //color: lighten(var(--text-color), 15%);
 
-        &::before {
+        &.sidebar-category::before {
           opacity: 0.25;
         }
 
@@ -140,7 +159,7 @@
 
     #categories-header-right {
       color: vars.$od-black;
-      font-size: 15px;
+      font-size: 1rem;
       width: 50%;
     }
   }
@@ -156,7 +175,7 @@
       animation: 2s cubic-bezier(0.35, 1, 0.5, 1) 1 forwards floatup;
       bottom: 0;
       content: "Copied to clipboard!";
-      left: vars.$sidebar-width / 2;
+      left: math.div(vars.$sidebar-width, 2);
       pointer-events: none;
       position: absolute;
       z-index: 2;

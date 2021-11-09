@@ -42,10 +42,10 @@ def resource_not_found(_) -> Response:
     return ResponseData(message=f"Unrecognized HTTP resource {request.path}"), 404
 
 
-@app.errorhandler(500)
-@app.errorhandler(Exception)
-def generic_exception(e) -> Response:
-    return ResponseData(message=f"Unhandled exception: {repr(e)}"), 500
+# @app.errorhandler(500)
+# @app.errorhandler(Exception)
+# def generic_exception(e) -> Response:
+#     return ResponseData(message=f"Unhandled exception: {repr(e)}"), 500
 
 
 @app.errorhandler(MethodNotAllowed)

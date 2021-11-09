@@ -50,10 +50,11 @@
     }
 
     &.selected-recipe {
-      background-color: vars.$sidebar-item-active-background-color;
+      background-color: var(--recipe-list-active-background-color);
+
       .recipe {
         border-color: transparent;
-        color: lighten(vars.$text-color, 20%);
+        //color: lighten(var(--text-color), 20%);
       }
 
       + .recipe-wrapper .recipe {
@@ -63,10 +64,10 @@
 
     @include vars.on-hover {
       &:not(.selected-recipe) {
-        background-color: rgba(vars.$sidebar-item-active-background-color, 0.5);
+        background-color: rgba(var(--recipe-list-active-background-color), 0.5);
 
         .recipe {
-          color: lighten(vars.$text-color, 15%);
+          //color: lighten(var(--text-color), 15%);
         }
       }
     }

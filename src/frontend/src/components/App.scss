@@ -1,9 +1,5 @@
 @use "_vars";
 
-#app {
-  background-color: vars.$background-color;
-}
-
 #non-modals {
   transform: translateX(-100%);
   transition: transform ease-in;
@@ -15,12 +11,12 @@
 }
 
 #main-content {
-  background-color: vars.$background-color;
+  background-color: var(--background-color);
   display: flex;
   float: right;
   position: relative;
   transition-duration: vars.$standard-transition-duration;
-  transition-property: width, filter;
+  transition-property: background-color, filter, width;
   width: 100%;
 
   &.shifted-right {

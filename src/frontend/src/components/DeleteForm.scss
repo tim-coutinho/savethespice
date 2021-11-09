@@ -1,6 +1,6 @@
 @use "_vars";
 
-#delete-form {
+#delete-modal {
   @include vars.card;
   left: 50%;
   position: absolute;
@@ -14,14 +14,14 @@
     transition: transform ease-out;
   }
 
-  #delete-form-btns {
+  #delete-modal-btns {
     align-items: center;
     display: flex;
     justify-content: flex-end;
     margin: 40px 10px 10px auto;
   }
 
-  #delete-form-cancel {
+  #delete-modal-cancel {
     background-color: vars.$btn-secondary-color;
     color: vars.$btn-primary-color;
   }

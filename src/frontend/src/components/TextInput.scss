@@ -1,3 +1,4 @@
+@use "sass:math";
 @use "_vars";
 
 $input-border-width: 2px;
@@ -7,10 +8,10 @@ $padding-left: 5px;
 @mixin default-input($transition-duration, $border-width) {
   border-radius: 4px;
   border: $border-width solid vars.$od-comment-grey;
+  background-color: vars.$background-color-light;
   color: vars.$od-black;
-  //font-size: initial;
-  height: 100%;
   outline: none;
+  height: 100%;
   padding-left: $padding-left;
   padding-right: 4 * $padding-left;
   transition: $transition-duration;
@@ -40,7 +41,7 @@ $padding-left: 5px;
     opacity: 0.75;
     position: absolute;
     right: $input-border-width + 5px;
-    transition: opacity vars.$standard-transition-duration / 2;
+    transition: opacity math.div(vars.$standard-transition-duration, 2);
     visibility: hidden;
 
     @include vars.on-hover {
@@ -49,7 +50,7 @@ $padding-left: 5px;
   }
 
   input {
-    @include default-input(vars.$standard-transition-duration / 2, $input-border-width);
+    @include default-input(math.div(vars.$standard-transition-duration, 2), $input-border-width);
 
     &:focus {
       border-color: vars.$od-blue;
@@ -75,20 +76,65 @@ $padding-left: 5px;
     }
   }
 
+  div[contenteditable],
+  ol,
+  ul {
+    @include default-input(math.div(vars.$standard-transition-duration, 2), $input-border-width);
+    display: flex;
+    overflow-x: auto;
+    //noinspection CssUnknownProperty
+    scrollbar-width: none;
+    flex-direction: column;
+    -ms-overflow-style: none;
+    justify-content: center;
+
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    &:focus {
+      border-color: vars.$od-blue;
+
+      ~ label {
+        color: vars.$od-blue;
+      }
+    }
+
+    &:focus,
+    &:not(:empty) {
+      height: calc(#{$input-height} + #{$input-border-width} * 2);
+
+      ~ label {
+        cursor: default;
+        left: $input-border-width;
+        top: calc(-#{$input-height} - #{$input-border-width} * 3);
+      }
+    }
+
+    &:not(:empty) ~ .fa-close {
+      visibility: visible;
+    }
+
+    div {
+      margin-left: 1em;
+      display: list-item;
+    }
+  }
+
   label {
     align-items: center;
     bottom: 0;
     color: vars.$od-white;
     cursor: text;
     display: flex;
-    //font-size: initial;
     height: 50%;
     left: $input-border-width + $padding-left;
     margin: auto;
     pointer-events: none;
     position: absolute;
     top: 0;
-    transition: vars.$standard-transition-duration / 2;
+    transition: math.div(vars.$standard-transition-duration, 2);
     user-select: none;
 
     i {

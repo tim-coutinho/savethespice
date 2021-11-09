@@ -9,7 +9,7 @@ from models.requests.categories import (
 
 category_delete_response_data, category_delete_response_model = _make_response_data_model(
     "DeleteCategory",
-    {"updatedRecipes": List(Integer), "failedUpdatedRecipes": List(Integer)},
+    {"updatedRecipes": List(Integer), "failedUpdatedReipes": List(Integer)},
     skip_none=True,
 )
 

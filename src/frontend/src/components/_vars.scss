@@ -17,18 +17,18 @@ $od-menu-grey: $od-visual-grey;
 $od-special-grey: #3b4048;
 $od-vertsplit: #181a1f;
 
-$background-color: $od-black;
 $btn-primary-color: $od-purple;
 $btn-secondary-color: #ffffff;
 $left-max-length: 15vw;
 $left-min-length: 320px;
-$sidebar-item-active-background-color: $od-visual-grey;
+$sidebar-item-active-background-color-dark: $od-visual-grey;
+$sidebar-item-active-background-color-light: $od-visual-grey;
 $sidebar-width: 250px;
 $standard-box-shadow: -4px 4px 4px 0 #0006;
 $standard-btn-length: 40px;
 $standard-transition-duration: 300ms;
-$text-color: $od-white;
-// $background-color: #ECEDEE;
+$background-color-dark: $od-black;
+$background-color-light: #f8f8ff;
 
 @mixin btn-primary-nohover {
   background-color: $btn-primary-color;
@@ -49,10 +49,12 @@ $text-color: $od-white;
 }
 
 @mixin card {
-  background-color: $background-color;
+  background-color: var(--background-color);
   border-radius: 10px;
   box-shadow: 0 1pt 5pt 0 #0000004d;
-  padding: 10px;
+  padding: 1rem;
+  transition-property: background-color;
+  transition-duration: $standard-transition-duration;
 }
 
 @mixin on-hover {

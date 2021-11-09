@@ -90,7 +90,7 @@ def sign_in(body: Mapping[str, str]) -> Response:
     :param body: Mapping containing email and password keys
     :return: (Response specifics, status code)
     """
-    logging.info("Starting sign in flow.")
+    logging.info(f"Starting sign in flow. {body}")
     email, password = verify_parameters(body, "email", "password")
 
     client: CognitoClient = boto3.client("cognito-idp")

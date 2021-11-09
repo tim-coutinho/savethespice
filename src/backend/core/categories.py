@@ -91,6 +91,7 @@ def post_category(
     :param pool_res: Response data used by the calling thread pool
     :return: (Response specifics, status code)
     """
+    logging.info(body)
     try:
         # If not updating an existing category, name must be present
         # TODO: Verify types

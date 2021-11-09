@@ -554,7 +554,7 @@ def add_categories_from_recipe(
         FilterExpression=Attr("name").is_in(cast(List[str], category_names)),
         **kwargs,
     ).get("Items", [])
-    categories_to_return = [
+    categories_to_return: List[CategoryEntry] = [
         category for category in existing_categories if category["name"] in category_names
     ]
 
@@ -564,7 +564,8 @@ def add_categories_from_recipe(
 
     if categories_to_add:
         logging.info(f"Adding categories {categories_to_add} to user with ID {user_id}.")
-    new_categories, failed_adds = [], []
+    new_categories: List[CategoryEntry] = []
+    failed_adds = []
     next_category_id = get_next_id(user_id, "category")
     table, _ = get_categories_table()
     with table.batch_writer() as batch:

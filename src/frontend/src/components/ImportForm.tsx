@@ -1,20 +1,24 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { transitionDuration, useRenderTimeout, Views } from "../lib/common";
-
-import { ViewContext } from "../lib/context";
-
-import "./ImportForm.scss";
+import { FocusEventHandler, ReactElement, useEffect, useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+import { transitionDuration, useRenderTimeout, View } from "../lib/common";
+import { currentViewState } from "../store";
 import Button from "./Button";
 
-export default ({ handleImport }) => {
-  const ref = useRef(null);
-  const { currentView, setCurrentView } = useContext(ViewContext);
+import "./ImportForm.scss";
+
+interface ImportFormProps {
+  handleImport: (value: string) => Promise<void>;
+}
+
+export default ({ handleImport }: ImportFormProps): ReactElement => {
+  const ref = useRef<HTMLTextAreaElement>(null);
   const [pending, setPending] = useState(false);
   const [valid, setValid] = useState(false);
   const [value, setValue] = useState("");
+  const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
 
-  const handleBlur = () => {
+  const handleBlur: FocusEventHandler<HTMLTextAreaElement> = () => {
     try {
       setValue(JSON.stringify(JSON.parse(value), null, 2));
     } catch (SyntaxError) {
@@ -23,7 +27,7 @@ export default ({ handleImport }) => {
   };
 
   useEffect(() => {
-    setVisible(currentView === Views.IMPORT);
+    setVisible(currentView === View.IMPORT);
   }, [currentView]);
 
   useEffect(() => {
@@ -41,7 +45,7 @@ export default ({ handleImport }) => {
     }
     setValue("");
     setValid(false);
-    setTimeout(() => ref.current.focus(), transitionDuration / 2);
+    setTimeout(() => ref.current?.focus(), transitionDuration / 2);
   }, [visible]);
 
   return (
@@ -55,8 +59,8 @@ export default ({ handleImport }) => {
           <div style={{ fontSize: "1.125em" }}>Paste JSON:</div>
           <textarea
             value={value}
-            cols="50"
-            rows="20"
+            cols={50}
+            rows={20}
             onChange={({ target: { value } }) => setValue(value)}
             onBlur={handleBlur}
             ref={ref}
@@ -64,7 +68,7 @@ export default ({ handleImport }) => {
             spellCheck={false}
           />
           <div id="import-form-btns">
-            <Button id="import-form-cancel" onClick={() => setCurrentView(Views.HOME)} secondary>
+            <Button id="import-form-cancel" onClick={() => setCurrentView(View.HOME)} secondary>
               Cancel
             </Button>
             <Button
@@ -72,7 +76,7 @@ export default ({ handleImport }) => {
                 setPending(true);
                 handleImport(value).finally(() => {
                   setPending(false);
-                  setCurrentView(Views.HOME);
+                  setCurrentView(View.HOME);
                 });
               }}
               disabled={pending || !valid}

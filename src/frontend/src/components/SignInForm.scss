@@ -1,6 +1,6 @@
 @use "_vars";
 
-#sign-in-form {
+#sign-in-modal {
   @include vars.card;
   left: 50%;
   position: absolute;
@@ -14,11 +14,11 @@
     transition: transform ease-out;
   }
 
-  #sign-in-form-title {
+  #sign-in-modal-title {
     font-size: 1.25em;
   }
 
-  #sign-in-form-btns {
+  #sign-in-modal-btns {
     align-items: center;
     display: flex;
     justify-content: flex-end;
@@ -30,7 +30,7 @@
     }
   }
 
-  #sign-in-form-cancel {
+  #sign-in-modal-cancel {
     background-color: vars.$btn-secondary-color;
     color: vars.$btn-primary-color;
   }

@@ -14,7 +14,7 @@ recipe_update_response_data, recipe_update_response_model = _make_response_data_
     "UpdateRecipe",
     {
         "existingCategories": List(Integer),
-        "newCategories": List(Integer),
+        "newCategories": List(Nested(db_category_data, skip_none=True)),
         "categoryFailedAdds": List(String),
         "imgSrc": String(),
     },
@@ -25,7 +25,7 @@ recipe_add_response_data, recipe_add_response_model = _make_response_data_model(
     "AddRecipe",
     {
         **_db_recipe,
-        "existingCategories": List(Nested(db_category_data, skip_none=True)),
+        "existingCategories": List(Integer),
         "newCategories": List(Nested(db_category_data, skip_none=True)),
         "categoryFailedAdds": List(String),
     },
@@ -59,7 +59,7 @@ batch_recipe_add_response_data, batch_recipe_add_response_model = _make_response
     {
         "recipes": List(Nested(db_recipe_data), skip_none=True),
         "failedAdds": List(Nested(recipe_model), skip_none=True),
-        "existingCategories": List(Nested(db_category_data, skip_none=True)),
+        "existingCategories": List(Integer),
         "newCategories": List(Nested(db_category_data, skip_none=True)),
         "categoryFailedAdds": List(String),
     },

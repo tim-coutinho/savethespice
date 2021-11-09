@@ -1,11 +1,13 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
-import { transitionDuration, useRenderTimeout, Views } from "../lib/common";
-import { ViewContext } from "../lib/context";
+import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { SignedInState, transitionDuration, useRenderTimeout, View } from "../lib/common";
+import { currentViewState, signedInState } from "../store";
 import Button from "./Button";
 
-import TextInput from "./TextInput";
-
 import "./SignInForm.scss";
+
+import TextInput from "./TextInput";
+import { forgotPassword, signUp } from "../lib/operations";
 
 const Modes = {
   SIGN_UP: "Sign up",
@@ -13,14 +15,45 @@ const Modes = {
   FORGOT_PASSWORD: "Forgot password",
 };
 
-export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) => {
-  const { currentView } = useContext(ViewContext);
+interface SignInFormProps {
+  handleSignIn: (email: string, password: string) => Promise<string>;
+}
+
+export default ({ handleSignIn }: SignInFormProps): ReactElement => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState(Modes.SIGN_IN);
   const [authResponse, setAuthResponse] = useState("");
+  const [signedIn, setSignedIn] = useRecoilState(signedInState);
+  const currentView = useRecoilValue(currentViewState);
   const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
+
+  const handleSignUp = (email: string, password: string) => {
+    setSignedIn(SignedInState.PENDING);
+    return signUp(email, password)
+      .then(res => {
+        setSignedIn(SignedInState.SIGNED_OUT);
+        return res;
+      })
+      .catch(e => {
+        setSignedIn(SignedInState.SIGNED_OUT);
+        throw e;
+      });
+  };
+
+  const handleForgotPassword = (email: string) => {
+    setSignedIn(SignedInState.PENDING);
+    return forgotPassword(email)
+      .then(res => {
+        setSignedIn(SignedInState.SIGNED_OUT);
+        return res;
+      })
+      .catch(e => {
+        setSignedIn(SignedInState.SIGNED_OUT);
+        throw e;
+      });
+  };
 
   const handleSubmit = () => {
     switch (mode) {
@@ -30,9 +63,7 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
           .catch(res => setAuthResponse(res.message));
         return;
       case Modes.SIGN_IN:
-        handleSignIn(email, password)
-          .then(res => setAuthResponse(res))
-          .catch(({ message }) => setAuthResponse(message));
+        handleSignIn(email, password).catch(({ message }) => setAuthResponse(message));
         return;
       case Modes.FORGOT_PASSWORD:
         handleForgotPassword(email)
@@ -47,16 +78,16 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
   const isValid = useCallback(
     () =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-        email
+        email,
       ) &&
       (mode !== Modes.FORGOT_PASSWORD ? password.length >= 8 : true) &&
       (mode === Modes.SIGN_UP ? password === confirmPassword : true) &&
-      !pending,
-    [email, password, pending, confirmPassword, mode]
+      signedIn !== SignedInState.PENDING,
+    [email, password, signedIn, confirmPassword, mode],
   );
 
   useEffect(() => {
-    setVisible(currentView === Views.SIGN_IN);
+    setVisible(currentView === View.SIGN_IN);
   }, [currentView]);
 
   useEffect(() => {
@@ -75,24 +106,24 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
 
   return (
     <div
-      id="sign-in-form"
+      id="sign-in-modal"
       className={visible ? "visible" : ""}
       style={{ transitionDuration: `${transitionDuration}ms` }}
     >
       {rendered && (
         <>
-          <div id="sign-in-form-title">{mode}</div>
+          <div id="sign-in-modal-title">{mode}</div>
           <TextInput
             placeholder="Email"
             name="email"
-            setValue={e => {
+            setValue={(e: KeyboardEvent & ChangeEvent<HTMLInputElement>) => {
               if (e.key === "Enter") {
                 if (isValid()) {
                   handleSubmit();
                 }
                 return;
               }
-              setEmail(e.target.value);
+              setEmail(e.currentTarget.value);
             }}
             value={email}
           />
@@ -100,14 +131,14 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
             <TextInput
               placeholder="Password"
               name="password"
-              setValue={e => {
+              setValue={(e: KeyboardEvent & ChangeEvent<HTMLInputElement>) => {
                 if (e.key === "Enter") {
                   if (isValid()) {
                     handleSubmit();
                   }
                   return;
                 }
-                setPassword(e.target.value);
+                setPassword(e.currentTarget.value);
               }}
               value={password}
               type="password"
@@ -117,23 +148,23 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
             <TextInput
               placeholder="Confirm password"
               name="confirmPassword"
-              setValue={e => {
+              setValue={(e: KeyboardEvent & ChangeEvent<HTMLInputElement>) => {
                 if (e.key === "Enter") {
                   if (isValid()) {
                     handleSubmit();
                   }
                   return;
                 }
-                setConfirmPassword(e.target.value);
+                setConfirmPassword(e.currentTarget.value);
               }}
               value={confirmPassword}
               type="password"
             />
           )}
           {authResponse && <span>{authResponse}</span>}
-          <div id="sign-in-form-btns">
+          <div id="sign-in-modal-btns">
             <Button
-              id="sign-in-form-btn-left"
+              id="sign-in-modal-btn-left"
               onClick={() => setMode(Modes.FORGOT_PASSWORD)}
               disabled={mode === Modes.FORGOT_PASSWORD}
               secondary
@@ -141,13 +172,13 @@ export default ({ handleSignIn, handleSignUp, handleForgotPassword, pending }) =
               {`${Modes.FORGOT_PASSWORD}?`}
             </Button>
             <Button
-              id="sign-in-form-btn-middle"
+              id="sign-in-modal-btn-middle"
               onClick={() => setMode(mode === Modes.SIGN_IN ? Modes.SIGN_UP : Modes.SIGN_IN)}
               secondary
             >
               {`${mode === Modes.SIGN_IN ? Modes.SIGN_UP : Modes.SIGN_IN}?`}
             </Button>
-            <Button id="sign-in-form-btn-right" onClick={handleSubmit} disabled={!isValid()}>
+            <Button id="sign-in-modal-btn-right" onClick={handleSubmit} disabled={!isValid()}>
               {mode === Modes.FORGOT_PASSWORD ? "Send" : mode}
             </Button>
           </div>

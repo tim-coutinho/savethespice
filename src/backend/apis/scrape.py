@@ -42,7 +42,7 @@ class Scrape(Resource):
         except NoSchemaFoundInWildMode:
             return ResponseData(message=f"No recipe schema found at {url}"), 200
         except (ConnectionError, InvalidURL):
-            return ResponseData(message=f"{url} is not a valid url."), 400
+            return ResponseData(message=f"{url} is not a valid url."), 404
         except Exception:
             logging.exception(r"¯\_(ツ)_/¯")
             return ResponseData(message=r"¯\_(ツ)_/¯"), 500

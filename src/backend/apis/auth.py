@@ -1,4 +1,3 @@
-from flask import request
 from flask_restx import Namespace, Resource
 
 from core.auth import (
@@ -36,7 +35,7 @@ class SignUp(Resource):
     @api.marshal_with(default_response_model, skip_none=True)
     def post(self):
         """Sign up using email and password, sending a confirmation code to the email."""
-        body = request.json
+        body = api.payload
         return sign_up(body)
 
 
@@ -46,7 +45,7 @@ class ConfirmSignUp(Resource):
     @api.marshal_with(default_response_model, skip_none=True)
     def post(self):
         """Confirm sign up using a confirmation code."""
-        body = request.json
+        body = api.payload
         return confirm_sign_up(body)
 
 
@@ -58,7 +57,7 @@ class SignIn(Resource):
         """
         Sign in using email and password, returning an id token, refresh token, and user string.
         """
-        body = request.json
+        body = api.payload
         return sign_in(body)
 
 
@@ -70,7 +69,7 @@ class RefreshIdToken(Resource):
         """
         Refresh a user's ID token using a refresh token, returning an id token and user string.
         """
-        body = request.json
+        body = api.payload
         return refresh_id_token(body)
 
 
@@ -80,7 +79,7 @@ class ResendCode(Resource):
     @api.marshal_with(default_response_model, skip_none=True)
     def post(self):
         """Resend a confirmation code to a user's email."""
-        body = request.json
+        body = api.payload
         return resend_code(body)
 
 
@@ -90,7 +89,7 @@ class ForgotPassword(Resource):
     @api.marshal_with(default_response_model, skip_none=True)
     def post(self):
         """Send a forgot password email to a user."""
-        body = request.json
+        body = api.payload
         return forgot_password(body)
 
 
@@ -100,5 +99,5 @@ class ConfirmForgotPassword(Resource):
     @api.marshal_with(default_response_model, skip_none=True)
     def post(self):
         """Reset a user's password using a confirmation code and a new password."""
-        body = request.json
+        body = api.payload
         return confirm_forgot_password(body)

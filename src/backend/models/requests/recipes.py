@@ -13,6 +13,7 @@ _create_time = DateTime(required=True)
 _update_time = DateTime(required=True)
 _adapted_from = String()
 _url = String()
+_imgSrc = String()
 
 # Editable recipe fields
 _recipe = {
@@ -24,7 +25,7 @@ _recipe = {
     "categories": List(String),
     "adaptedFrom": _adapted_from,
     "url": _url,
-    "imgSrc": String(),
+    "imgSrc": _imgSrc,
 }
 recipe_model = Model("Recipe", _recipe)
 

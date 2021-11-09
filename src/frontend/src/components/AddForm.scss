@@ -1,76 +1,57 @@
 @use "_vars";
 
-#add-form {
+#add-modal {
   @include vars.card;
+  bottom: 5rem;
   color: vars.$od-black;
-  height: 95vh;
+  display: flex;
+  flex-direction: column;
   left: 50%;
+  min-height: 50vh;
   position: absolute;
-  top: 50%;
-  transform: translate(calc(75vw - 50%), -50%);
+  top: 5rem;
+  transform: translate(calc(100vw - 50%));
   transition: transform ease-in;
-  width: 45vw;
-  overflow-y: auto;
+  width: clamp(20em, 30vw, 65ch);
 
   &.visible {
-    transform: translate(-50%, -50%);
+    transform: translate(-50%);
     transition: transform ease-out;
   }
 
-  #add-form-form {
+  #add-modal-form {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    row-gap: 10px;
+    row-gap: 0.75em;
+    overflow-y: auto;
+  }
 
-    button {
-      padding: 5px;
-      font-size: 1.125em;
-      width: max-content;
+  #add-modal-btns {
+    display: flex;
+    margin-top: auto;
+    padding-top: 1em;
+    align-self: flex-end;
+
+    #add-modal-submit.error {
+      @include vars.btn-primary-nohover;
+      opacity: 0.5;
+      pointer-events: none;
+
+      @include vars.on-hover {
+        cursor: default;
+      }
     }
   }
 
-  #add-form-cancel {
-    background-color: vars.$btn-secondary-color;
-    color: vars.$btn-primary-color;
-  }
-
-  #add-form-submit.error {
-    @include vars.btn-primary-nohover;
-    opacity: 0.5;
-    pointer-events: none;
-
-    @include vars.on-hover {
-      cursor: default;
-    }
+  button {
+    padding: 5px;
+    font-size: 1.125em;
+    width: max-content;
   }
 
   ul,
   ol {
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    row-gap: 0.5em;
-    border-radius: 4px;
-    border: 2px solid vars.$od-comment-grey;
     margin: 0;
     padding: 0.5em 1em 0.5em 3ch;
-    transition: border-color vars.$standard-transition-duration / 2;
-    width: 15em;
-
-    &:focus-within {
-      border-color: vars.$od-blue;
-    }
-
-    &.error {
-      border-color: vars.$od-red;
-    }
-
-    input[type="text"] {
-      outline: none;
-      background-color: unset;
-      width: 100%;
-      border: none;
-    }
   }
 }
