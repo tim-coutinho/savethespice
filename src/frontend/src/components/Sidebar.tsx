@@ -37,16 +37,14 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const setCurrentView = useSetRecoilState(currentViewState);
   const setSignedIn = useSetRecoilState(signedInState);
 
-  const handleExport = () =>
+  const handleExport = (): void =>
     copyToClipboard(
       JSON.stringify(
         Array.from(allRecipes).map(([, recipe]) =>
           recipe.categories
             ? {
                 ...recipe,
-                categories: recipe.categories.map(
-                  c => (categories.get(c as number) as Category).name,
-                ),
+                categories: recipe.categories.map(c => (categories.get(c) as Category).name),
                 recipeId: undefined,
                 createTime: undefined,
                 updateTime: undefined,
@@ -56,7 +54,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
       ),
     );
 
-  const handleBlur = () => {
+  const handleBlur = (): void => {
     setShiftedLeft(false);
     setTimeout(() => setNewCategoryName(""), 100);
   };

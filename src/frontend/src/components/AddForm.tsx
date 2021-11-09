@@ -1,7 +1,7 @@
 import { ChangeEvent, KeyboardEvent, ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { addRecipe, scrape } from "../lib/operations";
+import { addRecipe, FormFields, scrape } from "../lib/operations";
 
 import { transitionDuration, useRenderTimeout, View } from "../lib/common";
 import {
@@ -15,23 +15,16 @@ import "./AddForm.scss";
 
 import Button from "./Button";
 import TextInput from "./TextInput";
-import { Category, Recipe } from "../types";
-
-type FormFields = Omit<
-  Recipe,
-  "userId" | "recipeId" | "createTime" | "updateTime" | "categories"
-> & {
-  categories: string[];
-};
+import { Category } from "../types";
 
 const baseForm: FormFields = {
   name: "",
   desc: "",
   cookTime: "",
   yield: "",
-  categories: [""],
-  ingredients: [""],
-  instructions: [""],
+  categories: [],
+  ingredients: [],
+  instructions: [],
   imgSrc: "",
 };
 
@@ -51,9 +44,17 @@ export default ({ editMode }: AddFormProps): ReactElement => {
   const [categories, setCategories] = useRecoilState(categoriesState);
   const [allRecipes, setAllRecipes] = useRecoilState(allRecipesState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
+  const selectedRecipe = allRecipes.get(selectedRecipeId);
   const initialValues = !editMode
     ? baseForm
-    : (allRecipes.get(selectedRecipeId) as FormFields) ?? baseForm;
+    : ({
+        ...selectedRecipe,
+        categories: selectedRecipe?.categories?.map(c => "" + c) ?? [],
+        createTime: undefined,
+        userId: undefined,
+        recipeId: undefined,
+        updateTime: undefined,
+      } as FormFields) ?? baseForm;
   const [form, setForm] = useState({ ...initialValues });
   const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
 
@@ -78,6 +79,7 @@ export default ({ editMode }: AddFormProps): ReactElement => {
 
   useEffect(() => {
     setVisible(currentView === View.ADD);
+    console.log(form);
   }, [currentView]);
 
   const valid = () => {
@@ -87,16 +89,13 @@ export default ({ editMode }: AddFormProps): ReactElement => {
     return [Object.keys(errors).some(x => errors[x]), errors];
   };
 
-  const valueChanged = (initialValue: keyof Recipe, newValue: Recipe[keyof Recipe]) => {
-    return (
-      // Value is list, new value altered
-      (typeof newValue === "object" && JSON.stringify(newValue) !== JSON.stringify(initialValue)) ||
-      // Value initially present, new value altered
-      (initialValue && newValue !== initialValue) ||
-      // Value not initially present, new value present
-      (initialValue === undefined && newValue)
-    );
-  };
+  const valueChanged = (initialValue: keyof FormFields, newValue: FormFields[keyof FormFields]) =>
+    // Value is list, new value altered
+    (typeof newValue === "object" && JSON.stringify(newValue) !== JSON.stringify(initialValue)) ||
+    // Value initially present, new value altered
+    (initialValue && newValue !== initialValue) ||
+    // Value not initially present, new value present
+    (initialValue === undefined && newValue);
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement> & KeyboardEvent) => {
     if (e.key) {
@@ -127,13 +126,13 @@ export default ({ editMode }: AddFormProps): ReactElement => {
           c => (categories.get(+c) as Category).name,
         );
       }
-      if (valueChanged(initialValue as keyof Recipe, v)) {
+      if (valueChanged(initialValue as keyof FormFields, v)) {
         setPending(true);
-        const res = await addRecipe(recipe as Recipe, editMode ? selectedRecipeId : undefined);
+        const res = await addRecipe(recipe, editMode ? selectedRecipeId : undefined);
         setAllRecipes(allRecipes => new Map(allRecipes.set(res.recipeId, res)));
         if (res.newCategories) {
           setCategories(categories => {
-            res.newCategories?.forEach(category => categories.set(category.categoryId, category));
+            res.newCategories?.forEach(c => categories.set(c.categoryId, c));
             return new Map(categories);
           });
         }
@@ -148,8 +147,8 @@ export default ({ editMode }: AddFormProps): ReactElement => {
     setScrapeStatus({ complete: false, inProgress: true, success: false });
     scrape(urlToScrape)
       .then(res => {
-        setScrapeStatus({ complete: true, inProgress: false, success: !!res });
-        res && setForm({ ...form, ...(res as typeof form) });
+        setScrapeStatus({ complete: true, inProgress: false, success: res === undefined });
+        res && setForm({ ...form, ...res });
       })
       .catch()
       .finally(() => setScrapeStatus({ complete: false, inProgress: false, success: false }));
@@ -204,26 +203,23 @@ export default ({ editMode }: AddFormProps): ReactElement => {
             <TextInput
               placeholder="Categories"
               name="categories"
-              value={form.categories ?? [""]}
+              value={form.categories ?? []}
               setValue={handleFormChange}
-              list
               width="100%"
             />
             <TextInput
               placeholder="Ingredients"
               name="ingredients"
-              value={form.ingredients ?? [""]}
+              value={form.ingredients ?? []}
               setValue={handleFormChange}
               width="100%"
-              list
             />
             <TextInput
               placeholder="Instructions"
               name="instructions"
-              value={form.instructions ?? [""]}
+              value={form.instructions ?? []}
               setValue={handleFormChange}
               width="100%"
-              list
               // ordered
             />
             <h1 style={{ color: "var(--text-color)", textAlign: "center" }}>OR</h1>

@@ -91,11 +91,11 @@ export default (): ReactElement => {
   const getAllRecipesAndCategories = () => {
     getAllRecipes()
       .then(({ recipes }) => {
-        setAllRecipes(new Map(recipes.map(recipe => [recipe.recipeId, recipe])));
+        setAllRecipes(new Map(recipes.map(r => [r.recipeId, r])));
       })
       .then(() => setRecipesLoading(false));
     getAllCategories().then(({ categories }) => {
-      setCategories(new Map(categories.map(category => [category.categoryId, category])));
+      setCategories(new Map(categories.map(c => [c.categoryId, c])));
     });
   };
 

@@ -1,4 +1,4 @@
-export type Recipe = {
+export interface Recipe {
   userId: string;
   recipeId: number;
   updateTime: string;
@@ -9,20 +9,16 @@ export type Recipe = {
   imgSrc?: string;
   ingredients?: string[];
   instructions?: string[];
-  categories?: (number | string)[];
+  categories?: number[];
   adaptedFrom?: string;
   yield?: number | string;
   url?: string;
-};
+}
 
-export type Category = {
+export interface Category {
   userId: string;
   categoryId: number;
   updateTime: string;
   createTime: string;
   name: string;
-};
-
-export type RecipeMap = Map<number, Recipe>;
-
-export type CategoryMap = Map<number, Category>;
+}

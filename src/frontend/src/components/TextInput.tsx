@@ -1,7 +1,7 @@
 import {
   FocusEventHandler,
   HTMLInputTypeAttribute,
-  MouseEvent,
+  MouseEventHandler,
   ReactElement,
   ReactEventHandler,
   useEffect,
@@ -19,7 +19,6 @@ interface TextInputProps {
   autofocus?: boolean;
   autofocusDelay?: number;
   id?: string;
-  list?: boolean;
   maxLength?: number;
   // ordered?: boolean;
   type?: HTMLInputTypeAttribute;
@@ -31,7 +30,6 @@ export default ({
   autofocus = false,
   autofocusDelay = 100,
   id,
-  list = false,
   maxLength = -1,
   name,
   // ordered = false,
@@ -88,8 +86,8 @@ export default ({
     }
   };
 
-  const clear = ({ currentTarget: { previousSibling } }: MouseEvent, list = false) => {
-    if (list) {
+  const clear: MouseEventHandler = ({ currentTarget: { previousSibling } }) => {
+    if (Array.isArray(value)) {
       (mainRef.current?.firstElementChild as HTMLElement).innerHTML = "";
     } else {
       const a = new CustomEvent("onChange", {
@@ -108,7 +106,7 @@ export default ({
 
   return (
     <div className="text-input" ref={mainRef} style={{ width }}>
-      {list ? (
+      {Array.isArray(value) ? (
         <div
           style={{ width }}
           onBlur={() =>
@@ -129,7 +127,11 @@ export default ({
           }}
           contentEditable
           suppressContentEditableWarning
-        />
+        >
+          {value.map(v => (
+            <div key={v}>{v}</div>
+          ))}
+        </div>
       ) : (
         <input
           id={id}
@@ -143,7 +145,7 @@ export default ({
           maxLength={maxLength}
         />
       )}
-      <i className="fa fa-close" onClick={e => clear(e, list)} />
+      <i className="fa fa-close" onClick={clear} />
       <label htmlFor={id}>
         {placeholder}
         <i className="far fa-question-circle fa-xs" ref={helpRef} />

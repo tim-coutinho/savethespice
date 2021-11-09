@@ -31,7 +31,7 @@ export const filteredRecipesState = selector({
       .filter(
         ([, recipe]) =>
           recipe.name.toLowerCase().includes(filter.toLowerCase()) &&
-          (selectedCategoryId === UNSET || recipe.categories?.includes(+selectedCategoryId)),
+          (selectedCategoryId === UNSET || recipe.categories?.includes(selectedCategoryId)),
       )
       .sort(([, { createTime: time1 }], [, { createTime: time2 }]) => (time1 <= time2 ? 1 : -1));
   },

@@ -80,8 +80,12 @@ export const forgotPassword = (email: string): Promise<string> => {
   });
 };
 
-export const scrape = (url: string): Promise<Recipe> => {
-  return api.get<Recipe>("scrape", { url }).then(([res, status]) => {
+interface ScrapeResponseData extends Omit<Recipe, "categories"> {
+  categories: string[];
+}
+
+export const scrape = (url: string): Promise<ScrapeResponseData | undefined> => {
+  return api.get<ScrapeResponseData>("scrape", { url }).then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);
     }
@@ -113,16 +117,21 @@ export const getAllCategories = (): Promise<GetAllCategoriesResponseData> =>
     return res.data;
   });
 
+export interface FormFields
+  extends Omit<Recipe, "userId" | "recipeId" | "createTime" | "updateTime" | "categories"> {
+  categories: string[];
+}
+
 export interface AddRecipeResponseData extends Recipe {
   existingCategories?: number[];
   newCategories?: Category[];
   categoryFailedAdds?: string[];
 }
 
-export const addRecipe = (recipe: Recipe, recipeId?: number): Promise<AddRecipeResponseData> =>
+export const addRecipe = (recipe: FormFields, recipeId?: number): Promise<AddRecipeResponseData> =>
   (recipeId !== undefined
-    ? api.put<AddRecipeResponseData, Recipe>(`recipes/${recipeId}`, recipe)
-    : api.post<AddRecipeResponseData, Recipe>("recipes", recipe)
+    ? api.put<AddRecipeResponseData, FormFields>(`recipes/${recipeId}`, recipe)
+    : api.post<AddRecipeResponseData, FormFields>("recipes", recipe)
   ).then(([res, status]) => {
     if (status !== 200 && status !== 201) {
       throw new Error(res.message);
@@ -164,7 +173,9 @@ interface DeleteCategoryResponseData {
   failedUpdatedRecipes: number[];
 }
 
-export const deleteCategory = (categoryId: number): Promise<DeleteCategoryResponseData> =>
+export const deleteCategory = (
+  categoryId: number,
+): Promise<DeleteCategoryResponseData | undefined> =>
   api.delete<DeleteCategoryResponseData>(`categories/${categoryId}`).then(([res, status]) => {
     if (status > 204) {
       throw new Error(res.message);
