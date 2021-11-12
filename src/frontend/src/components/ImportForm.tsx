@@ -1,22 +1,22 @@
 import { FocusEventHandler, ReactElement, useEffect, useRef, useState } from "react";
-import { useRecoilState } from "recoil";
-import { transitionDuration, useRenderTimeout, View } from "../lib/common";
-import { currentViewState } from "../store";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { transitionDuration, View } from "../lib/common";
+import { allRecipesState, currentViewState } from "../store";
 import Button from "./Button";
 
 import "./ImportForm.scss";
+import { AsyncRequestStatus, useAsync, useRenderTimeout } from "../lib/hooks";
+import { addRecipes } from "../lib/operations";
+import { Recipe } from "../types";
 
-interface ImportFormProps {
-  handleImport: (value: string) => Promise<void>;
-}
-
-export default ({ handleImport }: ImportFormProps): ReactElement => {
+export default (): ReactElement => {
   const ref = useRef<HTMLTextAreaElement>(null);
-  const [pending, setPending] = useState(false);
   const [valid, setValid] = useState(false);
   const [value, setValue] = useState("");
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
+  const setAllRecipes = useSetRecoilState(allRecipesState);
   const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
+  const [execute, request] = useAsync(addRecipes);
 
   const handleBlur: FocusEventHandler<HTMLTextAreaElement> = () => {
     try {
@@ -25,6 +25,15 @@ export default ({ handleImport }: ImportFormProps): ReactElement => {
       // Continue
     }
   };
+
+  useEffect(() => {
+    if (request.status === AsyncRequestStatus.SUCCESS) {
+      const { value } = request;
+      if (value?.recipes) {
+        setAllRecipes(new Map(value.recipes.map(r => [r.recipeId, r])));
+      }
+    }
+  }, [request]);
 
   useEffect(() => {
     setVisible(currentView === View.IMPORT);
@@ -73,13 +82,10 @@ export default ({ handleImport }: ImportFormProps): ReactElement => {
             </Button>
             <Button
               onClick={() => {
-                setPending(true);
-                handleImport(value).finally(() => {
-                  setPending(false);
-                  setCurrentView(View.HOME);
-                });
+                const recipes: Recipe[] = JSON.parse(value);
+                execute(recipes).finally(() => setCurrentView(View.HOME));
               }}
-              disabled={pending || !valid}
+              disabled={request.status === AsyncRequestStatus.PENDING || !valid}
             >
               Import
             </Button>

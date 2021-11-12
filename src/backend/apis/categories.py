@@ -96,14 +96,14 @@ class Categories(Resource):
 @api.response(404, description="Not Found", model=not_found_model)
 class Category(Resource):
     @api.marshal_with(db_category_response_model)
-    def get(self, categoryId):
+    def get(self, categoryId: int):
         """Get a category by ID."""
         user_id = request.environ["USER_ID"]
         return get_category(user_id, categoryId)
 
     @api.marshal_with(category_delete_response_model, skip_none=True)
     @api.response(204, description="Success")
-    def delete(self, categoryId):
+    def delete(self, categoryId: int):
         """Delete a category by ID."""
         user_id = request.environ["USER_ID"]
 
@@ -119,7 +119,7 @@ class Category(Resource):
 
     @api.expect(category_update_model)
     @api.response(204, description="Success")
-    def patch(self, categoryId):
+    def patch(self, categoryId: int):
         """Update a category by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]
@@ -127,7 +127,7 @@ class Category(Resource):
 
     @api.expect(category_model)
     @api.marshal_with(db_category_response_model)
-    def put(self, categoryId):
+    def put(self, categoryId: int):
         """Overwrite a category by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]

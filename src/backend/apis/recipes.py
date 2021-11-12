@@ -85,13 +85,13 @@ class Recipes(Resource):
 @api.param("recipeId", "Unique recipe ID.")
 class Recipe(Resource):
     @api.marshal_with(recipe_model)
-    def get(self, recipeId):
+    def get(self, recipeId: int):
         """Get a recipe by ID."""
         user_id = request.environ["USER_ID"]
         return get_recipe(user_id, recipeId)
 
     @api.response(204, description="Success")
-    def delete(self, recipeId):
+    def delete(self, recipeId: int):
         """Delete a recipe by ID."""
         user_id = request.environ["USER_ID"]
         return delete_recipe(user_id, recipeId)
@@ -99,7 +99,7 @@ class Recipe(Resource):
     @api.expect(recipe_update_model)
     @api.marshal_with(recipe_update_response_model)
     @api.response(204, description="Success")
-    def patch(self, recipeId):
+    def patch(self, recipeId: int):
         """Update a recipe by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]
@@ -107,7 +107,7 @@ class Recipe(Resource):
 
     @api.expect(recipe_model)
     @api.marshal_with(recipe_add_response_model)
-    def put(self, recipeId):
+    def put(self, recipeId: int):
         """Overwrite a recipe by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]

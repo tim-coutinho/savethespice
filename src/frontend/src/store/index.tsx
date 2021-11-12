@@ -2,7 +2,6 @@ import { atom, selector } from "recoil";
 import { SignedInState, Theme, ThemeSetting, UNSET, View } from "../lib/common";
 import { Category, Recipe } from "../types";
 
-export const recipesLoadingState = atom({ key: "recipesLoadingState", default: true });
 export const filterState = atom({ key: "filterState", default: "" });
 export const itemIdToDeleteState = atom<number>({ key: "itemIdToDeleteState", default: UNSET });
 

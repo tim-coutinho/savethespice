@@ -1,9 +1,16 @@
-import { ChangeEvent, KeyboardEvent, ReactElement, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  ClipboardEventHandler,
+  KeyboardEvent,
+  ReactElement,
+  useEffect,
+  useState,
+} from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { addRecipe, FormFields, scrape } from "../lib/operations";
 
-import { transitionDuration, useRenderTimeout, View } from "../lib/common";
+import { transitionDuration, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
@@ -16,6 +23,7 @@ import "./AddForm.scss";
 import Button from "./Button";
 import TextInput from "./TextInput";
 import { Category } from "../types";
+import { AsyncRequestStatus, useAsync, useRenderTimeout } from "../lib/hooks";
 
 const baseForm: FormFields = {
   name: "",
@@ -33,13 +41,6 @@ interface AddFormProps {
 }
 
 export default ({ editMode }: AddFormProps): ReactElement => {
-  const [pending, setPending] = useState(false);
-  const [urlToScrape, setUrlToScrape] = useState("");
-  const [scrapeStatus, setScrapeStatus] = useState({
-    complete: false,
-    inProgress: false,
-    success: false,
-  });
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [categories, setCategories] = useRecoilState(categoriesState);
   const [allRecipes, setAllRecipes] = useRecoilState(allRecipesState);
@@ -49,14 +50,19 @@ export default ({ editMode }: AddFormProps): ReactElement => {
     ? baseForm
     : ({
         ...selectedRecipe,
-        categories: selectedRecipe?.categories?.map(c => "" + c) ?? [],
+        categories: selectedRecipe?.categories?.map(c => `${c}`) ?? [],
         createTime: undefined,
         userId: undefined,
         recipeId: undefined,
         updateTime: undefined,
       } as FormFields) ?? baseForm;
   const [form, setForm] = useState({ ...initialValues });
+  const [urlToScrape, setUrlToScrape] = useState("");
   const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
+  const [executeScrape, scrapeRequest] = useAsync((url: string) => scrape(url));
+  const [executeAddRecipe, addRecipeRequest] = useAsync((recipe: FormFields) =>
+    addRecipe(recipe, editMode ? selectedRecipeId : undefined),
+  );
 
   useEffect(() => {
     if (!visible) {
@@ -70,17 +76,30 @@ export default ({ editMode }: AddFormProps): ReactElement => {
       instructions: initialValues.instructions,
     });
     setUrlToScrape("");
-    setScrapeStatus({
-      complete: false,
-      inProgress: false,
-      success: false,
-    });
   }, [visible]);
 
   useEffect(() => {
     setVisible(currentView === View.ADD);
-    console.log(form);
   }, [currentView]);
+
+  useEffect(() => {
+    scrapeRequest.value && setForm({ ...form, ...scrapeRequest.value });
+  }, [scrapeRequest]);
+
+  useEffect(() => {
+    if (addRecipeRequest.status === AsyncRequestStatus.SUCCESS) {
+      const { value } = addRecipeRequest;
+      if (value) {
+        setAllRecipes(allRecipes => new Map(allRecipes.set(value.recipeId, value)));
+        if (addRecipeRequest.value?.newCategories) {
+          setCategories(categories => {
+            addRecipeRequest.value?.newCategories?.forEach(c => categories.set(c.categoryId, c));
+            return new Map(categories);
+          });
+        }
+      }
+    }
+  }, [addRecipeRequest]);
 
   const valid = () => {
     const errors: { [key: string]: boolean } = {
@@ -121,37 +140,26 @@ export default ({ editMode }: AddFormProps): ReactElement => {
       let initialValue = initialValues[k as keyof FormFields];
       if (k === "categories" && (initialValue as string[])[0] !== "") {
         // Categories holds IDs, map to category names
-        console.log(k, v, initialValue);
         initialValue = (initialValue as NonNullable<typeof recipe.categories>).map(
           c => (categories.get(+c) as Category).name,
         );
       }
       if (valueChanged(initialValue as keyof FormFields, v)) {
-        setPending(true);
-        const res = await addRecipe(recipe, editMode ? selectedRecipeId : undefined);
-        setAllRecipes(allRecipes => new Map(allRecipes.set(res.recipeId, res)));
-        if (res.newCategories) {
-          setCategories(categories => {
-            res.newCategories?.forEach(c => categories.set(c.categoryId, c));
-            return new Map(categories);
-          });
-        }
-        setPending(false);
+        await executeAddRecipe(recipe);
         break;
       }
     }
     setCurrentView(View.HOME);
   };
 
-  const scrapeUrl = () => {
-    setScrapeStatus({ complete: false, inProgress: true, success: false });
-    scrape(urlToScrape)
-      .then(res => {
-        setScrapeStatus({ complete: true, inProgress: false, success: res === undefined });
-        res && setForm({ ...form, ...res });
-      })
-      .catch()
-      .finally(() => setScrapeStatus({ complete: false, inProgress: false, success: false }));
+  const handlePaste: ClipboardEventHandler<HTMLDivElement> = e => {
+    const file = e.clipboardData.files[0];
+    if (!file) {
+      return;
+    }
+    const fr = new FileReader();
+    fr.addEventListener("load", () => setForm({ ...form, imgSrc: fr.result as string }));
+    fr.readAsDataURL(e.clipboardData.files[0]);
   };
 
   return (
@@ -159,6 +167,7 @@ export default ({ editMode }: AddFormProps): ReactElement => {
       id="add-modal"
       className={visible ? "visible" : ""}
       style={{ transitionDuration: `${transitionDuration}ms` }}
+      onPaste={handlePaste}
     >
       {rendered && (
         <>
@@ -238,14 +247,22 @@ export default ({ editMode }: AddFormProps): ReactElement => {
             <Button
               id="add-modal-submit"
               onClick={handleSubmit}
-              disabled={pending || !form.name || scrapeStatus.inProgress}
+              disabled={
+                addRecipeRequest.status === AsyncRequestStatus.PENDING ||
+                !form.name ||
+                scrapeRequest.status === AsyncRequestStatus.PENDING
+              }
             >
               Save Recipe
             </Button>
             <Button
               id="add-modal-scrape"
-              onClick={scrapeUrl}
-              disabled={pending || scrapeStatus.inProgress || urlToScrape === ""}
+              onClick={() => executeScrape(urlToScrape)}
+              disabled={
+                addRecipeRequest.status === AsyncRequestStatus.PENDING ||
+                scrapeRequest.status === AsyncRequestStatus.PENDING ||
+                urlToScrape === ""
+              }
             >
               Scrape
             </Button>

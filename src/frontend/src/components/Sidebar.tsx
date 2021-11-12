@@ -1,23 +1,31 @@
-import { ReactElement, ChangeEvent, EventHandler, KeyboardEvent, useState } from "react";
+import { ChangeEvent, EventHandler, KeyboardEvent, ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { copyToClipboard, SignedInState, Theme, UNSET, View } from "../lib/common";
+import {
+  copyToClipboard,
+  SignedInState,
+  Theme,
+  transitionDuration,
+  UNSET,
+  View,
+} from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
   currentViewState,
-  themeState,
+  itemIdToDeleteState,
+  modalActiveState,
   selectedCategoryIdState,
   signedInState,
-  modalActiveState,
-  itemIdToDeleteState,
+  themeState,
 } from "../store";
 
 import "./Sidebar.scss";
 
 import SidebarItem from "./SidebarItem";
 import TextInput from "./TextInput";
-import { addCategory, signOut } from "../lib/operations";
+import { addCategory, getAllCategories, signOut } from "../lib/operations";
 import { Category } from "../types";
+import { useAsync, useRenderTimeout } from "../lib/hooks";
 
 interface SidebarProps {
   handleDeleteCategory: () => void;
@@ -36,6 +44,23 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const setCategoryIdToDelete = useSetRecoilState(itemIdToDeleteState);
   const setCurrentView = useSetRecoilState(currentViewState);
   const setSignedIn = useSetRecoilState(signedInState);
+  const [, inputRendered, setInputVisible] = useRenderTimeout(transitionDuration);
+  const [executeAddCategory, addCategoryRequest] = useAsync(addCategory);
+  const [executeGetAllCategories, getAllCategoriesRequest] = useAsync(getAllCategories);
+
+  useEffect(() => {
+    executeGetAllCategories();
+  }, []);
+
+  useEffect(() => {
+    if (getAllCategoriesRequest.value) {
+      setCategories(new Map(getAllCategoriesRequest.value.categories.map(c => [c.categoryId, c])));
+    }
+  }, [getAllCategoriesRequest]);
+
+  useEffect(() => {
+    setInputVisible(shiftedLeft);
+  }, [shiftedLeft]);
 
   const handleExport = (): void =>
     copyToClipboard(
@@ -55,8 +80,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
     );
 
   const handleBlur = (): void => {
-    setShiftedLeft(false);
-    setTimeout(() => setNewCategoryName(""), 100);
+    newCategoryName === "" && setShiftedLeft(false);
   };
 
   const handleNewCategoryChange: EventHandler<
@@ -65,21 +89,25 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
     if (!e.key) {
       setNewCategoryName(e.currentTarget.value);
     } else if (e.key === "Escape") {
-      handleBlur();
+      setNewCategoryName("");
+      setShiftedLeft(false);
     } else if (e.key === "Enter" && newCategoryName !== "") {
       // Ensure category with this name doesn't already exist
       if (Array.from(categories).some(([, { name }]) => name === newCategoryName)) {
         return;
       }
-      const res = await addCategory(newCategoryName);
-      if (!res) {
-        return;
-      }
-      setCategories(categories => new Map(categories.set(res.categoryId, res)));
-      setNewCategoryName("");
-      handleBlur();
+      executeAddCategory(newCategoryName);
     }
   };
+
+  useEffect(() => {
+    const { value } = addCategoryRequest;
+    if (value !== null) {
+      setCategories(categories => new Map(categories.set(value.categoryId, value)));
+      setNewCategoryName("");
+      setShiftedLeft(false);
+    }
+  }, [addCategoryRequest]);
 
   return (
     <aside id="sidebar" className={modalActive ? "disabled" : ""}>
@@ -96,7 +124,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
             onMouseLeave={() => setAddHover(false)}
           />
         </div>
-        {shiftedLeft && (
+        {inputRendered && (
           <TextInput
             placeholder="Category Name"
             name="categoryName"
@@ -104,6 +132,8 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
             value={newCategoryName}
             autofocus
             autofocusDelay={200}
+            onBlur={handleBlur}
+            width="13.5em"
           />
         )}
       </span>
@@ -116,7 +146,9 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
           selected={selectedCategoryId === UNSET}
         />
         {Array.from(categories)
-          .sort(([, { name: name1 }], [, { name: name2 }]) => (name1 <= name2 ? 1 : -1))
+          .sort(([, { name: name1 }], [, { name: name2 }]) =>
+            name1.toLowerCase() >= name2.toLowerCase() ? 1 : -1,
+          )
           .map(([categoryId, { name }]) => (
             <SidebarItem
               key={categoryId}

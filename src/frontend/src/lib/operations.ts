@@ -80,18 +80,17 @@ export const forgotPassword = (email: string): Promise<string> => {
   });
 };
 
-interface ScrapeResponseData extends Omit<Recipe, "categories"> {
+export interface ScrapeResponseData extends Omit<Recipe, "categories"> {
   categories: string[];
 }
 
-export const scrape = (url: string): Promise<ScrapeResponseData | undefined> => {
-  return api.get<ScrapeResponseData>("scrape", { url }).then(([res, status]) => {
+export const scrape = (url: string): Promise<ScrapeResponseData | undefined> =>
+  api.get<ScrapeResponseData>("scrape", { url }).then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);
     }
     return res.data;
   });
-};
 
 interface GetAllRecipesResponseData {
   recipes: Recipe[];
@@ -139,18 +138,24 @@ export const addRecipe = (recipe: FormFields, recipeId?: number): Promise<AddRec
     return res.data;
   });
 
-interface AddRecipesResponseData extends AddRecipeResponseData {
+interface AddRecipesResponseData
+  extends Pick<
+    AddRecipeResponseData,
+    "existingCategories" | "newCategories" | "categoryFailedAdds"
+  > {
   recipes?: Recipe[];
   failedAdds?: Recipe[];
 }
 
 export const addRecipes = (recipes: Recipe[]): Promise<AddRecipesResponseData> =>
-  api.put<AddRecipesResponseData, Recipe[]>("recipes", recipes).then(([res, status]) => {
-    if (status !== 200) {
-      throw new Error(res.message);
-    }
-    return res.data;
-  });
+  api
+    .put<AddRecipesResponseData, { recipes: Recipe[] }>("recipes", { recipes })
+    .then(([res, status]) => {
+      if (status !== 200) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    });
 
 export const deleteRecipe = (recipeId: number): Promise<void> =>
   api.delete(`recipes/${recipeId}`).then(([res, status]) => {

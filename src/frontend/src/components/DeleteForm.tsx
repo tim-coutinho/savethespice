@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { Color, transitionDuration, UNSET, useRenderTimeout, View } from "../lib/common";
+import { Color, transitionDuration, UNSET, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
@@ -15,10 +15,10 @@ import Button from "./Button";
 import "./DeleteForm.scss";
 import { deleteCategory, deleteRecipe } from "../lib/operations";
 import { Recipe } from "../types";
+import { AsyncRequestStatus, useAsync, useRenderTimeout } from "../lib/hooks";
 
 export default (): ReactElement => {
-  const [pending, setPending] = useState(false);
-  const [type, setType] = useState("");
+  const [type, setType] = useState<"recipe" | "category" | "">("");
   const setAllRecipes = useSetRecoilState(allRecipesState);
   const setCategories = useSetRecoilState(categoriesState);
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
@@ -26,45 +26,41 @@ export default (): ReactElement => {
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const itemIdToDelete = useRecoilValue(itemIdToDeleteState);
   const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
+  const [executeDeleteRecipe, deleteRecipeRequest] = useAsync(deleteRecipe);
+  const [executeDeleteCategory, deleteCategoryRequest] = useAsync(deleteCategory);
 
-  const handleDeleteRecipe = async (recipeId: number): Promise<void> => {
-    if (recipeId === null) {
-      return Promise.reject();
-    }
-    await deleteRecipe(recipeId);
-    setAllRecipes(allRecipes => {
-      allRecipes.delete(recipeId);
-      return new Map(allRecipes);
-    });
-    recipeId === selectedRecipeId && setSelectedRecipeId(UNSET);
-  };
-
-  const handleDeleteCategory = async (categoryId: number): Promise<void> => {
-    if (categoryId === null) {
-      return Promise.reject();
-    }
-    const res = await deleteCategory(categoryId);
-    if (res?.updatedRecipes) {
+  useEffect(() => {
+    if (deleteRecipeRequest.status === AsyncRequestStatus.SUCCESS) {
       setAllRecipes(allRecipes => {
-        res.updatedRecipes.forEach(recipeId => {
+        allRecipes.delete(itemIdToDelete);
+        return new Map(allRecipes);
+      });
+      itemIdToDelete === selectedRecipeId && setSelectedRecipeId(UNSET);
+    }
+  }, [deleteRecipeRequest]);
+
+  useEffect(() => {
+    if (deleteCategoryRequest.status === AsyncRequestStatus.SUCCESS) {
+      setAllRecipes(allRecipes => {
+        deleteCategoryRequest.value?.updatedRecipes.forEach(recipeId => {
           const recipe = allRecipes.get(recipeId) as Recipe;
-          recipe.categories?.splice(recipe.categories.findIndex(c => c === categoryId, 1));
+          recipe.categories?.splice(recipe.categories.findIndex(c => c === itemIdToDelete, 1));
         });
         return new Map(allRecipes);
       });
+      setCategories(categories => {
+        categories.delete(itemIdToDelete);
+        return new Map(categories);
+      });
+      itemIdToDelete === +selectedCategoryId && setSelectedCategoryId(UNSET);
     }
-    setCategories(categories => {
-      categories.delete(categoryId);
-      return new Map(categories);
-    });
-    categoryId === +selectedCategoryId && setSelectedCategoryId(UNSET);
-  };
+  }, [deleteCategoryRequest]);
 
   useEffect(() => {
     if (currentView !== View.HOME) {
-      setType(currentView === View.DELETE_RECIPE ? "recipe" : "category");
+      setType(currentView === View.DELETE ? "recipe" : "category");
     }
-    setVisible(currentView === View.DELETE_RECIPE || currentView === View.DELETE_CATEGORY);
+    setVisible(currentView === View.DELETE);
   }, [currentView]);
 
   return (
@@ -85,17 +81,18 @@ export default (): ReactElement => {
             <Button
               onClick={() => {
                 if (itemIdToDelete !== -1) {
-                  setPending(true);
-                  (currentView === View.DELETE_RECIPE ? handleDeleteRecipe : handleDeleteCategory)(
+                  (type === "recipe" ? executeDeleteRecipe : executeDeleteCategory)(
                     itemIdToDelete,
                   ).finally(() => {
-                    setPending(false);
                     setCurrentView(View.HOME);
                   });
                 }
               }}
               primaryColor={Color.OD_DARK_RED}
-              disabled={pending}
+              disabled={
+                deleteRecipeRequest.status === AsyncRequestStatus.PENDING ||
+                deleteCategoryRequest.status === AsyncRequestStatus.PENDING
+              }
             >
               Delete
             </Button>

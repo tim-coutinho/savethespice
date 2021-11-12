@@ -1,21 +1,34 @@
 import { ReactElement, useEffect, useRef } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { filteredRecipesState, recipesLoadingState, selectedRecipeIdState } from "../store";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { allRecipesState, filteredRecipesState, selectedRecipeIdState } from "../store";
 
-import "./SidebarRecipeList.scss";
+import "./RecipeList.scss";
 import RecipeLoader from "./RecipeLoader";
+import { AsyncRequestStatus, useAsync } from "../lib/hooks";
+import { getAllRecipes } from "../lib/operations";
 
 export default (): ReactElement => {
   const ref = useRef<HTMLUListElement>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
+  const setAllRecipes = useSetRecoilState(allRecipesState);
   const recipes = useRecoilValue(filteredRecipesState);
-  const recipesLoading = useRecoilValue(recipesLoadingState);
+  const [execute, request] = useAsync(getAllRecipes);
 
   useEffect(() => {
-    if (!recipes || !ref.current) {
+    execute();
+  }, []);
+
+  useEffect(() => {
+    if (request.value) {
+      setAllRecipes(new Map(request.value.recipes.map(r => [r.recipeId, r])));
+    }
+  }, [request]);
+
+  useEffect(() => {
+    if (!recipes) {
       return;
     }
-    ref.current.querySelectorAll("[data-src]").forEach(image =>
+    ref.current?.querySelectorAll("[data-src]").forEach(image =>
       new IntersectionObserver((entries, observer) => {
         entries
           .filter(({ isIntersecting }) => isIntersecting)
@@ -28,7 +41,7 @@ export default (): ReactElement => {
     );
   }, [recipes]);
 
-  if (recipesLoading) {
+  if (request.status === AsyncRequestStatus.PENDING) {
     return (
       <ul id="recipe-list">
         {Array(7)

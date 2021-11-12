@@ -1,27 +1,13 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
-import {
-  addRecipes,
-  getAllCategories,
-  getAllRecipes,
-  refreshIdToken,
-  signIn,
-} from "../lib/operations";
-import {
-  SignedInState,
-  Theme,
-  transitionDuration,
-  UNSET,
-  useRenderTimeout,
-  View,
-} from "../lib/common";
+import { refreshIdToken } from "../lib/operations";
+import { SignedInState, Theme, transitionDuration, UNSET, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
   currentViewState,
   modalActiveState,
-  recipesLoadingState,
   selectedRecipeIdState,
   signedInState,
   themeState,
@@ -35,9 +21,10 @@ import DeleteForm from "./DeleteForm";
 import Details from "./Details";
 import Header from "./Header";
 import ImportForm from "./ImportForm";
-import SidebarRecipeList from "./SidebarRecipeList";
+import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
 import SignInForm from "./SignInForm";
+import { useRenderTimeout } from "../lib/hooks";
 
 export default (): ReactElement => {
   const [editMode, setEditMode] = useState(false);
@@ -49,16 +36,13 @@ export default (): ReactElement => {
   const theme = useRecoilValue(themeState);
   const setAllRecipes = useSetRecoilState(allRecipesState);
   const setCategories = useSetRecoilState(categoriesState);
-  const setRecipesLoading = useSetRecoilState(recipesLoadingState);
   const [visible, rendered, setVisible] = useRenderTimeout();
 
   const handleViewChange = (source: typeof View[keyof typeof View]): void =>
     setCurrentView(() => {
       switch (source) {
-        case View.DELETE_CATEGORY:
-          return currentView === View.DELETE_CATEGORY ? View.HOME : View.DELETE_CATEGORY;
-        case View.DELETE_RECIPE:
-          return currentView === View.DELETE_RECIPE ? View.HOME : View.DELETE_RECIPE;
+        case View.DELETE:
+          return currentView === View.DELETE ? View.HOME : View.DELETE;
         case View.EDIT:
           setEditMode(true);
           return currentView === View.ADD ? View.HOME : View.ADD;
@@ -81,23 +65,6 @@ export default (): ReactElement => {
   // const handleRemoveFromShoppingList = ingredient => {
   //   setShoppingList(shoppingList.filter(other => other !== ingredient));
   // };
-
-  const handleImport = async (importString: string): Promise<void> => {
-    const recipes = JSON.parse(importString);
-    await addRecipes(recipes);
-    handleViewChange(View.IMPORT);
-  };
-
-  const getAllRecipesAndCategories = () => {
-    getAllRecipes()
-      .then(({ recipes }) => {
-        setAllRecipes(new Map(recipes.map(r => [r.recipeId, r])));
-      })
-      .then(() => setRecipesLoading(false));
-    getAllCategories().then(({ categories }) => {
-      setCategories(new Map(categories.map(c => [c.categoryId, c])));
-    });
-  };
 
   useEffect(() => {
     if (signedIn === SignedInState.REFRESHING_ID_TOKEN) {
@@ -133,9 +100,7 @@ export default (): ReactElement => {
           setSignedIn(SignedInState.SIGNED_OUT);
           return;
         }
-        setRecipesLoading(true);
         setSignedIn(SignedInState.SIGNED_IN);
-        getAllRecipesAndCategories();
       })
       .catch(() => {
         setVisible(false);
@@ -152,7 +117,7 @@ export default (): ReactElement => {
       >
         {rendered && (
           <>
-            <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE_CATEGORY)} />
+            <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
             <div
               id="main-content"
               className={
@@ -161,12 +126,12 @@ export default (): ReactElement => {
             >
               <div id="left">
                 <Header handleViewChange={source => () => handleViewChange(source)} />
-                <SidebarRecipeList />
+                <RecipeList />
               </div>
               <div id="right">
                 {selectedRecipeId !== UNSET && (
                   <Details
-                    handleDeleteRecipe={() => handleViewChange(View.DELETE_RECIPE)}
+                    handleDeleteRecipe={() => handleViewChange(View.DELETE)}
                     editRecipe={() => handleViewChange(View.EDIT)}
                     // shoppingList={shoppingList}
                     // handleAddToShoppingList={handleAddToShoppingList}
@@ -181,26 +146,8 @@ export default (): ReactElement => {
       <div id="modals">
         <AddForm editMode={editMode} />
         <DeleteForm />
-        <ImportForm handleImport={handleImport} />
-        <SignInForm
-          handleSignIn={(email, password) => {
-            setSignedIn(SignedInState.PENDING);
-            return signIn(email, password)
-              .then(userId => {
-                if (!userId) {
-                  setSignedIn(SignedInState.SIGNED_OUT);
-                  return "";
-                }
-                getAllRecipesAndCategories();
-                setSignedIn(SignedInState.SIGNED_IN);
-                return userId;
-              })
-              .catch(e => {
-                setSignedIn(SignedInState.SIGNED_OUT);
-                throw e;
-              });
-          }}
-        />
+        <ImportForm />
+        <SignInForm />
       </div>
     </div>
   );

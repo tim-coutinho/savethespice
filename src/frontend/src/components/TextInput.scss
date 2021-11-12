@@ -15,6 +15,7 @@ $padding-left: 5px;
   padding-left: $padding-left;
   padding-right: 4 * $padding-left;
   transition: $transition-duration;
+  transition-delay: inherit;
   width: inherit;
 }
 
@@ -135,6 +136,7 @@ $padding-left: 5px;
     position: absolute;
     top: 0;
     transition: math.div(vars.$standard-transition-duration, 2);
+    transition-delay: inherit;
     user-select: none;
 
     i {

@@ -24,6 +24,7 @@ interface TextInputProps {
   type?: HTMLInputTypeAttribute;
   valid?: () => [boolean, string];
   width?: string;
+  onBlur?: FocusEventHandler<HTMLInputElement | HTMLDivElement>;
 }
 
 export default ({
@@ -39,10 +40,12 @@ export default ({
   valid = () => [true, ""],
   value,
   width = "15em",
+  onBlur,
 }: TextInputProps): ReactElement => {
   const mainRef = useRef<HTMLDivElement>(null);
   const helpRef = useRef<HTMLDivElement>(null);
   // const tagName = useRef(ordered ? "ol" : "ul");
+  const [focused, setFocused] = useState(false);
   const [isValid, setIsValid] = useState(valid()[0]);
   const [reason, setReason] = useState(valid()[1]);
 
@@ -71,7 +74,7 @@ export default ({
       setTimeout(() => (mainRef.current?.firstElementChild as HTMLElement).focus(), autofocusDelay);
   }, []);
 
-  const resize: FocusEventHandler = ({ type }) => {
+  const resize: FocusEventHandler<HTMLInputElement> = ({ type }) => {
     if (mainRef.current === null || helpRef.current === null) {
       return;
     }
@@ -105,14 +108,20 @@ export default ({
   };
 
   return (
-    <div className="text-input" ref={mainRef} style={{ width }}>
+    <div
+      className="text-input"
+      ref={mainRef}
+      style={{ width, transitionDelay: focused ? `${autofocusDelay}ms` : "" }}
+    >
       {Array.isArray(value) ? (
         <div
           style={{ width }}
-          onBlur={() =>
+          onFocus={() => setFocused(true)}
+          onBlur={e => {
+            onBlur?.(e);
             (mainRef.current?.firstElementChild as HTMLElement).innerText.trim() === "" &&
-            ((mainRef.current?.firstElementChild as HTMLElement).innerHTML = "")
-          }
+              ((mainRef.current?.firstElementChild as HTMLElement).innerHTML = "");
+          }}
           onPaste={e => {
             const paste = e.clipboardData.getData("text");
             const selection = window.getSelection();
@@ -136,10 +145,17 @@ export default ({
         <input
           id={id}
           name={name}
-          onBlur={resize}
+          onFocus={e => {
+            setFocused(true);
+            resize(e);
+          }}
+          onBlur={e => {
+            setFocused(false);
+            resize(e);
+            onBlur?.(e);
+          }}
           onChange={setValue}
           onKeyDown={setValue}
-          onFocus={resize}
           value={value}
           type={type}
           maxLength={maxLength}
