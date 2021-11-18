@@ -116,7 +116,7 @@ def get_recipe(user_id: str, recipe_id: int) -> Response:
             return (
                 ResponseData(
                     message="One of the following parameters is invalid: "
-                            f"{{User ID: {user_id}, Category ID: {recipe_id}}}"
+                    f"{{User ID: {user_id}, Category ID: {recipe_id}}}"
                 ),
                 400,
             )
@@ -443,8 +443,8 @@ def put_recipes(user_id: str, body: Iterable[RecipeEntry]) -> Response:
                 continue
             data = res["data"]
             for list_, name in zip(
-                    (existing_categories, new_categories, category_failed_adds),
-                    ("existingCategories", "newCategories", "categoryFailedAdds"),
+                (existing_categories, new_categories, category_failed_adds),
+                ("existingCategories", "newCategories", "categoryFailedAdds"),
             ):
                 list_.extend(data.pop(name, []))
 
@@ -478,8 +478,8 @@ def delete_recipe(user_id: str, recipe_id: int) -> Response:
                 ConditionExpression=Attr("userId").exists() & Attr("recipeId").exists(),
                 ReturnValues="ALL_OLD",
             )
-                .get("Attributes", {})
-                .get("imgSrc")
+            .get("Attributes", {})
+            .get("imgSrc")
         )
     except resource.meta.client.exceptions.ConditionalCheckFailedException:
         return (
@@ -493,7 +493,7 @@ def delete_recipe(user_id: str, recipe_id: int) -> Response:
             return (
                 ResponseData(
                     message="One of the following parameters is invalid: "
-                            f"{{User ID: {user_id}, Category ID: {recipe_id}}}"
+                    f"{{User ID: {user_id}, Category ID: {recipe_id}}}"
                 ),
                 400,
             )
@@ -501,7 +501,7 @@ def delete_recipe(user_id: str, recipe_id: int) -> Response:
         raise
 
     if image_source and image_source.startswith(IMAGE_PREFIX):  # Delete self-hosted image from S3
-        key = image_source[len(IMAGE_PREFIX):]  # Don't have remove_prefix in 3.8, sad
+        key = image_source[len(IMAGE_PREFIX) :]  # Don't have remove_prefix in 3.8, sad
         logging.info(f"Deleting image with key {key} for user with ID {user_id}.")
         image: Object = boto3.resource("s3").Object(os.environ["images_bucket_name"], key)
         image.delete()
@@ -642,8 +642,9 @@ def add_image_from_recipe(body: RecipeEntry) -> RecipeEntry:
     image_source = body.pop("imgSrc", None)
     if not image_source:
         return body
-    if (image_source.startswith(IMAGE_PREFIX)  # Already self-hosted
-            or image_source.startswith("data:image/")):  # Data URL
+    if image_source.startswith(IMAGE_PREFIX) or image_source.startswith(  # Already self-hosted
+        "data:image/"
+    ):  # Data URL
         body["imgSrc"] = image_source
         return body
 

@@ -6,7 +6,7 @@ from aws_cdk.aws_apigateway import (
     LambdaIntegration,
     LambdaRestApi,
 )
-from aws_cdk.aws_cloudfront import BehaviorOptions, Distribution, ViewerProtocolPolicy
+from aws_cdk.aws_cloudfront import BehaviorOptions, Distribution, PriceClass, ViewerProtocolPolicy
 from aws_cdk.aws_cloudfront_origins import S3Origin
 from aws_cdk.aws_cognito import (
     AccountRecovery,
@@ -76,6 +76,7 @@ class SaveTheSpiceStack(Stack):
                     origin=S3Origin(deployment_bucket),
                     viewer_protocol_policy=ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 ),
+                price_class=PriceClass.PRICE_CLASS_100,
             ),
         )
 
@@ -160,12 +161,10 @@ class SaveTheSpiceStack(Stack):
                     actions=["cognito-idp:*"],
                     resources=[user_pool.user_pool_arn],
                 ),
-                PolicyStatement(
-                    actions=["dynamodb:PutItem"],
-                    resources=[meta_table.table_arn],
-                ),
             ],
         )
+
+        meta_table.grant_write_data(auth_lambda)
 
         main_lambda = PythonFunction(
             self,
@@ -198,14 +197,11 @@ class SaveTheSpiceStack(Stack):
                         categories_table.table_arn,
                     ],
                 ),
-                PolicyStatement(
-                    actions=["s3:PutObject"],
-                    resources=[images_bucket.bucket_arn],
-                ),
             ],
         )
 
         images_bucket.grant_put(main_lambda.grant_principal)
+        images_bucket.grant_delete(main_lambda.grant_principal)
 
         root_endpoint = LambdaRestApi(
             self,
