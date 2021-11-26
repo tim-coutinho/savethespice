@@ -22,6 +22,7 @@ from models import (
     invalid_input_model,
     not_found_model,
     recipe_add_response_model,
+    db_recipe_response_model,
     recipe_model,
     recipe_update_model,
     recipe_update_response_model,
@@ -81,34 +82,34 @@ class Recipes(Resource):
         return put_recipes(user_id, recipes)
 
 
-@api.route("/<int:recipeId>")
-@api.param("recipeId", "Unique recipe ID.")
+@api.route("/<int:recipe_id>")
+@api.param("recipe_id", "Unique recipe ID.")
 class Recipe(Resource):
-    @api.marshal_with(recipe_model)
-    def get(self, recipeId: int):
+    @api.marshal_with(db_recipe_response_model)
+    def get(self, recipe_id: int):
         """Get a recipe by ID."""
         user_id = request.environ["USER_ID"]
-        return get_recipe(user_id, recipeId)
+        return get_recipe(user_id, recipe_id)
 
     @api.response(204, description="Success")
-    def delete(self, recipeId: int):
+    def delete(self, recipe_id: int):
         """Delete a recipe by ID."""
         user_id = request.environ["USER_ID"]
-        return delete_recipe(user_id, recipeId)
+        return delete_recipe(user_id, recipe_id)
 
     @api.expect(recipe_update_model)
     @api.marshal_with(recipe_update_response_model)
     @api.response(204, description="Success")
-    def patch(self, recipeId: int):
+    def patch(self, recipe_id: int):
         """Update a recipe by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]
-        return patch_recipe(user_id, body, recipeId)
+        return patch_recipe(user_id, body, recipe_id)
 
     @api.expect(recipe_model)
     @api.marshal_with(recipe_add_response_model)
-    def put(self, recipeId: int):
+    def put(self, recipe_id: int):
         """Overwrite a recipe by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]
-        return put_recipe(user_id, body, recipeId)
+        return put_recipe(user_id, body, recipe_id)

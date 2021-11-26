@@ -20,7 +20,7 @@ export default ({ handleViewChange }: HeaderProps): ReactElement => {
   const ref = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useRecoilState(filterState);
   const currentView = useRecoilValue(currentViewState);
-  const categories = useRecoilValue(categoriesState);
+  const allCategories = useRecoilValue(categoriesState);
   const selectedCategoryId = useRecoilValue(selectedCategoryIdState);
 
   const handleFilterChange: ChangeEventHandler<HTMLInputElement> = ({ currentTarget }) => {
@@ -41,7 +41,7 @@ export default ({ handleViewChange }: HeaderProps): ReactElement => {
       </Button>
       <span>
         <h3 id="category-label" style={filter !== "" ? { opacity: "0" } : {}}>
-          {categories.get(+selectedCategoryId)?.name ?? "All Recipes"}
+          {allCategories.get(+selectedCategoryId)?.name ?? "All Recipes"}
         </h3>
         <span
           id="filter-wrapper"

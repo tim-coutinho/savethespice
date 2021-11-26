@@ -38,7 +38,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const [shiftedLeft, setShiftedLeft] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const [theme, setTheme] = useRecoilState(themeState);
-  const [categories, setCategories] = useRecoilState(categoriesState);
+  const [allCategories, setAllCategories] = useRecoilState(categoriesState);
   const modalActive = useRecoilValue(modalActiveState);
   const allRecipes = useRecoilValue(allRecipesState);
   const setCategoryIdToDelete = useSetRecoilState(itemIdToDeleteState);
@@ -54,7 +54,9 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
 
   useEffect(() => {
     if (getAllCategoriesRequest.value) {
-      setCategories(new Map(getAllCategoriesRequest.value.categories.map(c => [c.categoryId, c])));
+      setAllCategories(
+        new Map(getAllCategoriesRequest.value.categories.map(c => [c.categoryId, c])),
+      );
     }
   }, [getAllCategoriesRequest]);
 
@@ -69,7 +71,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
           recipe.categories
             ? {
                 ...recipe,
-                categories: recipe.categories.map(c => (categories.get(c) as Category).name),
+                categories: recipe.categories.map(c => (allCategories.get(c) as Category).name),
                 recipeId: undefined,
                 createTime: undefined,
                 updateTime: undefined,
@@ -93,7 +95,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
       setShiftedLeft(false);
     } else if (e.key === "Enter" && newCategoryName !== "") {
       // Ensure category with this name doesn't already exist
-      if (Array.from(categories).some(([, { name }]) => name === newCategoryName)) {
+      if (Array.from(allCategories).some(([, { name }]) => name === newCategoryName)) {
         return;
       }
       executeAddCategory(newCategoryName);
@@ -103,7 +105,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   useEffect(() => {
     const { value } = addCategoryRequest;
     if (value !== null) {
-      setCategories(categories => new Map(categories.set(value.categoryId, value)));
+      setAllCategories(categories => new Map(categories.set(value.categoryId, value)));
       setNewCategoryName("");
       setShiftedLeft(false);
     }
@@ -145,7 +147,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
           handleClick={() => setSelectedCategoryId(UNSET)}
           selected={selectedCategoryId === UNSET}
         />
-        {Array.from(categories)
+        {Array.from(allCategories)
           .sort(([, { name: name1 }], [, { name: name2 }]) =>
             name1.toLowerCase() >= name2.toLowerCase() ? 1 : -1,
           )

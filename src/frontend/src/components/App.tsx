@@ -35,7 +35,7 @@ export default (): ReactElement => {
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
   const theme = useRecoilValue(themeState);
   const setAllRecipes = useSetRecoilState(allRecipesState);
-  const setCategories = useSetRecoilState(categoriesState);
+  const setAllCategories = useSetRecoilState(categoriesState);
   const [visible, rendered, setVisible] = useRenderTimeout();
 
   const handleViewChange = (source: typeof View[keyof typeof View]): void =>
@@ -84,7 +84,7 @@ export default (): ReactElement => {
       return;
     }
     setAllRecipes(new Map());
-    setCategories(new Map());
+    setAllCategories(new Map());
   }, [rendered]);
 
   useEffect(() => {

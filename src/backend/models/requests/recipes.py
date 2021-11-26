@@ -6,7 +6,7 @@ from models.common import _make_response_data_model
 _recipe_id = Integer(required=True)
 _name = String(min_length=1, max_length=200, required=True)
 _desc = String(max_length=200)
-_cookTime = String()
+_cook_time = String()
 _ingredients = List(String)
 _instructions = List(String)
 _create_time = DateTime(required=True)
@@ -19,7 +19,7 @@ _imgSrc = String()
 _recipe = {
     "name": _name,
     "desc": _desc,
-    "cookTime": _cookTime,
+    "cookTime": _cook_time,
     "ingredients": _ingredients,
     "instructions": _instructions,
     "categories": List(String),

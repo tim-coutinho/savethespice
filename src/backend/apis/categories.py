@@ -90,28 +90,28 @@ class Categories(Resource):
         return post_category(user_id, body)
 
 
-@api.route("/<int:categoryId>")
-@api.param("categoryId", "Unique category ID.")
+@api.route("/<int:category_id>")
+@api.param("category_id", "Unique category ID.")
 @api.response(400, description="Invalid Input", model=invalid_input_model)
 @api.response(404, description="Not Found", model=not_found_model)
 class Category(Resource):
     @api.marshal_with(db_category_response_model)
-    def get(self, categoryId: int):
+    def get(self, category_id: int):
         """Get a category by ID."""
         user_id = request.environ["USER_ID"]
-        return get_category(user_id, categoryId)
+        return get_category(user_id, category_id)
 
     @api.marshal_with(category_delete_response_model, skip_none=True)
     @api.response(204, description="Success")
-    def delete(self, categoryId: int):
+    def delete(self, category_id: int):
         """Delete a category by ID."""
         user_id = request.environ["USER_ID"]
 
-        res, status_code = delete_category(user_id, categoryId)
+        res, status_code = delete_category(user_id, category_id)
         if status_code != 204:
             return ResponseData(message=res["message"]), status_code
 
-        res, status_code = remove_categories_from_recipes(user_id, [categoryId])
+        res, status_code = remove_categories_from_recipes(user_id, [category_id])
         if status_code != 204:
             return ResponseData(data=res["data"]), status_code
 
@@ -119,16 +119,16 @@ class Category(Resource):
 
     @api.expect(category_update_model)
     @api.response(204, description="Success")
-    def patch(self, categoryId: int):
+    def patch(self, category_id: int):
         """Update a category by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]
-        return patch_category(user_id, body, categoryId)
+        return patch_category(user_id, body, category_id)
 
     @api.expect(category_model)
     @api.marshal_with(db_category_response_model)
-    def put(self, categoryId: int):
+    def put(self, category_id: int):
         """Overwrite a category by ID."""
         body = api.payload
         user_id = request.environ["USER_ID"]
-        return put_category(user_id, body, categoryId)
+        return put_category(user_id, body, category_id)

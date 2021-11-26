@@ -20,7 +20,7 @@ import { AsyncRequestStatus, useAsync, useRenderTimeout } from "../lib/hooks";
 export default (): ReactElement => {
   const [type, setType] = useState<"recipe" | "category" | "">("");
   const setAllRecipes = useSetRecoilState(allRecipesState);
-  const setCategories = useSetRecoilState(categoriesState);
+  const setAllCategories = useSetRecoilState(categoriesState);
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
@@ -48,7 +48,7 @@ export default (): ReactElement => {
         });
         return new Map(allRecipes);
       });
-      setCategories(categories => {
+      setAllCategories(categories => {
         categories.delete(itemIdToDelete);
         return new Map(categories);
       });
