@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 import { refreshIdToken } from "../lib/operations";
-import { SignedInState, Theme, transitionDuration, UNSET, View } from "../lib/common";
+import { Color, prefix, SignedInState, transitionDuration, UNSET, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
@@ -10,7 +10,6 @@ import {
   modalActiveState,
   selectedRecipeIdState,
   signedInState,
-  themeState,
 } from "../store";
 
 // import ShoppingList from "./ShoppingList";
@@ -25,6 +24,8 @@ import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
 import SignInForm from "./SignInForm";
 import { useRenderTimeout } from "../lib/hooks";
+import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
+import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 
 export default (): ReactElement => {
   const [editMode, setEditMode] = useState(false);
@@ -33,7 +34,10 @@ export default (): ReactElement => {
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
   const modalActive = useRecoilValue(modalActiveState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
-  const theme = useRecoilValue(themeState);
+  const [theme, setTheme] = useLocalStorageValue({
+    key: `${prefix}theme`,
+    defaultValue: useColorScheme(),
+  });
   const setAllRecipes = useSetRecoilState(allRecipesState);
   const setAllCategories = useSetRecoilState(categoriesState);
   const [visible, rendered, setVisible] = useRenderTimeout();
@@ -88,7 +92,8 @@ export default (): ReactElement => {
   }, [rendered]);
 
   useEffect(() => {
-    Theme.setting = theme;
+    localStorage.setItem(`${prefix}theme`, theme);
+    document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   useEffect(() => {
@@ -109,46 +114,55 @@ export default (): ReactElement => {
   }, []);
 
   return (
-    <div id="app">
-      <div
-        id="non-modals"
-        className={visible ? "visible" : ""}
-        style={{ transitionDuration: `${transitionDuration}ms` }}
+    <ColorSchemeProvider
+      colorScheme={theme}
+      toggleColorScheme={v => setTheme(v ?? theme === "light" ? "dark" : "light")}
+    >
+      <MantineProvider
+        theme={{ primaryColor: Color.OD_PURPLE, fontFamily: "Roboto", colorScheme: theme }}
       >
-        {rendered && (
-          <>
-            <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
-            <div
-              id="main-content"
-              className={
-                currentView === View.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
-              }
-            >
-              <div id="left">
-                <Header handleViewChange={source => () => handleViewChange(source)} />
-                <RecipeList />
-              </div>
-              <div id="right">
-                {selectedRecipeId !== UNSET && (
-                  <Details
-                    handleDeleteRecipe={() => handleViewChange(View.DELETE)}
-                    editRecipe={() => handleViewChange(View.EDIT)}
-                    // shoppingList={shoppingList}
-                    // handleAddToShoppingList={handleAddToShoppingList}
-                    // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
-                  />
-                )}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-      <div id="modals">
-        <AddForm editMode={editMode} />
-        <DeleteForm />
-        <ImportForm />
-        <SignInForm />
-      </div>
-    </div>
+        <div id="app">
+          <div
+            id="non-modals"
+            className={visible ? "visible" : ""}
+            style={{ transitionDuration: `${transitionDuration}ms` }}
+          >
+            {rendered && (
+              <>
+                <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
+                <div
+                  id="main-content"
+                  className={
+                    currentView === View.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
+                  }
+                >
+                  <div id="left">
+                    <Header handleViewChange={source => () => handleViewChange(source)} />
+                    <RecipeList />
+                  </div>
+                  <div id="right">
+                    {selectedRecipeId !== UNSET && (
+                      <Details
+                        handleDeleteRecipe={() => handleViewChange(View.DELETE)}
+                        editRecipe={() => handleViewChange(View.EDIT)}
+                        // shoppingList={shoppingList}
+                        // handleAddToShoppingList={handleAddToShoppingList}
+                        // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          <div id="modals">
+            <AddForm editMode={editMode} />
+            <DeleteForm />
+            <ImportForm />
+            <SignInForm />
+          </div>
+        </div>
+      </MantineProvider>
+    </ColorSchemeProvider>
   );
 };

@@ -1,13 +1,6 @@
 import { ChangeEvent, EventHandler, KeyboardEvent, ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import {
-  copyToClipboard,
-  SignedInState,
-  Theme,
-  transitionDuration,
-  UNSET,
-  View,
-} from "../lib/common";
+import { copyToClipboard, SignedInState, transitionDuration, UNSET, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
@@ -16,7 +9,6 @@ import {
   modalActiveState,
   selectedCategoryIdState,
   signedInState,
-  themeState,
 } from "../store";
 
 import "./Sidebar.scss";
@@ -26,6 +18,7 @@ import TextInput from "./TextInput";
 import { addCategory, getAllCategories, signOut } from "../lib/operations";
 import { Category } from "../types";
 import { useAsync, useRenderTimeout } from "../lib/hooks";
+import { useMantineColorScheme } from "@mantine/core";
 
 interface SidebarProps {
   handleDeleteCategory: () => void;
@@ -37,7 +30,6 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [shiftedLeft, setShiftedLeft] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
-  const [theme, setTheme] = useRecoilState(themeState);
   const [allCategories, setAllCategories] = useRecoilState(categoriesState);
   const modalActive = useRecoilValue(modalActiveState);
   const allRecipes = useRecoilValue(allRecipesState);
@@ -47,6 +39,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const [, inputRendered, setInputVisible] = useRenderTimeout(transitionDuration);
   const [executeAddCategory, addCategoryRequest] = useAsync(addCategory);
   const [executeGetAllCategories, getAllCategoriesRequest] = useAsync(getAllCategories);
+  const { colorScheme: theme, toggleColorScheme: toggleTheme } = useMantineColorScheme();
 
   useEffect(() => {
     executeGetAllCategories();
@@ -191,7 +184,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
           key="Theme"
           categoryName="Theme"
           classes={`sidebar-item theme ${theme}`}
-          handleClick={() => setTheme(theme === Theme.LIGHT ? Theme.DARK : Theme.LIGHT)}
+          handleClick={() => toggleTheme()}
         />
         <SidebarItem
           key="Sign Out"

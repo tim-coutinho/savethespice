@@ -1,5 +1,6 @@
+import { ColorScheme } from "@mantine/core";
 import { atom, selector } from "recoil";
-import { SignedInState, Theme, ThemeSetting, UNSET, View } from "../lib/common";
+import { SignedInState, UNSET, View } from "../lib/common";
 import { Category, Recipe } from "../types";
 
 export const filterState = atom({ key: "filterState", default: "" });
@@ -49,11 +50,6 @@ export const currentViewState = atom({
 export const modalActiveState = selector({
   key: "modalActiveState",
   get: ({ get }) => get(currentViewState).modal,
-});
-
-export const themeState = atom<ThemeSetting>({
-  key: "themeState",
-  default: Theme.setting,
 });
 
 export const signedInState = atom({

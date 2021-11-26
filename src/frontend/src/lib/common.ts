@@ -43,26 +43,6 @@ export enum Color {
   WHITE = "#ffffff",
 }
 
-export type ThemeSetting = "light" | "dark";
-
-export class Theme {
-  private static readonly storageName: string = `${prefix}theme`;
-  static readonly LIGHT: ThemeSetting = "light";
-  static readonly DARK: ThemeSetting = "dark";
-
-  static get setting(): ThemeSetting {
-    return (
-      (localStorage.getItem(Theme.storageName) as ThemeSetting) ??
-      (window.matchMedia("(prefers-color-scheme: dark)").matches ? Theme.DARK : Theme.LIGHT)
-    );
-  }
-
-  static set setting(themeSetting: ThemeSetting) {
-    localStorage.setItem(Theme.storageName, themeSetting);
-    document.documentElement.setAttribute("data-theme", themeSetting);
-  }
-}
-
 interface FetchResponse<T> {
   data: T;
   message: string;
