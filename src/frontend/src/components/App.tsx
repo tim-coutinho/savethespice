@@ -16,13 +16,13 @@ import {
 import AddForm from "./AddForm";
 
 import "./App.scss";
+import AuthForm from "./AuthForm";
 import DeleteForm from "./DeleteForm";
 import Details from "./Details";
 import Header from "./Header";
 import ImportForm from "./ImportForm";
 import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
-import SignInForm from "./SignInForm";
 import { useRenderTimeout } from "../lib/hooks";
 import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
@@ -159,7 +159,7 @@ export default (): ReactElement => {
             <AddForm editMode={editMode} />
             <DeleteForm />
             <ImportForm />
-            <SignInForm />
+            <AuthForm />
           </div>
         </div>
       </MantineProvider>
