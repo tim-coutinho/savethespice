@@ -25,29 +25,33 @@ export enum AsyncRequestStatus {
   ERROR = "error",
 }
 
+interface AsyncRequest<T, E> {
+  status: AsyncRequestStatus;
+  value: T | null;
+  error: E | null;
+  reset: () => void;
+}
+
 export const useAsync = <T, S = undefined, E = string>(
   asyncFunction: (params: S) => Promise<T>,
-): [
-  (params?: S) => Promise<void>,
-  {
-    status: AsyncRequestStatus;
-    value: T | null;
-    error: E | null;
-  },
-] => {
-  const [request, setRequest] = useState<{
-    status: AsyncRequestStatus;
-    value: T | null;
-    error: E | null;
-  }>({
+): [(params?: S) => Promise<void>, AsyncRequest<T, E>] => {
+  const [request, setRequest] = useState<AsyncRequest<T, E>>({
     status: AsyncRequestStatus.IDLE,
     value: null,
     error: null,
+    reset: () => null,
   });
+  const reset = () =>
+    setRequest(prev => ({
+      ...prev,
+      status: AsyncRequestStatus.IDLE,
+      value: null,
+      error: null,
+    }));
 
   const execute = useCallback(
     (params = undefined) => {
-      setRequest({ status: AsyncRequestStatus.PENDING, value: null, error: null });
+      setRequest({ status: AsyncRequestStatus.PENDING, value: null, error: null, reset });
 
       return asyncFunction(params)
         .then(response => {

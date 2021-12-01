@@ -1,7 +1,7 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { Color } from "../lib/common";
-import { filteredRecipesState, itemIdToDeleteState, selectedRecipeIdState } from "../store";
+import { filteredRecipesState, itemToDeleteState, selectedRecipeIdState } from "../store";
 
 import Button from "./Button";
 
@@ -20,7 +20,7 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
   const [recipe, setRecipe] = useState({} as Recipe);
   const recipes = useRecoilValue(filteredRecipesState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
-  const setRecipeIdToDelete = useSetRecoilState(itemIdToDeleteState);
+  const setItemToDelete = useSetRecoilState(itemToDeleteState);
 
   useEffect(() => {
     const selectedRecipe = recipes.find(([id]) => +id === selectedRecipeId)?.[1];
@@ -35,7 +35,7 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
         </Button>
         <Button
           onClick={() => {
-            setRecipeIdToDelete(+selectedRecipeId);
+            setItemToDelete({ type: "recipe", id: selectedRecipeId });
             handleDeleteRecipe();
           }}
           primaryColor={Color.OD_DARK_RED}

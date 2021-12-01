@@ -1,11 +1,10 @@
-import { ReactElement, useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
 import { Autocomplete, Button, Group, Modal, PasswordInput, Tab, Tabs, Text } from "@mantine/core";
 import { useForm } from "@mantine/hooks";
 import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
+import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { SignedInState, transitionDuration, View } from "../lib/common";
-import { useRenderTimeout } from "../lib/hooks";
+import { SignedInState, View } from "../lib/common";
 import { forgotPassword, signIn, signUp } from "../lib/operations";
 import { currentViewState, signedInState } from "../store";
 
@@ -19,8 +18,7 @@ export default (): ReactElement => {
   const [authResponse, setAuthResponse] = useState("");
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
   const currentView = useRecoilValue(currentViewState);
-  const [visible, , setVisible] = useRenderTimeout(transitionDuration);
-  const [activeTab, setActiveTab] = useState(Mode.SIGN_IN);
+  const activeTab = useRef(Mode.SIGN_IN);
   const form = useForm({
     initialValues: { email: "", password: "", confirmPassword: "" },
   });
@@ -69,7 +67,7 @@ export default (): ReactElement => {
   };
 
   const handleSubmit = (values: typeof form.values) => {
-    switch (activeTab) {
+    switch (activeTab.current) {
       case Mode.SIGN_IN:
         return handleSignIn(values.email, values.password).catch(({ message }) =>
           setAuthResponse(message),
@@ -85,34 +83,34 @@ export default (): ReactElement => {
     }
   };
 
+  const invalidForm = useMemo(
+    () =>
+      !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+        form.values.email,
+      ) ||
+      (activeTab.current !== Mode.FORGOT_PASSWORD && form.values.password.length < 8) ||
+      (activeTab.current === Mode.SIGN_UP && form.values.confirmPassword !== form.values.password),
+    [form.values.email, form.values.password, form.values.confirmPassword],
+  );
+
   useEffect(() => {
-    setVisible(currentView === View.SIGN_IN);
+    currentView !== View.SIGN_IN && setTimeout(form.reset, 500);
   }, [currentView]);
-
-  useEffect(() => {
-    form.reset();
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (!visible) {
-      return;
-    }
-    form.reset();
-  }, [visible]);
 
   return (
     <Modal
-      opened={visible}
-      onClose={() => setVisible(false)}
+      opened={currentView === View.SIGN_IN}
+      onClose={() => null}
       closeOnClickOutside={false}
       hideCloseButton
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Tabs
-          active={activeTab}
+          active={activeTab.current}
           onTabChange={i => {
             setAuthResponse("");
-            setActiveTab(i);
+            activeTab.current = i;
+            form.reset();
           }}
           grow
         >
@@ -203,20 +201,11 @@ export default (): ReactElement => {
           <Button
             type="submit"
             loading={signedIn === SignedInState.PENDING}
-            disabled={
-              !(
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-                  form.values.email,
-                ) &&
-                (activeTab === Mode.FORGOT_PASSWORD || form.values.password.length >= 8) &&
-                (activeTab !== Mode.SIGN_UP || form.values.confirmPassword === form.values.password)
-              ) || signedIn === SignedInState.SIGNED_IN
-            }
-            sx={{ float: "right", transitionDuration: `${transitionDuration}ms` }}
+            disabled={invalidForm || signedIn === SignedInState.SIGNED_IN}
           >
-            {activeTab === Mode.SIGN_IN
+            {activeTab.current === Mode.SIGN_IN
               ? "Sign In"
-              : activeTab === Mode.SIGN_UP
+              : activeTab.current === Mode.SIGN_UP
               ? "Sign Up"
               : "Send"}
           </Button>

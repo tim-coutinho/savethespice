@@ -5,7 +5,7 @@ import {
   allRecipesState,
   categoriesState,
   currentViewState,
-  itemIdToDeleteState,
+  itemToDeleteState,
   modalActiveState,
   selectedCategoryIdState,
   signedInState,
@@ -33,7 +33,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const [allCategories, setAllCategories] = useRecoilState(categoriesState);
   const modalActive = useRecoilValue(modalActiveState);
   const allRecipes = useRecoilValue(allRecipesState);
-  const setCategoryIdToDelete = useSetRecoilState(itemIdToDeleteState);
+  const setItemToDelete = useSetRecoilState(itemToDeleteState);
   const setCurrentView = useSetRecoilState(currentViewState);
   const setSignedIn = useSetRecoilState(signedInState);
   const [, inputRendered, setInputVisible] = useRenderTimeout(transitionDuration);
@@ -153,7 +153,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
               selected={selectedCategoryId === categoryId}
               handleDelete={e => {
                 e.stopPropagation();
-                setCategoryIdToDelete(categoryId);
+                setItemToDelete({ type: "category", id: categoryId });
                 handleDeleteCategory();
               }}
             />

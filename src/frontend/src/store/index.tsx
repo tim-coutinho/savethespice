@@ -4,7 +4,11 @@ import { SignedInState, UNSET, View } from "../lib/common";
 import { Category, Recipe } from "../types";
 
 export const filterState = atom({ key: "filterState", default: "" });
-export const itemIdToDeleteState = atom<number>({ key: "itemIdToDeleteState", default: UNSET });
+
+export const itemToDeleteState = atom<{ type: "category" | "recipe"; id: number }>({
+  key: "itemToDeleteState",
+  default: { type: "recipe", id: UNSET },
+});
 
 export const selectedCategoryIdState = atom({
   key: "selectedCategoryIdState",
