@@ -1,97 +1,65 @@
-import { FocusEventHandler, ReactElement, useEffect, useRef, useState } from "react";
+import { Button, JsonInput, Modal } from "@mantine/core";
+import { ReactElement, useEffect, useMemo, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { transitionDuration, View } from "../lib/common";
-import { allRecipesState, currentViewState } from "../store";
-import Button from "./Button";
-
-import "./ImportForm.scss";
-import { AsyncRequestStatus, useAsync, useRenderTimeout } from "../lib/hooks";
+import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { addRecipes } from "../lib/operations";
+import { allRecipesState, currentViewState } from "../store";
 import { Recipe } from "../types";
 
+import "./ImportForm.scss";
+
 export default (): ReactElement => {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  const [valid, setValid] = useState(false);
   const [value, setValue] = useState("");
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const setAllRecipes = useSetRecoilState(allRecipesState);
-  const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
   const [execute, request] = useAsync(addRecipes);
 
-  const handleBlur: FocusEventHandler<HTMLTextAreaElement> = () => {
-    try {
-      setValue(JSON.stringify(JSON.parse(value), null, 2));
-    } catch (SyntaxError) {
-      // Continue
-    }
-  };
+  const handleClose = () => setCurrentView(View.HOME);
 
-  useEffect(() => {
-    if (request.status === AsyncRequestStatus.SUCCESS) {
-      const { value } = request;
-      if (value?.recipes) {
-        setAllRecipes(new Map(value.recipes.map(r => [r.recipeId, r])));
-      }
-    }
-  }, [request]);
-
-  useEffect(() => {
-    setVisible(currentView === View.IMPORT);
-  }, [currentView]);
-
-  useEffect(() => {
+  const formVisible = useMemo(() => currentView === View.IMPORT, [currentView]);
+  const invalidForm = useMemo(() => {
     try {
       const importObject = JSON.parse(value);
-      setValid(importObject.length > 0);
+      return !importObject.length;
     } catch {
-      setValid(false);
+      return true;
     }
   }, [value]);
 
   useEffect(() => {
-    if (!visible) {
+    if (request.status === AsyncRequestStatus.SUCCESS && request.value?.recipes) {
+      setAllRecipes(new Map(request.value.recipes.map(r => [r.recipeId, r])));
+    }
+  }, [request.status]);
+
+  useEffect(() => {
+    if (!formVisible) {
       return;
     }
     setValue("");
-    setValid(false);
-    setTimeout(() => ref.current?.focus(), transitionDuration / 2);
-  }, [visible]);
+  }, [formVisible]);
 
   return (
-    <div
-      id="import-form"
-      className={visible ? "visible" : ""}
-      style={{ transitionDuration: `${transitionDuration}ms` }}
-    >
-      {rendered && (
-        <>
-          <div style={{ fontSize: "1.125em" }}>Paste JSON:</div>
-          <textarea
-            value={value}
-            cols={50}
-            rows={20}
-            onChange={({ target: { value } }) => setValue(value)}
-            onBlur={handleBlur}
-            ref={ref}
-            className={`${value !== "" ? (!valid ? "error" : "valid") : ""}`}
-            spellCheck={false}
-          />
-          <div id="import-form-btns">
-            <Button id="import-form-cancel" onClick={() => setCurrentView(View.HOME)} secondary>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                const recipes: Recipe[] = JSON.parse(value);
-                execute(recipes).finally(() => setCurrentView(View.HOME));
-              }}
-              disabled={request.status === AsyncRequestStatus.PENDING || !valid}
-            >
-              Import
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
+    <Modal title="Paste JSON" opened={formVisible} onClose={handleClose}>
+      <JsonInput
+        validationError="Invalid JSON"
+        value={value}
+        onChange={setValue}
+        minRows={30}
+        formatOnBlur
+      />
+      <Button
+        onClick={() => {
+          const recipes: Recipe[] = JSON.parse(value);
+          execute(recipes).finally(handleClose);
+        }}
+        disabled={request.status === AsyncRequestStatus.PENDING || invalidForm}
+        mt="md"
+        sx={{ float: "right", transitionDuration: `${transitionDuration}ms` }}
+      >
+        Import
+      </Button>
+    </Modal>
   );
 };
