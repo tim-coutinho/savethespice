@@ -1,4 +1,3 @@
-import { ColorScheme } from "@mantine/core";
 import { atom, selector } from "recoil";
 import { SignedInState, UNSET, View } from "../lib/common";
 import { Category, Recipe } from "../types";
@@ -25,18 +24,51 @@ export const allRecipesState = atom<Map<number, Recipe>>({
   default: new Map(),
 });
 
+export const filterOptionsState = atom({
+  key: "filterOptionsState",
+  default: {
+    name: true,
+    desc: true,
+    ingredients: true,
+    instructions: true,
+  },
+});
+
 export const filteredRecipesState = selector({
   key: "filteredRecipesState",
   get: ({ get }) => {
     const allRecipes = get(allRecipesState);
-    const filter = get(filterState);
+    const filter = get(filterState).trim();
+    const filterOptions = get(filterOptionsState);
     const selectedCategoryId = get(selectedCategoryIdState);
     return Array.from(allRecipes)
-      .filter(
-        ([, recipe]) =>
-          recipe.name.toLowerCase().includes(filter.toLowerCase()) &&
-          (selectedCategoryId === UNSET || recipe.categories?.includes(selectedCategoryId)),
-      )
+      .filter(([, recipe]) => {
+        if (selectedCategoryId !== UNSET && !recipe.categories?.includes(selectedCategoryId)) {
+          return false;
+        }
+        if (filter === "") {
+          return true;
+        }
+        if (filterOptions.name && recipe.name.toLowerCase().includes(filter.toLowerCase())) {
+          return true;
+        } else if (
+          filterOptions.desc &&
+          recipe.desc?.toLowerCase().includes(filter.toLowerCase())
+        ) {
+          return true;
+        } else if (
+          filterOptions.ingredients &&
+          recipe.ingredients?.some(i => i.includes(filter.toLowerCase()))
+        ) {
+          return true;
+        } else if (
+          filterOptions.instructions &&
+          recipe.instructions?.some(i => i.includes(filter.toLowerCase()))
+        ) {
+          return true;
+        }
+        return false;
+      })
       .sort(([, { createTime: time1 }], [, { createTime: time2 }]) => (time1 <= time2 ? 1 : -1));
   },
 });
