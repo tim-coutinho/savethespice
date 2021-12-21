@@ -2,7 +2,7 @@ import { Button, Group, Modal, Text } from "@mantine/core";
 import { ReactElement, useEffect, useMemo } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
-import { UNSET, View } from "../lib/common";
+import { transitionDuration, UNSET, View } from "../lib/common";
 import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { deleteCategory, deleteRecipe } from "../lib/operations";
 import {
@@ -14,6 +14,7 @@ import {
   selectedRecipeIdState,
 } from "../store";
 import { Recipe } from "../types";
+import { FlipButton } from "./FlipButton";
 
 export default (): ReactElement => {
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
@@ -71,7 +72,7 @@ export default (): ReactElement => {
         <Button variant="default" onClick={() => setCurrentView(View.HOME)}>
           Cancel
         </Button>
-        <Button
+        <FlipButton
           color="red"
           onClick={() => {
             if (itemToDelete.id !== -1) {
@@ -87,9 +88,11 @@ export default (): ReactElement => {
             deleteCategoryRequest.status === AsyncRequestStatus.PENDING
           }
           disabled={deleteButtonDisabled}
+          sx={{ transitionDuration: `${transitionDuration}ms` }}
+          border
         >
           Delete
-        </Button>
+        </FlipButton>
       </Group>
     </Modal>
   );

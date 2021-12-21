@@ -12,14 +12,17 @@ export const prefix = "SaveTheSpice-";
 export const transitionDuration = 300;
 export const UNSET = -1;
 
-export const View: Record<string, { modal: boolean }> = {
+export const View: Record<
+  "ADD" | "DELETE" | "EDIT" | "HOME" | "IMPORT" | "SIDEBAR" | "AUTH",
+  { modal: boolean }
+> = {
   ADD: { modal: true },
   DELETE: { modal: true },
   EDIT: { modal: true },
   HOME: { modal: false },
   IMPORT: { modal: true },
   SIDEBAR: { modal: false },
-  SIGN_IN: { modal: false },
+  AUTH: { modal: false },
 };
 
 export enum SignedInState {
@@ -91,14 +94,4 @@ export const getById = (elementId: string): HTMLElement => {
     throw ReferenceError(`${elementId} does not exist`);
   }
   return elem;
-};
-
-export const copyToClipboard = (str: string): void => {
-  const listener = (e: ClipboardEvent) => {
-    e.preventDefault();
-    e.clipboardData?.setData("text/plain", str);
-    document.removeEventListener("copy", listener);
-  };
-  document.addEventListener("copy", listener);
-  document.execCommand("copy"); // Copy - only works as a result of a user action (e.g. click events)
 };

@@ -1,12 +1,13 @@
+import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { ReactElement, useEffect, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { Color } from "../lib/common";
-import { filteredRecipesState, itemToDeleteState, selectedRecipeIdState } from "../store";
 
-import Button from "./Button";
+import { transitionDuration } from "../lib/common";
+import { filteredRecipesState, itemToDeleteState, selectedRecipeIdState } from "../store";
+import { Recipe } from "../types";
 
 import "./Details.scss";
-import { Recipe } from "../types";
+import { FlipButton } from "./FlipButton";
 
 interface DetailsProps {
   handleDeleteRecipe: () => void;
@@ -23,25 +24,36 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
   const setItemToDelete = useSetRecoilState(itemToDeleteState);
 
   useEffect(() => {
-    const selectedRecipe = recipes.find(([id]) => +id === selectedRecipeId)?.[1];
+    const selectedRecipe = recipes.find(([id]) => id === selectedRecipeId)?.[1];
     selectedRecipe && setRecipe(selectedRecipe);
   }, [recipes, selectedRecipeId]);
 
   return recipe ? (
     <div id="details-card">
       <div id="header">
-        <Button id="edit-btn" onClick={editRecipe}>
-          <i className="fa fa-pencil-alt" />
-        </Button>
-        <Button
+        <FlipButton
+          onClick={editRecipe}
+          sx={{ transitionDuration: `${transitionDuration}ms` }}
+          length={40}
+          border
+          square
+        >
+          <Pencil1Icon width={30} height={30} />
+        </FlipButton>
+        <FlipButton
           onClick={() => {
             setItemToDelete({ type: "recipe", id: selectedRecipeId });
             handleDeleteRecipe();
           }}
-          primaryColor={Color.OD_DARK_RED}
+          color="red"
+          ml={10}
+          sx={{ transitionDuration: `${transitionDuration}ms` }}
+          length={40}
+          border
+          square
         >
-          <i className="fa fa-trash" />
-        </Button>
+          <TrashIcon width={30} height={30} />
+        </FlipButton>
       </div>
       <div id="details">
         {recipe.imgSrc && <img className="recipe-img" src={recipe.imgSrc} alt={recipe.name} />}

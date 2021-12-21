@@ -1,6 +1,5 @@
+import { Button } from "@mantine/core";
 import { MouseEventHandler, ReactElement } from "react";
-import { Color } from "../lib/common";
-import Button from "./Button";
 
 interface SidebarItemProps {
   categoryName: string;
@@ -21,11 +20,7 @@ export default ({
     <li className={`${selected ? "selected-item" : ""} ${classes}`} onClick={handleClick}>
       {categoryName}
       {handleDelete && categoryName !== "All Recipes" && classes?.includes("sidebar-category") && (
-        <Button
-          onClick={handleDelete}
-          classes="category-delete-btn"
-          primaryColor={Color.OD_DARK_RED}
-        >
+        <Button onClick={handleDelete} className="category-delete-btn" color="red">
           <i className="fa fa-trash" />
         </Button>
       )}

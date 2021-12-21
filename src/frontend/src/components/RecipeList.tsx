@@ -22,10 +22,10 @@ export default (): ReactElement => {
     if (request.value) {
       setAllRecipes(new Map(request.value.recipes.map(r => [r.recipeId, r])));
     }
-  }, [request]);
+  }, [request.status]);
 
   useEffect(() => {
-    if (!recipes) {
+    if (recipes.length === 0) {
       return;
     }
     ref.current?.querySelectorAll("[data-src]").forEach(image =>

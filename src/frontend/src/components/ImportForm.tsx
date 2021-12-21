@@ -1,4 +1,4 @@
-import { Button, JsonInput, Modal } from "@mantine/core";
+import { JsonInput, Modal } from "@mantine/core";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { transitionDuration, View } from "../lib/common";
@@ -7,7 +7,7 @@ import { addRecipes } from "../lib/operations";
 import { allRecipesState, currentViewState } from "../store";
 import { Recipe } from "../types";
 
-import "./ImportForm.scss";
+import { FlipButton } from "./FlipButton";
 
 export default (): ReactElement => {
   const [value, setValue] = useState("");
@@ -49,7 +49,7 @@ export default (): ReactElement => {
         minRows={30}
         formatOnBlur
       />
-      <Button
+      <FlipButton
         onClick={() => {
           const recipes: Recipe[] = JSON.parse(value);
           execute(recipes).finally(handleClose);
@@ -57,9 +57,10 @@ export default (): ReactElement => {
         disabled={request.status === AsyncRequestStatus.PENDING || invalidForm}
         mt="md"
         sx={{ float: "right", transitionDuration: `${transitionDuration}ms` }}
+        border
       >
         Import
-      </Button>
+      </FlipButton>
     </Modal>
   );
 };

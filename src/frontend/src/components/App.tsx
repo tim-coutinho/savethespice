@@ -1,8 +1,11 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
+import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
+import { ReactElement, useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
+import { prefix, SignedInState, transitionDuration, UNSET, View } from "../lib/common";
+import { useRenderTimeout } from "../lib/hooks";
 import { refreshIdToken } from "../lib/operations";
-import { Color, prefix, SignedInState, transitionDuration, UNSET, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
@@ -12,9 +15,8 @@ import {
   signedInState,
 } from "../store";
 
-// import ShoppingList from "./ShoppingList";
 import AddForm from "./AddForm";
-
+// import ShoppingList from "./ShoppingList";
 import "./App.scss";
 import AuthForm from "./AuthForm";
 import DeleteForm from "./DeleteForm";
@@ -23,12 +25,9 @@ import Header from "./Header";
 import ImportForm from "./ImportForm";
 import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
-import { useRenderTimeout } from "../lib/hooks";
-import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
-import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 
 export default (): ReactElement => {
-  const [editMode, setEditMode] = useState(false);
+  const editMode = useRef(false);
   // const [shoppingList, setShoppingList] = useState([]);
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
@@ -48,10 +47,10 @@ export default (): ReactElement => {
         case View.DELETE:
           return currentView === View.DELETE ? View.HOME : View.DELETE;
         case View.EDIT:
-          setEditMode(true);
+          editMode.current = true;
           return currentView === View.ADD ? View.HOME : View.ADD;
         case View.ADD:
-          setEditMode(false);
+          editMode.current = false;
           return currentView === View.ADD ? View.HOME : View.ADD;
         case View.SIDEBAR:
           return currentView === View.HOME ? View.SIDEBAR : View.HOME;
@@ -76,7 +75,7 @@ export default (): ReactElement => {
     }
     if (signedIn !== SignedInState.SIGNED_IN) {
       setVisible(false);
-      setCurrentView(View.SIGN_IN);
+      setCurrentView(View.AUTH);
     } else {
       setVisible(true);
       setCurrentView(View.HOME);
@@ -116,10 +115,15 @@ export default (): ReactElement => {
   return (
     <ColorSchemeProvider
       colorScheme={theme}
-      toggleColorScheme={v => setTheme(v ?? theme === "light" ? "dark" : "light")}
+      toggleColorScheme={v => setTheme(v ?? theme === "dark" ? "light" : "dark")}
     >
       <MantineProvider
-        theme={{ primaryColor: Color.OD_PURPLE, fontFamily: "Roboto", colorScheme: theme }}
+        theme={{
+          headings: { fontWeight: 600 },
+          primaryColor: "violet",
+          fontFamily: "Roboto",
+          colorScheme: theme,
+        }}
       >
         <div id="app">
           <div
@@ -156,7 +160,7 @@ export default (): ReactElement => {
             )}
           </div>
           <div id="modals">
-            <AddForm editMode={editMode} />
+            <AddForm editMode={editMode.current} />
             <DeleteForm />
             <ImportForm />
             <AuthForm />

@@ -1,7 +1,7 @@
-import { useMantineColorScheme } from "@mantine/core";
 import { ReactElement } from "react";
 // import Skeleton from "react-loading-skeleton";
 import ContentLoader from "react-content-loader";
+import { useMantineColorScheme } from "@mantine/core";
 
 import { Color } from "../lib/common";
 

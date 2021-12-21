@@ -1,12 +1,13 @@
-import { Autocomplete, Button, Group, Modal, PasswordInput, Tab, Tabs, Text } from "@mantine/core";
+import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs, Text } from "@mantine/core";
 import { useForm } from "@mantine/hooks";
 import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
 import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { SignedInState, View } from "../lib/common";
+import { SignedInState, transitionDuration, View } from "../lib/common";
 import { forgotPassword, signIn, signUp } from "../lib/operations";
 import { currentViewState, signedInState } from "../store";
+import { FlipButton } from "./FlipButton";
 
 enum Mode {
   SIGN_IN,
@@ -94,12 +95,12 @@ export default (): ReactElement => {
   );
 
   useEffect(() => {
-    currentView !== View.SIGN_IN && setTimeout(form.reset, 500);
+    currentView !== View.AUTH && setTimeout(form.reset, 500);
   }, [currentView]);
 
   return (
     <Modal
-      opened={currentView === View.SIGN_IN}
+      opened={currentView === View.AUTH}
       onClose={() => null}
       closeOnClickOutside={false}
       hideCloseButton
@@ -120,8 +121,6 @@ export default (): ReactElement => {
                 label="Email"
                 placeholder="example@gmail.com"
                 icon={<EnvelopeClosedIcon />}
-                value={form.values.email}
-                onChange={value => form.setFieldValue("email", value)}
                 data={
                   form.values.email.trim().length > 0 && !form.values.email.includes("@")
                     ? ["gmail.com", "yahoo.com", "hotmail.com", "live.com"].map(
@@ -130,13 +129,13 @@ export default (): ReactElement => {
                     : []
                 }
                 mt="xs"
+                {...form.getInputProps("email")}
               />
               <PasswordInput
                 label="Password"
                 placeholder="********************"
                 icon={<LockClosedIcon />}
-                value={form.values.password}
-                onChange={({ currentTarget: { value } }) => form.setFieldValue("password", value)}
+                {...form.getInputProps("password")}
               />
             </Group>
           </Tab>
@@ -146,8 +145,6 @@ export default (): ReactElement => {
                 label="Email"
                 placeholder="example@gmail.com"
                 icon={<EnvelopeClosedIcon />}
-                value={form.values.email}
-                onChange={value => form.setFieldValue("email", value)}
                 data={
                   form.values.email.trim().length > 0 && !form.values.email.includes("@")
                     ? ["gmail.com", "yahoo.com", "hotmail.com", "live.com"].map(
@@ -156,23 +153,20 @@ export default (): ReactElement => {
                     : []
                 }
                 mt="xs"
+                {...form.getInputProps("email")}
               />
               <PasswordInput
                 label="Password"
                 placeholder="********************"
                 icon={<LockClosedIcon />}
-                value={form.values.password}
-                onChange={({ currentTarget: { value } }) => form.setFieldValue("password", value)}
+                {...form.getInputProps("password")}
               />
               <PasswordInput
                 label="Confirm password"
                 placeholder={"*".repeat(form.values.password.length)}
                 icon={<LockClosedIcon />}
-                value={form.values.confirmPassword}
-                onChange={({ currentTarget: { value } }) =>
-                  form.setFieldValue("confirmPassword", value)
-                }
                 disabled={form.values.password.length === 0}
+                {...form.getInputProps("confirmPassword")}
               />
             </Group>
           </Tab>
@@ -181,8 +175,6 @@ export default (): ReactElement => {
               label="Email"
               placeholder="example@gmail.com"
               icon={<EnvelopeClosedIcon />}
-              value={form.values.email}
-              onChange={value => form.setFieldValue("email", value)}
               data={
                 form.values.email.trim().length > 0 && !form.values.email.includes("@")
                   ? ["gmail.com", "yahoo.com", "hotmail.com", "live.com"].map(
@@ -191,6 +183,7 @@ export default (): ReactElement => {
                   : []
               }
               mt="xs"
+              {...form.getInputProps("email")}
             />
           </Tab>
         </Tabs>
@@ -198,17 +191,19 @@ export default (): ReactElement => {
           <Text color="red" size="sm">
             {authResponse}
           </Text>
-          <Button
+          <FlipButton
             type="submit"
             loading={signedIn === SignedInState.PENDING}
             disabled={invalidForm || signedIn === SignedInState.SIGNED_IN}
+            sx={{ transitionDuration: `${transitionDuration}ms` }}
+            border
           >
             {activeTab.current === Mode.SIGN_IN
               ? "Sign In"
               : activeTab.current === Mode.SIGN_UP
               ? "Sign Up"
               : "Send"}
-          </Button>
+          </FlipButton>
         </Group>
       </form>
     </Modal>
