@@ -9,7 +9,6 @@ const serialize = (obj?: Record<string, unknown> | string) =>
   );
 
 export const prefix = "SaveTheSpice-";
-export const transitionDuration = 300;
 export const UNSET = -1;
 
 export const View: Record<

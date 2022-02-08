@@ -2,7 +2,7 @@ import { Button, Group, Modal, Text } from "@mantine/core";
 import { ReactElement, useEffect, useMemo } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
-import { transitionDuration, UNSET, View } from "../lib/common";
+import { UNSET, View } from "../lib/common";
 import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { deleteCategory, deleteRecipe } from "../lib/operations";
 import {
@@ -88,7 +88,7 @@ export default (): ReactElement => {
             deleteCategoryRequest.status === AsyncRequestStatus.PENDING
           }
           disabled={deleteButtonDisabled}
-          sx={{ transitionDuration: `${transitionDuration}ms` }}
+          sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
           border
         >
           Delete

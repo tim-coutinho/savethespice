@@ -4,7 +4,7 @@ import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
 import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { SignedInState, transitionDuration, View } from "../lib/common";
+import { SignedInState, View } from "../lib/common";
 import { forgotPassword, signIn, signUp } from "../lib/operations";
 import { currentViewState, signedInState } from "../store";
 import { FlipButton } from "./FlipButton";
@@ -195,7 +195,7 @@ export default (): ReactElement => {
             type="submit"
             loading={signedIn === SignedInState.PENDING}
             disabled={invalidForm || signedIn === SignedInState.SIGNED_IN}
-            sx={{ transitionDuration: `${transitionDuration}ms` }}
+            sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
             border
           >
             {activeTab.current === Mode.SIGN_IN

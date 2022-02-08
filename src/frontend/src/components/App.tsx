@@ -1,9 +1,9 @@
-import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
+import { ColorSchemeProvider, MantineProvider, Paper } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 import { ReactElement, useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
-import { prefix, SignedInState, transitionDuration, UNSET, View } from "../lib/common";
+import { prefix, SignedInState, UNSET, View } from "../lib/common";
 import { useRenderTimeout } from "../lib/hooks";
 import { refreshIdToken } from "../lib/operations";
 import {
@@ -92,7 +92,6 @@ export default (): ReactElement => {
 
   useEffect(() => {
     localStorage.setItem(`${prefix}theme`, theme);
-    document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   useEffect(() => {
@@ -123,29 +122,40 @@ export default (): ReactElement => {
           primaryColor: "violet",
           fontFamily: "Roboto",
           colorScheme: theme,
+          other: { buttonLength: 40, transitionDuration: 300 },
+        }}
+        styles={{
+          Image: theme => ({
+            placeholder: {
+              backgroundColor: theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
+            },
+          }),
         }}
       >
-        <div id="app">
-          <div
-            id="non-modals"
-            className={visible ? "visible" : ""}
-            style={{ transitionDuration: `${transitionDuration}ms` }}
-          >
+        <Paper
+          id="app"
+          sx={theme => ({
+            "&[data-themechange], &[data-themechange] *": {
+              transition: `${theme.other.transitionDuration}ms !important`,
+            },
+          })}
+        >
+          <div id="non-modals" className={visible ? "visible" : ""}>
             {rendered && (
               <>
                 <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
-                <div
+                <Paper
                   id="main-content"
                   className={
                     currentView === View.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
                   }
                 >
-                  <div id="left">
+                  <Paper id="left" radius={0}>
                     <Header handleViewChange={source => () => handleViewChange(source)} />
                     <RecipeList />
-                  </div>
-                  <div id="right">
-                    {selectedRecipeId !== UNSET && (
+                  </Paper>
+                  {selectedRecipeId !== UNSET && (
+                    <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
                       <Details
                         handleDeleteRecipe={() => handleViewChange(View.DELETE)}
                         editRecipe={() => handleViewChange(View.EDIT)}
@@ -153,19 +163,17 @@ export default (): ReactElement => {
                         // handleAddToShoppingList={handleAddToShoppingList}
                         // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
                       />
-                    )}
-                  </div>
-                </div>
+                    </Paper>
+                  )}
+                </Paper>
               </>
             )}
           </div>
-          <div id="modals">
-            <AddForm editMode={editMode.current} />
-            <DeleteForm />
-            <ImportForm />
-            <AuthForm />
-          </div>
-        </div>
+          <AddForm editMode={editMode.current} />
+          <DeleteForm />
+          <ImportForm />
+          <AuthForm />
+        </Paper>
       </MantineProvider>
     </ColorSchemeProvider>
   );

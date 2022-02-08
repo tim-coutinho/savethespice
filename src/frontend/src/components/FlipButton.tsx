@@ -9,17 +9,13 @@ type FlipButtonProps<C extends ElementType> = ButtonProps<C> & {
   square?: boolean;
 };
 
-type FlipButtonComponent = <C extends ElementType = "button">(
-  props: FlipButtonProps<C>,
-) => ReactElement;
-
-export const FlipButton: FlipButtonComponent = <C extends ElementType>({
+export const FlipButton = <C extends ElementType>({
   border,
   hoverOverride,
   length,
   square,
   ...props
-}: FlipButtonProps<C>) => {
+}: FlipButtonProps<C>): ReactElement => {
   const { hovered, ref } = useHover<HTMLButtonElement>();
   if (square && length === undefined) {
     throw new Error("FlipButton marked as square but length not provided");
@@ -32,8 +28,12 @@ export const FlipButton: FlipButtonComponent = <C extends ElementType>({
       ref={ref}
       sx={theme => ({
         ...(typeof props.sx === "function" ? props.sx(theme) : props.sx),
-        border: border ? `2px solid ${theme.colors[props.color || theme.primaryColor][7]}` : "",
-        ...(square ? { width: length, height: length, padding: 0 } : {}),
+        border: border
+          ? `2px solid ${
+              theme.colors[props.color || theme.primaryColor][theme.colorScheme === "light" ? 6 : 8]
+            }`
+          : undefined,
+        ...(length !== undefined ? { width: length, height: length, padding: 0 } : {}),
       })}
     />
   );

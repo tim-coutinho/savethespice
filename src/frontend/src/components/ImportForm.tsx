@@ -1,16 +1,17 @@
 import { JsonInput, Modal } from "@mantine/core";
-import { ReactElement, useEffect, useMemo, useState } from "react";
+import { ReactElement, useEffect, useMemo } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { transitionDuration, View } from "../lib/common";
+import { View } from "../lib/common";
 import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { addRecipes } from "../lib/operations";
 import { allRecipesState, currentViewState } from "../store";
 import { Recipe } from "../types";
 
 import { FlipButton } from "./FlipButton";
+import { useInputState } from "@mantine/hooks";
 
 export default (): ReactElement => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useInputState("");
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const setAllRecipes = useSetRecoilState(allRecipesState);
   const [execute, request] = useAsync(addRecipes);
@@ -56,7 +57,10 @@ export default (): ReactElement => {
         }}
         disabled={request.status === AsyncRequestStatus.PENDING || invalidForm}
         mt="md"
-        sx={{ float: "right", transitionDuration: `${transitionDuration}ms` }}
+        sx={theme => ({
+          float: "right",
+          transitionDuration: `${theme.other.transitionDuration}ms`,
+        })}
         border
       >
         Import
