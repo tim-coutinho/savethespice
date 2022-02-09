@@ -4,7 +4,8 @@ import { allRecipesState, filteredRecipesState, selectedRecipeIdState } from "..
 
 import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { getAllRecipes } from "../lib/operations";
-import { Box, Group, Image, Text } from "@mantine/core";
+import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
+import { UNSET } from "../lib/common";
 
 export default (): ReactElement => {
   const ref = useRef<HTMLUListElement>(null);
@@ -38,8 +39,10 @@ export default (): ReactElement => {
     );
   }, [recipes]);
 
-  if (request.status === AsyncRequestStatus.PENDING) {
-    return <></>;
+  function createLoadingRecipes(): typeof recipes {
+    return Array(5)
+      .fill(0)
+      .map((_, i) => [i, { userId: "", recipeId: -1, name: "", createTime: "", updateTime: "" }]);
   }
 
   return (
@@ -50,53 +53,66 @@ export default (): ReactElement => {
       grow
       noWrap
     >
-      {recipes.map(([recipeId, recipe]) => (
-        <Box
-          key={recipeId}
-          onClick={() => setSelectedRecipeId(recipeId)}
-          className={selectedRecipeId === recipeId ? "selected" : ""}
-          sx={theme => ({
-            cursor: "pointer",
-            transition: `background-color 50ms`,
-            "&:not(:first-of-type) > div:first-of-type": {
-              borderTop: `1px solid ${theme.colors.gray[7]}`,
-            },
-            "&.selected": {
-              backgroundColor:
-                theme.colorScheme === "light" ? theme.colors.gray[4] : theme.colors.dark[4],
-              "> div:first-of-type": { borderTopColor: "transparent" },
-              "+ div > div:first-of-type": { borderTopColor: "transparent" },
-            },
-            "&:hover:not(.selected)": {
-              backgroundColor:
-                theme.colorScheme === "light"
-                  ? theme.fn.rgba(theme.colors.gray[4], 0.4)
-                  : theme.fn.rgba(theme.colors.dark[4], 0.3),
-            },
-          })}
-        >
+      {(request.status === AsyncRequestStatus.PENDING ? createLoadingRecipes() : recipes).map(
+        ([recipeId, recipe]) => (
           <Box
+            key={recipeId}
+            onClick={() => setSelectedRecipeId(recipeId)}
+            className={selectedRecipeId === recipeId ? "selected" : ""}
             sx={theme => ({
-              display: "grid",
-              gridTemplateColumns: "auto 120px",
-              alignItems: "center",
-              justifyContent: "space-between",
-              margin: `0 ${theme.spacing.md}px`,
-              padding: `${theme.spacing.md}px 0`,
+              cursor: "pointer",
+              transition: `background-color 50ms`,
+              "&:not(:first-of-type) > div:first-of-type": {
+                borderTop: `1px solid ${theme.colors.gray[7]}`,
+              },
+              "&.selected": {
+                backgroundColor:
+                  theme.colorScheme === "light" ? theme.colors.gray[4] : theme.colors.dark[4],
+                "> div:first-of-type": { borderTopColor: "transparent" },
+                "+ div > div:first-of-type": { borderTopColor: "transparent" },
+              },
+              "&:hover:not(.selected)": {
+                backgroundColor:
+                  theme.colorScheme === "light"
+                    ? theme.fn.rgba(theme.colors.gray[4], 0.4)
+                    : theme.fn.rgba(theme.colors.dark[4], 0.3),
+              },
             })}
           >
-            <Text>{recipe.name}</Text>
-            <Image
-              width={120}
-              height={80}
-              src={recipe.imgSrc}
-              sx={{ position: "relative" }}
-              styles={{ placeholder: { width: 120 } }}
-              withPlaceholder
-            />
+            <Box
+              sx={theme => ({
+                display: "grid",
+                gridTemplateColumns: "auto 120px",
+                alignItems: "center",
+                justifyContent: "space-between",
+                margin: `0 ${theme.spacing.md}px`,
+                padding: `${theme.spacing.md}px 0`,
+              })}
+            >
+              {recipe.recipeId === UNSET ? (
+                <div>
+                  <Skeleton width={200} height="1em" />
+                  <Skeleton width={100} height="1em" mt={6} />
+                </div>
+              ) : (
+                <Text>{recipe.name}</Text>
+              )}
+              {recipe.recipeId === UNSET ? (
+                <Skeleton width={120} height={80} radius={0} />
+              ) : (
+                <Image
+                  width={120}
+                  height={80}
+                  src={recipe.imgSrc}
+                  sx={{ position: "relative" }}
+                  styles={{ placeholder: { width: 120 } }}
+                  withPlaceholder
+                />
+              )}
+            </Box>
           </Box>
-        </Box>
-      ))}
+        ),
+      )}
     </Group>
   );
 };

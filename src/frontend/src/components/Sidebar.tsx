@@ -102,7 +102,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   return (
     <Paper radius={0}>
       <Navbar
-        width={{ base: 250 }}
+        width={{ base: `${theme.other.sidebarWidth}px` }}
         zIndex={-1}
         sx={{
           "& > div:not(:first-of-type)": { boxShadow: `0 -1px ${theme.colors.gray[7]}` },

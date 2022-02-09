@@ -10,14 +10,12 @@ import {
   allRecipesState,
   categoriesState,
   currentViewState,
-  modalActiveState,
   selectedRecipeIdState,
   signedInState,
 } from "../store";
 
 import AddForm from "./AddForm";
 // import ShoppingList from "./ShoppingList";
-import "./App.scss";
 import AuthForm from "./AuthForm";
 import DeleteForm from "./DeleteForm";
 import Details from "./Details";
@@ -31,7 +29,6 @@ export default (): ReactElement => {
   // const [shoppingList, setShoppingList] = useState([]);
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
-  const modalActive = useRecoilValue(modalActiveState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
   const [theme, setTheme] = useLocalStorageValue({
     key: `${prefix}theme`,
@@ -122,7 +119,7 @@ export default (): ReactElement => {
           primaryColor: "violet",
           fontFamily: "Roboto",
           colorScheme: theme,
-          other: { buttonLength: 40, transitionDuration: 300 },
+          other: { buttonLength: 40, transitionDuration: 300, sidebarWidth: 250 },
         }}
         styles={{
           Image: theme => ({
@@ -140,17 +137,33 @@ export default (): ReactElement => {
             },
           })}
         >
-          <div id="non-modals" className={visible ? "visible" : ""}>
+          <div className={visible ? "visible" : ""}>
             {rendered && (
               <>
                 <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
                 <Paper
-                  id="main-content"
-                  className={
-                    currentView === View.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
-                  }
+                  className={currentView === View.SIDEBAR ? "shifted-right" : ""}
+                  sx={theme => ({
+                    display: "flex",
+                    float: "right",
+                    transitionDuration: `${theme.other.transitionDuration}ms`,
+                    transitionProperty: "width",
+                    width: "100%",
+                    "&.shifted-right": {
+                      width: `calc(100vw - ${theme.other.sidebarWidth}px)`,
+                    },
+                  })}
                 >
-                  <Paper id="left" radius={0}>
+                  <Paper
+                    radius={0}
+                    sx={theme => ({
+                      borderRight: `1px solid ${theme.colors.gray[7]}`,
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "100vh",
+                      width: 420,
+                    })}
+                  >
                     <Header handleViewChange={source => () => handleViewChange(source)} />
                     <RecipeList />
                   </Paper>
