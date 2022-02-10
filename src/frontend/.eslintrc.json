@@ -19,7 +19,8 @@
     }
   },
   "rules": {
-    // React 17 baby,
+    "linebreak-style": ["error", "unix"],
+    // React 17 baby
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
     "react/display-name": "off"

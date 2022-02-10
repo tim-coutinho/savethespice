@@ -1,13 +1,12 @@
 import { ReactElement } from "react";
 // import Skeleton from "react-loading-skeleton";
 import ContentLoader from "react-content-loader";
-import { useRecoilValue } from "recoil";
+import { useMantineColorScheme } from "@mantine/core";
 
-import { Color, Theme } from "../lib/common";
-import { themeState } from "../store";
+import { Color } from "../lib/common";
 
 export default (): ReactElement => {
-  const theme = useRecoilValue(themeState);
+  const { colorScheme: theme } = useMantineColorScheme();
 
   return (
     <div className="recipe-wrapper">
@@ -23,8 +22,8 @@ export default (): ReactElement => {
           width={263}
           height={95}
           viewBox="0 0 263 95"
-          backgroundColor={theme === Theme.DARK ? Color.WHITE : Color.OD_WHITE}
-          foregroundColor={theme === Theme.DARK ? Color.OD_WHITE : Color.WHITE}
+          backgroundColor={theme === "dark" ? Color.WHITE : Color.OD_WHITE}
+          foregroundColor={theme === "dark" ? Color.OD_WHITE : Color.WHITE}
         >
           <rect x="143" y="20" rx="0" ry="0" width="119" height="120" />
           <rect x="0" y="65" rx="2" ry="2" width="70" height="6" />

@@ -1,39 +1,39 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ColorSchemeProvider, MantineProvider, Paper } from "@mantine/core";
+import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
+import { ReactElement, useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
+import { prefix, SignedInState, UNSET, View } from "../lib/common";
+import { useRenderTimeout } from "../lib/hooks";
 import { refreshIdToken } from "../lib/operations";
-import { SignedInState, Theme, transitionDuration, UNSET, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
   currentViewState,
-  modalActiveState,
   selectedRecipeIdState,
   signedInState,
-  themeState,
 } from "../store";
 
-// import ShoppingList from "./ShoppingList";
 import AddForm from "./AddForm";
-
-import "./App.scss";
+// import ShoppingList from "./ShoppingList";
+import AuthForm from "./AuthForm";
 import DeleteForm from "./DeleteForm";
 import Details from "./Details";
 import Header from "./Header";
 import ImportForm from "./ImportForm";
 import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
-import SignInForm from "./SignInForm";
-import { useRenderTimeout } from "../lib/hooks";
 
 export default (): ReactElement => {
-  const [editMode, setEditMode] = useState(false);
+  const editMode = useRef(false);
   // const [shoppingList, setShoppingList] = useState([]);
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
-  const modalActive = useRecoilValue(modalActiveState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
-  const theme = useRecoilValue(themeState);
+  const [theme, setTheme] = useLocalStorageValue({
+    key: `${prefix}theme`,
+    defaultValue: useColorScheme(),
+  });
   const setAllRecipes = useSetRecoilState(allRecipesState);
   const setAllCategories = useSetRecoilState(categoriesState);
   const [visible, rendered, setVisible] = useRenderTimeout();
@@ -44,10 +44,10 @@ export default (): ReactElement => {
         case View.DELETE:
           return currentView === View.DELETE ? View.HOME : View.DELETE;
         case View.EDIT:
-          setEditMode(true);
+          editMode.current = true;
           return currentView === View.ADD ? View.HOME : View.ADD;
         case View.ADD:
-          setEditMode(false);
+          editMode.current = false;
           return currentView === View.ADD ? View.HOME : View.ADD;
         case View.SIDEBAR:
           return currentView === View.HOME ? View.SIDEBAR : View.HOME;
@@ -72,7 +72,7 @@ export default (): ReactElement => {
     }
     if (signedIn !== SignedInState.SIGNED_IN) {
       setVisible(false);
-      setCurrentView(View.SIGN_IN);
+      setCurrentView(View.AUTH);
     } else {
       setVisible(true);
       setCurrentView(View.HOME);
@@ -88,7 +88,7 @@ export default (): ReactElement => {
   }, [rendered]);
 
   useEffect(() => {
-    Theme.setting = theme;
+    localStorage.setItem(`${prefix}theme`, theme);
   }, [theme]);
 
   useEffect(() => {
@@ -109,46 +109,85 @@ export default (): ReactElement => {
   }, []);
 
   return (
-    <div id="app">
-      <div
-        id="non-modals"
-        className={visible ? "visible" : ""}
-        style={{ transitionDuration: `${transitionDuration}ms` }}
+    <ColorSchemeProvider
+      colorScheme={theme}
+      toggleColorScheme={v => setTheme(v ?? theme === "dark" ? "light" : "dark")}
+    >
+      <MantineProvider
+        theme={{
+          headings: { fontWeight: 600 },
+          primaryColor: "violet",
+          fontFamily: "Roboto",
+          colorScheme: theme,
+          other: { buttonLength: 40, transitionDuration: 300, sidebarWidth: 250 },
+        }}
+        styles={{
+          Image: theme => ({
+            placeholder: {
+              backgroundColor: theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
+            },
+          }),
+        }}
       >
-        {rendered && (
-          <>
-            <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
-            <div
-              id="main-content"
-              className={
-                currentView === View.SIDEBAR ? "shifted-right" : modalActive ? "disabled" : ""
-              }
-            >
-              <div id="left">
-                <Header handleViewChange={source => () => handleViewChange(source)} />
-                <RecipeList />
-              </div>
-              <div id="right">
-                {selectedRecipeId !== UNSET && (
-                  <Details
-                    handleDeleteRecipe={() => handleViewChange(View.DELETE)}
-                    editRecipe={() => handleViewChange(View.EDIT)}
-                    // shoppingList={shoppingList}
-                    // handleAddToShoppingList={handleAddToShoppingList}
-                    // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
-                  />
-                )}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-      <div id="modals">
-        <AddForm editMode={editMode} />
-        <DeleteForm />
-        <ImportForm />
-        <SignInForm />
-      </div>
-    </div>
+        <Paper
+          id="app"
+          sx={theme => ({
+            "&[data-themechange], &[data-themechange] *": {
+              transition: `${theme.other.transitionDuration}ms !important`,
+            },
+          })}
+        >
+          <div className={visible ? "visible" : ""}>
+            {rendered && (
+              <>
+                <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
+                <Paper
+                  className={currentView === View.SIDEBAR ? "shifted-right" : ""}
+                  sx={theme => ({
+                    display: "flex",
+                    float: "right",
+                    transitionDuration: `${theme.other.transitionDuration}ms`,
+                    transitionProperty: "width",
+                    width: "100%",
+                    "&.shifted-right": {
+                      width: `calc(100vw - ${theme.other.sidebarWidth}px)`,
+                    },
+                  })}
+                >
+                  <Paper
+                    radius={0}
+                    sx={theme => ({
+                      borderRight: `1px solid ${theme.colors.gray[7]}`,
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "100vh",
+                      width: 420,
+                    })}
+                  >
+                    <Header handleViewChange={source => () => handleViewChange(source)} />
+                    <RecipeList />
+                  </Paper>
+                  {selectedRecipeId !== UNSET && (
+                    <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
+                      <Details
+                        handleDeleteRecipe={() => handleViewChange(View.DELETE)}
+                        editRecipe={() => handleViewChange(View.EDIT)}
+                        // shoppingList={shoppingList}
+                        // handleAddToShoppingList={handleAddToShoppingList}
+                        // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+                      />
+                    </Paper>
+                  )}
+                </Paper>
+              </>
+            )}
+          </div>
+          <AddForm editMode={editMode.current} />
+          <DeleteForm />
+          <ImportForm />
+          <AuthForm />
+        </Paper>
+      </MantineProvider>
+    </ColorSchemeProvider>
   );
 };

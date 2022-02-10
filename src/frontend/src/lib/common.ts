@@ -9,17 +9,19 @@ const serialize = (obj?: Record<string, unknown> | string) =>
   );
 
 export const prefix = "SaveTheSpice-";
-export const transitionDuration = 300;
 export const UNSET = -1;
 
-export const View: Record<string, { modal: boolean }> = {
+export const View: Record<
+  "ADD" | "DELETE" | "EDIT" | "HOME" | "IMPORT" | "SIDEBAR" | "AUTH",
+  { modal: boolean }
+> = {
   ADD: { modal: true },
   DELETE: { modal: true },
   EDIT: { modal: true },
   HOME: { modal: false },
   IMPORT: { modal: true },
   SIDEBAR: { modal: false },
-  SIGN_IN: { modal: false },
+  AUTH: { modal: false },
 };
 
 export enum SignedInState {
@@ -41,26 +43,6 @@ export enum Color {
   OD_WHITE = "#abb2bf",
   OD_BLACK = "#282c34",
   WHITE = "#ffffff",
-}
-
-export type ThemeSetting = "light" | "dark";
-
-export class Theme {
-  private static readonly storageName: string = `${prefix}theme`;
-  static readonly LIGHT: ThemeSetting = "light";
-  static readonly DARK: ThemeSetting = "dark";
-
-  static get setting(): ThemeSetting {
-    return (
-      (localStorage.getItem(Theme.storageName) as ThemeSetting) ??
-      (window.matchMedia("(prefers-color-scheme: dark)").matches ? Theme.DARK : Theme.LIGHT)
-    );
-  }
-
-  static set setting(themeSetting: ThemeSetting) {
-    localStorage.setItem(Theme.storageName, themeSetting);
-    document.documentElement.setAttribute("data-theme", themeSetting);
-  }
 }
 
 interface FetchResponse<T> {
@@ -111,14 +93,4 @@ export const getById = (elementId: string): HTMLElement => {
     throw ReferenceError(`${elementId} does not exist`);
   }
   return elem;
-};
-
-export const copyToClipboard = (str: string): void => {
-  const listener = (e: ClipboardEvent) => {
-    e.preventDefault();
-    e.clipboardData?.setData("text/plain", str);
-    document.removeEventListener("copy", listener);
-  };
-  document.addEventListener("copy", listener);
-  document.execCommand("copy"); // Copy - only works as a result of a user action (e.g. click events)
 };

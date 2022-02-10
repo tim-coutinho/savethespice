@@ -30,14 +30,14 @@ export const refreshIdToken = (): Promise<string> => {
     });
 };
 
-export const signUp = (email: string, password: string): Promise<string> => {
+export const signUp = (email: string, password: string): Promise<[string, number]> => {
   const body = { email, password };
 
-  return api.post<undefined, string>("auth/signup", typeof body).then(([res, status]) => {
+  return api.post<undefined, typeof body>("auth/signup", body).then(([res, status]) => {
     if (status >= 400) {
       throw new Error(res.message);
     }
-    return res.message;
+    return [res.message, status];
   });
 };
 
@@ -70,9 +70,9 @@ export const signOut = (): Promise<void> => {
 };
 
 export const forgotPassword = (email: string): Promise<string> => {
-  const body = JSON.stringify({ email });
+  const body = { email };
 
-  return api.post<undefined, string>("auth/forgotpassword", body).then(([res, status]) => {
+  return api.post<undefined, typeof body>("auth/forgotpassword", body).then(([res, status]) => {
     if (status >= 400) {
       throw new Error(res.message);
     }

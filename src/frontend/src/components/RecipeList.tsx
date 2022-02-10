@@ -2,10 +2,10 @@ import { ReactElement, useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { allRecipesState, filteredRecipesState, selectedRecipeIdState } from "../store";
 
-import "./RecipeList.scss";
-import RecipeLoader from "./RecipeLoader";
 import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { getAllRecipes } from "../lib/operations";
+import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
+import { UNSET } from "../lib/common";
 
 export default (): ReactElement => {
   const ref = useRef<HTMLUListElement>(null);
@@ -19,13 +19,11 @@ export default (): ReactElement => {
   }, []);
 
   useEffect(() => {
-    if (request.value) {
-      setAllRecipes(new Map(request.value.recipes.map(r => [r.recipeId, r])));
-    }
-  }, [request]);
+    request.value && setAllRecipes(new Map(request.value.recipes.map(r => [r.recipeId, r])));
+  }, [request.status]);
 
   useEffect(() => {
-    if (!recipes) {
+    if (recipes.length === 0) {
       return;
     }
     ref.current?.querySelectorAll("[data-src]").forEach(image =>
@@ -41,36 +39,80 @@ export default (): ReactElement => {
     );
   }, [recipes]);
 
-  if (request.status === AsyncRequestStatus.PENDING) {
-    return (
-      <ul id="recipe-list">
-        {Array(7)
-          .fill(0)
-          .map((_, i) => (
-            <RecipeLoader key={i} />
-          ))}
-      </ul>
-    );
+  function createLoadingRecipes(): typeof recipes {
+    return Array(5)
+      .fill(0)
+      .map((_, i) => [i, { userId: "", recipeId: -1, name: "", createTime: "", updateTime: "" }]);
   }
 
   return (
-    <ul id="recipe-list" ref={ref}>
-      {recipes.length !== 0 ? (
-        recipes.map(([id, recipe]) => (
-          <li
-            key={id}
-            className={`${selectedRecipeId === +id ? "selected-recipe" : ""} recipe-wrapper`}
-            onClick={() => setSelectedRecipeId(+id)}
+    <Group
+      direction="column"
+      spacing={0}
+      sx={{ overflowX: "hidden", overflowY: "auto" }}
+      grow
+      noWrap
+    >
+      {(request.status === AsyncRequestStatus.PENDING ? createLoadingRecipes() : recipes).map(
+        ([recipeId, recipe]) => (
+          <Box
+            key={recipeId}
+            onClick={() => setSelectedRecipeId(recipeId)}
+            className={selectedRecipeId === recipeId ? "selected" : ""}
+            sx={theme => ({
+              cursor: "pointer",
+              transition: `background-color 50ms`,
+              "&:not(:first-of-type) > div:first-of-type": {
+                borderTop: `1px solid ${theme.colors.gray[7]}`,
+              },
+              "&.selected": {
+                backgroundColor:
+                  theme.colorScheme === "light" ? theme.colors.gray[4] : theme.colors.dark[4],
+                "> div:first-of-type": { borderTopColor: "transparent" },
+                "+ div > div:first-of-type": { borderTopColor: "transparent" },
+              },
+              "&:hover:not(.selected)": {
+                backgroundColor:
+                  theme.colorScheme === "light"
+                    ? theme.fn.rgba(theme.colors.gray[4], 0.4)
+                    : theme.fn.rgba(theme.colors.dark[4], 0.3),
+              },
+            })}
           >
-            <div className="recipe">
-              <div className="recipe-text">{recipe.name}</div>
-              {recipe.imgSrc && <img className="recipe-img" alt="" data-src={recipe.imgSrc} />}
-            </div>
-          </li>
-        ))
-      ) : (
-        <h2 style={{ marginLeft: "25%" }}>No recipes found.</h2>
+            <Box
+              sx={theme => ({
+                display: "grid",
+                gridTemplateColumns: "auto 120px",
+                alignItems: "center",
+                justifyContent: "space-between",
+                margin: `0 ${theme.spacing.md}px`,
+                padding: `${theme.spacing.md}px 0`,
+              })}
+            >
+              {recipe.recipeId === UNSET ? (
+                <div>
+                  <Skeleton width={200} height="1em" />
+                  <Skeleton width={100} height="1em" mt={6} />
+                </div>
+              ) : (
+                <Text>{recipe.name}</Text>
+              )}
+              {recipe.recipeId === UNSET ? (
+                <Skeleton width={120} height={80} radius={0} />
+              ) : (
+                <Image
+                  width={120}
+                  height={80}
+                  src={recipe.imgSrc}
+                  sx={{ position: "relative" }}
+                  styles={{ placeholder: { width: 120 } }}
+                  withPlaceholder
+                />
+              )}
+            </Box>
+          </Box>
+        ),
       )}
-    </ul>
+    </Group>
   );
 };

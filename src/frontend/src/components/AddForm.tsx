@@ -1,39 +1,44 @@
 import {
-  ChangeEvent,
-  ClipboardEventHandler,
-  KeyboardEvent,
-  ReactElement,
-  useEffect,
-  useState,
-} from "react";
+  Box,
+  Button,
+  Group,
+  LoadingOverlay,
+  Modal,
+  MultiSelect,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { useForm } from "@mantine/hooks";
+// import { RichTextEditor } from "@mantine/rte";
+import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
+import { ClipboardEventHandler, ReactElement, useEffect, useMemo, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
+import { View } from "../lib/common";
+import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { addRecipe, FormFields, scrape } from "../lib/operations";
-
-import { transitionDuration, View } from "../lib/common";
 import {
   allRecipesState,
   categoriesState,
   currentViewState,
   selectedRecipeIdState,
 } from "../store";
-
-import "./AddForm.scss";
-
-import Button from "./Button";
-import TextInput from "./TextInput";
 import { Category } from "../types";
-import { AsyncRequestStatus, useAsync, useRenderTimeout } from "../lib/hooks";
 
-const baseForm: FormFields = {
+import { FlipButton } from "./FlipButton";
+
+const baseForm = {
   name: "",
   desc: "",
+  imgSrc: "",
   cookTime: "",
   yield: "",
-  categories: [],
-  ingredients: [],
-  instructions: [],
-  imgSrc: "",
+  categories: [] as string[],
+  ingredients: "",
+  instructions: "",
+  // ingredients: "<ul><li></li></ul>",
+  // instructions: "<ol><li></li></ol>",
+  urlToScrape: "",
 };
 
 interface AddFormProps {
@@ -45,68 +50,70 @@ export default ({ editMode }: AddFormProps): ReactElement => {
   const [categories, setCategories] = useRecoilState(categoriesState);
   const [allRecipes, setAllRecipes] = useRecoilState(allRecipesState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
-  const selectedRecipe = allRecipes.get(selectedRecipeId);
-  const initialValues = !editMode
-    ? baseForm
-    : ({
-        ...selectedRecipe,
-        categories: selectedRecipe?.categories?.map(c => `${c}`) ?? [],
-        createTime: undefined,
-        userId: undefined,
-        recipeId: undefined,
-        updateTime: undefined,
-      } as FormFields) ?? baseForm;
-  const [form, setForm] = useState({ ...initialValues });
-  const [urlToScrape, setUrlToScrape] = useState("");
-  const [visible, rendered, setVisible] = useRenderTimeout(transitionDuration);
+  const initialValues = useRef({ ...baseForm });
   const [executeScrape, scrapeRequest] = useAsync((url: string) => scrape(url));
   const [executeAddRecipe, addRecipeRequest] = useAsync((recipe: FormFields) =>
     addRecipe(recipe, editMode ? selectedRecipeId : undefined),
   );
+  const form = useForm({ initialValues: { ...initialValues.current } });
+
+  const formVisible = useMemo(() => currentView === View.ADD, [currentView]);
+
+  const requestInProgress = useMemo(
+    () =>
+      addRecipeRequest.status === AsyncRequestStatus.PENDING ||
+      addRecipeRequest.status === AsyncRequestStatus.SUCCESS ||
+      scrapeRequest.status === AsyncRequestStatus.PENDING,
+    [addRecipeRequest.status, scrapeRequest.status],
+  );
 
   useEffect(() => {
-    if (!visible) {
+    if (!formVisible) {
       return;
     }
-    setForm({
-      ...baseForm,
-      ...initialValues,
-      categories: initialValues.categories?.map(c => categories.get(+c)?.name ?? ""),
-      ingredients: initialValues.ingredients,
-      instructions: initialValues.instructions,
-    });
-    setUrlToScrape("");
-  }, [visible]);
-
-  useEffect(() => {
-    setVisible(currentView === View.ADD);
-  }, [currentView]);
-
-  useEffect(() => {
-    scrapeRequest.value && setForm({ ...form, ...scrapeRequest.value });
-  }, [scrapeRequest]);
-
-  useEffect(() => {
-    if (addRecipeRequest.status === AsyncRequestStatus.SUCCESS) {
-      const { value } = addRecipeRequest;
-      if (value) {
-        setAllRecipes(allRecipes => new Map(allRecipes.set(value.recipeId, value)));
-        if (addRecipeRequest.value?.newCategories) {
-          setCategories(categories => {
-            addRecipeRequest.value?.newCategories?.forEach(c => categories.set(c.categoryId, c));
-            return new Map(categories);
-          });
-        }
-      }
+    if (editMode) {
+      const selectedRecipe = allRecipes.get(selectedRecipeId);
+      selectedRecipe &&
+        (initialValues.current = {
+          name: selectedRecipe.name,
+          desc: selectedRecipe.desc ?? "",
+          imgSrc: selectedRecipe.imgSrc ?? "",
+          cookTime: selectedRecipe.cookTime ?? "",
+          yield: `${selectedRecipe.yield ?? ""}`,
+          categories:
+            selectedRecipe?.categories?.map(c => (categories.get(c) as Category).name) ?? [],
+          ingredients: "",
+          instructions: "",
+          urlToScrape: "",
+        });
+    } else {
+      initialValues.current = { ...baseForm };
     }
-  }, [addRecipeRequest]);
+    form.setValues({ ...initialValues.current });
+  }, [formVisible, editMode]);
 
-  const valid = () => {
-    const errors: { [key: string]: boolean } = {
-      name: form.name.length === 0,
-    };
-    return [Object.keys(errors).some(x => errors[x]), errors];
-  };
+  useEffect(() => {
+    if (scrapeRequest.status === AsyncRequestStatus.SUCCESS && scrapeRequest.value) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      form.setValues({ ...form.values, ...scrapeRequest.value });
+    }
+  }, [scrapeRequest.status]);
+
+  useEffect(() => {
+    if (addRecipeRequest.status === AsyncRequestStatus.SUCCESS && addRecipeRequest.value) {
+      const { value } = addRecipeRequest;
+      setAllRecipes(allRecipes => new Map(allRecipes.set(value.recipeId, value)));
+      if (addRecipeRequest.value?.newCategories) {
+        setCategories(categories => {
+          addRecipeRequest.value?.newCategories?.forEach(c => categories.set(c.categoryId, c));
+          return new Map(categories);
+        });
+      }
+      addRecipeRequest.reset();
+      setCurrentView(View.HOME);
+    }
+  }, [addRecipeRequest.status]);
 
   const valueChanged = (initialValue: keyof FormFields, newValue: FormFields[keyof FormFields]) =>
     // Value is list, new value altered
@@ -116,40 +123,32 @@ export default ({ editMode }: AddFormProps): ReactElement => {
     // Value not initially present, new value present
     (initialValue === undefined && newValue);
 
-  const handleFormChange = (e: ChangeEvent<HTMLInputElement> & KeyboardEvent) => {
-    if (e.key) {
-      return;
-    }
-    const { name, value } = e.currentTarget;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleSubmit = async () => {
-    if (valid()[0]) {
-      return;
-    }
-    const recipe: FormFields = {
-      ...form,
-      categories: form.categories?.map(c => c.trim()).filter(item => item !== ""),
-      ingredients: form.ingredients?.map(i => i.trim()).filter(item => item !== ""),
-      instructions: form.instructions?.map(i => i.trim()).filter(item => item !== ""),
+  const handleSubmit = async (values: typeof form.values) => {
+    const recipe = {
+      ...values,
+      ingredients: [values.ingredients],
+      instructions: [values.instructions],
+      urlToScrape: undefined,
+      // ingredients: values.ingredients?.map(i => i.trim()).filter(item => item !== ""),
+      // instructions: values.instructions?.map(i => i.trim()).filter(item => item !== ""),
     };
 
     for (const [k, v] of Object.entries(recipe)) {
       // No op if nothing to update
-      let initialValue = initialValues[k as keyof FormFields];
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      let initialValue = initialValues.current[k as keyof FormFields];
       if (k === "categories" && (initialValue as string[])[0] !== "") {
         // Categories holds IDs, map to category names
         initialValue = (initialValue as NonNullable<typeof recipe.categories>).map(
           c => (categories.get(+c) as Category).name,
         );
       }
-      if (valueChanged(initialValue as keyof FormFields, v)) {
+      if (valueChanged(initialValue, v)) {
         await executeAddRecipe(recipe);
         break;
       }
     }
-    setCurrentView(View.HOME);
   };
 
   const handlePaste: ClipboardEventHandler<HTMLDivElement> = e => {
@@ -158,117 +157,140 @@ export default ({ editMode }: AddFormProps): ReactElement => {
       return;
     }
     const fr = new FileReader();
-    fr.addEventListener("load", () => setForm({ ...form, imgSrc: fr.result as string }));
+    fr.addEventListener("load", () => form.setFieldValue("imgSrc", fr.result as string));
     fr.readAsDataURL(e.clipboardData.files[0]);
   };
 
   return (
-    <div
-      id="add-modal"
-      className={visible ? "visible" : ""}
-      style={{ transitionDuration: `${transitionDuration}ms` }}
-      onPaste={handlePaste}
+    <Modal
+      title={`${editMode ? "Edit" : "New"} Recipe`}
+      opened={formVisible}
+      onClose={() => setCurrentView(View.HOME)}
+      overflow="inside"
+      centered
     >
-      {rendered && (
-        <>
-          <form id="add-modal-form">
-            <TextInput
-              placeholder="Recipe Name"
-              name="name"
-              setValue={handleFormChange}
-              value={form.name}
-              width="100%"
-              maxLength={200}
-              autofocus
-            />
-            <TextInput
-              placeholder="Description"
-              name="desc"
-              setValue={handleFormChange}
-              value={form.desc ?? ""}
-              width="100%"
-            />
-            <TextInput
-              placeholder="Image URL"
-              name="imgSrc"
-              setValue={handleFormChange}
-              value={form.imgSrc ?? ""}
-              width="100%"
-            />
-            <TextInput
-              placeholder="Cook Time (min)"
-              name="cookTime"
-              setValue={handleFormChange}
-              value={form.cookTime ?? ""}
-              width="100%"
-            />
-            <TextInput
-              placeholder="Yield (servings)"
-              name="yield"
-              setValue={handleFormChange}
-              value={form.yield ?? ""}
-              width="100%"
-            />
-            <TextInput
-              placeholder="Categories"
-              name="categories"
-              value={form.categories ?? []}
-              setValue={handleFormChange}
-              width="100%"
-            />
-            <TextInput
-              placeholder="Ingredients"
-              name="ingredients"
-              value={form.ingredients ?? []}
-              setValue={handleFormChange}
-              width="100%"
-            />
-            <TextInput
-              placeholder="Instructions"
-              name="instructions"
-              value={form.instructions ?? []}
-              setValue={handleFormChange}
-              width="100%"
-              // ordered
-            />
-            <h1 style={{ color: "var(--text-color)", textAlign: "center" }}>OR</h1>
-            <TextInput
-              placeholder="Add by URL"
-              name="scrapeUrl"
-              setValue={e => setUrlToScrape(e.currentTarget.value)}
-              value={urlToScrape}
-              width="100%"
-            />
-          </form>
-          <div id="add-modal-btns">
-            <Button id="add-modal-cancel" onClick={() => setCurrentView(View.HOME)} secondary>
-              Cancel
-            </Button>
-            <Button
-              id="add-modal-submit"
-              onClick={handleSubmit}
-              disabled={
-                addRecipeRequest.status === AsyncRequestStatus.PENDING ||
-                !form.name ||
-                scrapeRequest.status === AsyncRequestStatus.PENDING
-              }
-            >
-              Save Recipe
-            </Button>
-            <Button
-              id="add-modal-scrape"
-              onClick={() => executeScrape(urlToScrape)}
-              disabled={
-                addRecipeRequest.status === AsyncRequestStatus.PENDING ||
-                scrapeRequest.status === AsyncRequestStatus.PENDING ||
-                urlToScrape === ""
-              }
-            >
-              Scrape
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
+      <Box
+        component="form"
+        onSubmit={form.onSubmit(handleSubmit)}
+        sx={theme => ({ marginRight: theme.spacing.lg })}
+      >
+        <Group direction="column" sx={{ position: "relative" }} grow>
+          <TextInput
+            label="Recipe Name"
+            placeholder="Saag Feta"
+            maxLength={200}
+            autoFocus
+            {...form.getInputProps("name")}
+          />
+          <TextInput
+            label="Description"
+            placeholder="Brong's favorite"
+            {...form.getInputProps("desc")}
+          />
+          <TextInput
+            label="Image URL"
+            placeholder="https://assets.bonappetit.com/photos/5c8a90c7623f1366f6166492/1:1/w_2240,c_limit/Saag-Paneer-but-with-Feta.jpg"
+            onPaste={handlePaste}
+            {...form.getInputProps("imgSrc")}
+          />
+          <TextInput label="Cook Time (min)" placeholder="30" {...form.getInputProps("cookTime")} />
+          <TextInput label="Yield" placeholder="4 servings" {...form.getInputProps("yield")} />
+          <MultiSelect
+            label="Categories"
+            placeholder="Select and/or create"
+            data={Array.from(categories)
+              .sort(([, { name: name1 }], [, { name: name2 }]) =>
+                name1.toLowerCase() >= name2.toLowerCase() ? 1 : -1,
+              )
+              .map(([, c]) => c.name)}
+            getCreateLabel={v => `+ ${v}`}
+            creatable
+            searchable
+            clearable
+            {...form.getInputProps("categories")}
+          />
+          <TextInput
+            label="Ingredients"
+            placeholder="Feta, spinach, ginger"
+            {...form.getInputProps("ingredients")}
+          />
+          <TextInput
+            label="Instructions"
+            placeholder="Blend spinach, add feta"
+            {...form.getInputProps("instructions")}
+          />
+          {/*<Text size="sm" sx={{ "&:hover": { cursor: "default" } }}>*/}
+          {/*  Ingredients*/}
+          {/*</Text>*/}
+          {/*<RichTextEditor*/}
+          {/*  value={form.values.ingredients}*/}
+          {/*  onChange={value => {*/}
+          {/*    console.log(value);*/}
+          {/*    // if (!value.includes("<li>")) {*/}
+          {/*    //   form.setFieldValue("ingredients", "<ul><li></li></ul>");*/}
+          {/*    // } else {*/}
+          {/*    form.setFieldValue("ingredients", value);*/}
+          {/*    // }*/}
+          {/*  }}*/}
+          {/*  controls={[]}*/}
+          {/*  styles={{ toolbar: { display: "none" } }}*/}
+          {/*/>*/}
+          {/*<Text size="sm" sx={{ "&:hover": { cursor: "default" } }}>*/}
+          {/*  Instructions*/}
+          {/*</Text>*/}
+          {/*<RichTextEditor*/}
+          {/*  value={form.values.instructions}*/}
+          {/*  onChange={value => form.setFieldValue("instructions", value)}*/}
+          {/*  controls={[]}*/}
+          {/*  styles={{ toolbar: { display: "none" } }}*/}
+          {/*/>*/}
+          <Title order={4} align="center">
+            OR
+          </Title>
+          <TextInput
+            label="Add by URL"
+            placeholder="https://www.bonappetit.com/recipe/saag-paneer-but-with-feta"
+            name="scrapeUrl"
+            {...form.getInputProps("urlToScrape")}
+          />
+          <LoadingOverlay
+            visible={scrapeRequest.status === AsyncRequestStatus.PENDING}
+            sx={({ fn }) => fn.cover(-10)}
+          />
+        </Group>
+        <Group position="right" mt="md">
+          <Button
+            variant="outline"
+            size="md"
+            color={scrapeRequest.status === AsyncRequestStatus.ERROR ? "red" : ""}
+            onClick={() => executeScrape(form.values.urlToScrape)}
+            loading={scrapeRequest.status === AsyncRequestStatus.PENDING}
+            disabled={form.values.urlToScrape === "" || requestInProgress}
+            leftIcon={
+              scrapeRequest.status === AsyncRequestStatus.SUCCESS ? (
+                <CheckCircledIcon />
+              ) : scrapeRequest.status === AsyncRequestStatus.ERROR ? (
+                <CrossCircledIcon />
+              ) : (
+                ""
+              )
+            }
+            sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
+          >
+            Scrape
+          </Button>
+          <FlipButton
+            type="submit"
+            size="md"
+            loading={addRecipeRequest.status === AsyncRequestStatus.PENDING}
+            disabled={form.values.name === "" || requestInProgress}
+            sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
+            border
+          >
+            Save Recipe
+          </FlipButton>
+        </Group>
+      </Box>
+    </Modal>
   );
 };
