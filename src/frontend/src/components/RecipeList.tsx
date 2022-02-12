@@ -1,29 +1,66 @@
-import { ReactElement, useEffect, useRef } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { allRecipesState, filteredRecipesState, selectedRecipeIdState } from "../store";
-
-import { AsyncRequestStatus, useAsync } from "../lib/hooks";
+import { ReactElement, useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  filterOptionsState,
+  filterState,
+  selectedCategoryIdState,
+  selectedRecipeIdState,
+} from "../store";
 import { getAllRecipes } from "../lib/operations";
 import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
 import { UNSET } from "../lib/common";
+import { useQuery } from "react-query";
+import { Recipe } from "../types";
 
 export default (): ReactElement => {
   const ref = useRef<HTMLUListElement>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
-  const setAllRecipes = useSetRecoilState(allRecipesState);
-  const recipes = useRecoilValue(filteredRecipesState);
-  const [execute, request] = useAsync(getAllRecipes);
+  const [filteredRecipes, setFilteredRecipes] = useState<[number, Recipe][]>([]);
+  const recipesQuery = useQuery("recipes", getAllRecipes);
+
+  const filter = useRecoilValue(filterState);
+  const filterOptions = useRecoilValue(filterOptionsState);
+  const selectedCategoryId = useRecoilValue(selectedCategoryIdState);
 
   useEffect(() => {
-    execute();
-  }, []);
+    if (!recipesQuery.data) {
+      return;
+    }
+    setFilteredRecipes(
+      Array.from(recipesQuery.data)
+        .filter(([, recipe]) => {
+          if (selectedCategoryId !== UNSET && !recipe.categories?.includes(selectedCategoryId)) {
+            return false;
+          }
+          if (filter === "") {
+            return true;
+          }
+          if (filterOptions.name && recipe.name.toLowerCase().includes(filter.toLowerCase())) {
+            return true;
+          } else if (
+            filterOptions.desc &&
+            recipe.desc?.toLowerCase().includes(filter.toLowerCase())
+          ) {
+            return true;
+          } else if (
+            filterOptions.ingredients &&
+            recipe.ingredients?.some(i => i.includes(filter.toLowerCase()))
+          ) {
+            return true;
+          } else if (
+            filterOptions.instructions &&
+            recipe.instructions?.some(i => i.includes(filter.toLowerCase()))
+          ) {
+            return true;
+          }
+          return false;
+        })
+        .sort(([, { createTime: time1 }], [, { createTime: time2 }]) => (time1 <= time2 ? 1 : -1)),
+    );
+  }, [recipesQuery.data, filter, filterOptions, selectedCategoryId]);
 
   useEffect(() => {
-    request.value && setAllRecipes(new Map(request.value.recipes.map(r => [r.recipeId, r])));
-  }, [request.status]);
-
-  useEffect(() => {
-    if (recipes.length === 0) {
+    if (filteredRecipes.length === 0) {
       return;
     }
     ref.current?.querySelectorAll("[data-src]").forEach(image =>
@@ -37,9 +74,9 @@ export default (): ReactElement => {
           });
       }).observe(image),
     );
-  }, [recipes]);
+  }, [filteredRecipes]);
 
-  function createLoadingRecipes(): typeof recipes {
+  function createLoadingRecipes(): typeof filteredRecipes {
     return Array(5)
       .fill(0)
       .map((_, i) => [i, { userId: "", recipeId: -1, name: "", createTime: "", updateTime: "" }]);
@@ -53,7 +90,7 @@ export default (): ReactElement => {
       grow
       noWrap
     >
-      {(request.status === AsyncRequestStatus.PENDING ? createLoadingRecipes() : recipes).map(
+      {(recipesQuery.isLoading ? createLoadingRecipes() : filteredRecipes).map(
         ([recipeId, recipe]) => (
           <Box
             key={recipeId}

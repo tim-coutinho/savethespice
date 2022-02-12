@@ -96,24 +96,24 @@ interface GetAllRecipesResponseData {
   recipes: Recipe[];
 }
 
-export const getAllRecipes = (): Promise<GetAllRecipesResponseData> =>
+export const getAllRecipes = (): Promise<Map<number, Recipe>> =>
   api.get<GetAllRecipesResponseData>("recipes").then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);
     }
-    return res.data;
+    return new Map(res.data.recipes.map(r => [r.recipeId, r]));
   });
 
 interface GetAllCategoriesResponseData {
   categories: Category[];
 }
 
-export const getAllCategories = (): Promise<GetAllCategoriesResponseData> =>
+export const getAllCategories = (): Promise<Map<number, Category>> =>
   api.get<GetAllCategoriesResponseData>("categories").then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);
     }
-    return res.data;
+    return new Map(res.data.categories.map(c => [c.categoryId, c]));
   });
 
 export interface FormFields

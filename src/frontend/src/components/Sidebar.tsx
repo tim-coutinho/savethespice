@@ -24,22 +24,20 @@ import {
   TriangleRightIcon,
 } from "@radix-ui/react-icons";
 import { MouseEvent, ReactElement, useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 import { getById, SignedInState, UNSET, View } from "../lib/common";
-import { useAsync } from "../lib/hooks";
 import { addCategory, getAllCategories, signOut } from "../lib/operations";
 import {
-  allRecipesState,
-  categoriesState,
   currentViewState,
   itemToDeleteState,
   selectedCategoryIdState,
   selectedRecipeIdState,
   signedInState,
 } from "../store";
-import { Category } from "../types";
+import { Category, Recipe } from "../types";
 import { FlipButton } from "./FlipButton";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 interface SidebarProps {
   handleDeleteCategory: () => void;
@@ -52,43 +50,65 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const [newCategoryName, setNewCategoryName] = useInputState("");
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const setSelectedRecipeId = useSetRecoilState(selectedRecipeIdState);
-  const [allCategories, setAllCategories] = useRecoilState(categoriesState);
-  const allRecipes = useRecoilValue(allRecipesState);
   const setItemToDelete = useSetRecoilState(itemToDeleteState);
   const setCurrentView = useSetRecoilState(currentViewState);
   const setSignedIn = useSetRecoilState(signedInState);
-  const [executeAddCategory, addCategoryRequest] = useAsync(addCategory);
-  const [executeGetAllCategories, getAllCategoriesRequest] = useAsync(getAllCategories);
   const { toggleColorScheme } = useMantineColorScheme();
   const clipboard = useClipboard();
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const theme = useMantineTheme();
 
-  useEffect(() => {
-    executeGetAllCategories();
-  }, []);
+  const queryClient = useQueryClient();
+  const recipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+  const categoriesQuery = useQuery("categories", getAllCategories);
+  const categoriesMutation = useMutation(addCategory, {
+    onMutate: async (categoryName: string) => {
+      await queryClient.cancelQueries("categories");
+      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
+      const categoryId = Math.random();
 
-  useEffect(() => {
-    if (getAllCategoriesRequest.value) {
-      setAllCategories(
-        new Map(getAllCategoriesRequest.value.categories.map(c => [c.categoryId, c])),
-      );
-    }
-  }, [getAllCategoriesRequest.status]);
+      previousCategories &&
+        queryClient.setQueryData(
+          "categories",
+          previousCategories?.set(categoryId, {
+            categoryId,
+            name: categoryName,
+            createTime: new Date().toISOString(),
+            updateTime: new Date().toISOString(),
+            userId: "",
+          }),
+        );
+      return { previousCategories };
+    },
+    onSuccess: category => {
+      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
+      previousCategories &&
+        queryClient.setQueryData(
+          "categories",
+          previousCategories.set(category.categoryId, category),
+        );
+      setNewCategoryName("");
+      toggleShiftedLeft();
+    },
+    onError: (_, __, context) => {
+      context?.previousCategories &&
+        queryClient.setQueryData("categories", context.previousCategories);
+    },
+  });
 
   useEffect(() => {
     shiftedLeft &&
       setTimeout(() => newCategoryNameInputRef.current?.focus(), theme.other.transitionDuration);
   }, [shiftedLeft]);
 
-  useEffect(() => {
-    const { value } = addCategoryRequest;
-    if (value !== null) {
-      setAllCategories(categories => new Map(categories.set(value.categoryId, value)));
-      setNewCategoryName("");
-      toggleShiftedLeft();
-    }
-  }, [addCategoryRequest.status]);
+  // useEffect(() => {
+  //   if (!categoriesMutation.isSuccess) {
+  //     return;
+  //   }
+  //   setAllCategories(categories => new Map(categories.set(value.categoryId, value)));
+  //   setNewCategoryName("");
+  //   toggleShiftedLeft();
+  // }, [categoriesMutation.status]);
 
   useEffect(() => {
     if (clipboard.copied && copyTextRef.current) {
@@ -174,8 +194,11 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
             <form
               onSubmit={e => {
                 e.preventDefault();
-                Array.from(allCategories).some(([, { name }]) => name === newCategoryName) ||
-                  executeAddCategory(newCategoryName);
+                (categoriesQuery.isSuccess &&
+                  Array.from(categoriesQuery.data).some(
+                    ([, { name }]) => name === newCategoryName,
+                  )) ||
+                  categoriesMutation.mutate(newCategoryName);
               }}
               style={{ position: "absolute", left: "100%", width: "100%", padding: 5 }}
             >
@@ -200,7 +223,7 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
             <TriangleRightIcon className="arrow" />
             <span style={{ position: "absolute", left: theme.spacing.lg }}>All Recipes</span>
           </Group>
-          {Array.from(allCategories)
+          {Array.from(categoriesQuery.data || [])
             .sort(([, { name: name1 }], [, { name: name2 }]) =>
               name1.toLowerCase() >= name2.toLowerCase() ? 1 : -1,
             )
@@ -242,12 +265,12 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
                 setCoords({ x: e.clientX, y: e.clientY });
                 clipboard.copy(
                   JSON.stringify(
-                    Array.from(allRecipes).map(([, recipe]) =>
+                    Array.from(recipes || []).map(([, recipe]) =>
                       recipe.categories
                         ? {
                             ...recipe,
                             categories: recipe.categories.map(
-                              c => (allCategories.get(c) as Category).name,
+                              c => (categoriesQuery.data?.get(c) as Category).name,
                             ),
                             recipeId: undefined,
                             createTime: undefined,

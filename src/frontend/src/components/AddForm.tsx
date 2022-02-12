@@ -14,18 +14,13 @@ import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { ClipboardEventHandler, ReactElement, useEffect, useMemo, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { View } from "../lib/common";
-import { AsyncRequestStatus, useAsync } from "../lib/hooks";
+import { UNSET, View } from "../lib/common";
 import { addRecipe, FormFields, scrape } from "../lib/operations";
-import {
-  allRecipesState,
-  categoriesState,
-  currentViewState,
-  selectedRecipeIdState,
-} from "../store";
-import { Category } from "../types";
+import { currentViewState, selectedRecipeIdState } from "../store";
+import { Category, Recipe } from "../types";
 
 import { FlipButton } from "./FlipButton";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const baseForm = {
   name: "",
@@ -46,25 +41,99 @@ interface AddFormProps {
 }
 
 export default ({ editMode }: AddFormProps): ReactElement => {
+  const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
-  const [categories, setCategories] = useRecoilState(categoriesState);
-  const [allRecipes, setAllRecipes] = useRecoilState(allRecipesState);
+  const recipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+  const categories = queryClient.getQueryData<Map<number, Category>>("categories");
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
   const initialValues = useRef({ ...baseForm });
-  const [executeScrape, scrapeRequest] = useAsync((url: string) => scrape(url));
-  const [executeAddRecipe, addRecipeRequest] = useAsync((recipe: FormFields) =>
-    addRecipe(recipe, editMode ? selectedRecipeId : undefined),
-  );
   const form = useForm({ initialValues: { ...initialValues.current } });
+
+  const addRecipeMutation = useMutation(
+    recipe => addRecipe(recipe, editMode ? selectedRecipeId : undefined),
+    {
+      onMutate: async (recipe: FormFields) => {
+        await queryClient.cancelQueries("recipes");
+        await queryClient.cancelQueries("categories");
+
+        const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+        const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
+
+        if (previousCategories) {
+          const newCategories = new Map(previousCategories);
+          const categoryNamesToIds = new Map(
+            Array.from(newCategories).map(([id, { name }]) => [name, id]),
+          );
+          recipe.categories.forEach(c => {
+            if (!categoryNamesToIds.has(c)) {
+              const categoryId = Math.random();
+              newCategories.set(Math.random(), {
+                categoryId,
+                name: c,
+                createTime: new Date().toISOString(),
+                updateTime: new Date().toISOString(),
+                userId: "",
+              });
+              categoryNamesToIds.set(c, categoryId);
+            }
+          });
+          queryClient.setQueryData("categories", newCategories);
+
+          if (previousRecipes) {
+            const newRecipes = new Map(previousRecipes);
+            const recipeId = Math.random();
+            newRecipes.set(recipeId, {
+              recipeId,
+              ...recipe,
+              categories: recipe.categories.map(c => categoryNamesToIds.get(c) || UNSET),
+              createTime: new Date().toISOString(),
+              updateTime: new Date().toISOString(),
+              userId: "",
+            });
+            queryClient.setQueryData("recipes", newRecipes);
+          }
+        }
+
+        setCurrentView(View.HOME);
+        return { previousRecipes, previousCategories };
+      },
+      onSuccess: data => {
+        const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+        const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
+        previousRecipes &&
+          queryClient.setQueryData("recipes", previousRecipes.set(data.recipeId, data));
+        data.newCategories &&
+          previousCategories &&
+          queryClient.setQueryData("categories", () => {
+            data.newCategories?.forEach(c => previousCategories.set(c.categoryId, c));
+            return new Map(previousCategories);
+          });
+      },
+      onError: (_, __, context) => {
+        context?.previousRecipes && queryClient.setQueryData("recipes", context.previousRecipes);
+        context?.previousCategories &&
+          queryClient.setQueryData("categories", context.previousCategories);
+      },
+    },
+  );
+  const scrapeQuery = useQuery(
+    ["scrape", form.values.urlToScrape],
+    () => scrape(form.values.urlToScrape),
+    {
+      enabled: false,
+      onSuccess: data => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        form.setValues({ ...form.values, ...data });
+      },
+    },
+  );
 
   const formVisible = useMemo(() => currentView === View.ADD, [currentView]);
 
   const requestInProgress = useMemo(
-    () =>
-      addRecipeRequest.status === AsyncRequestStatus.PENDING ||
-      addRecipeRequest.status === AsyncRequestStatus.SUCCESS ||
-      scrapeRequest.status === AsyncRequestStatus.PENDING,
-    [addRecipeRequest.status, scrapeRequest.status],
+    () => addRecipeMutation.isLoading || scrapeQuery.isLoading,
+    [addRecipeMutation.status, scrapeQuery.status],
   );
 
   useEffect(() => {
@@ -72,7 +141,7 @@ export default ({ editMode }: AddFormProps): ReactElement => {
       return;
     }
     if (editMode) {
-      const selectedRecipe = allRecipes.get(selectedRecipeId);
+      const selectedRecipe = recipes?.get(selectedRecipeId);
       selectedRecipe &&
         (initialValues.current = {
           name: selectedRecipe.name,
@@ -81,7 +150,7 @@ export default ({ editMode }: AddFormProps): ReactElement => {
           cookTime: selectedRecipe.cookTime ?? "",
           yield: `${selectedRecipe.yield ?? ""}`,
           categories:
-            selectedRecipe?.categories?.map(c => (categories.get(c) as Category).name) ?? [],
+            selectedRecipe?.categories?.map(c => (categories?.get(c) as Category).name) ?? [],
           ingredients: "",
           instructions: "",
           urlToScrape: "",
@@ -91,29 +160,6 @@ export default ({ editMode }: AddFormProps): ReactElement => {
     }
     form.setValues({ ...initialValues.current });
   }, [formVisible, editMode]);
-
-  useEffect(() => {
-    if (scrapeRequest.status === AsyncRequestStatus.SUCCESS && scrapeRequest.value) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      form.setValues({ ...form.values, ...scrapeRequest.value });
-    }
-  }, [scrapeRequest.status]);
-
-  useEffect(() => {
-    if (addRecipeRequest.status === AsyncRequestStatus.SUCCESS && addRecipeRequest.value) {
-      const { value } = addRecipeRequest;
-      setAllRecipes(allRecipes => new Map(allRecipes.set(value.recipeId, value)));
-      if (addRecipeRequest.value?.newCategories) {
-        setCategories(categories => {
-          addRecipeRequest.value?.newCategories?.forEach(c => categories.set(c.categoryId, c));
-          return new Map(categories);
-        });
-      }
-      addRecipeRequest.reset();
-      setCurrentView(View.HOME);
-    }
-  }, [addRecipeRequest.status]);
 
   const valueChanged = (initialValue: keyof FormFields, newValue: FormFields[keyof FormFields]) =>
     // Value is list, new value altered
@@ -141,11 +187,11 @@ export default ({ editMode }: AddFormProps): ReactElement => {
       if (k === "categories" && (initialValue as string[])[0] !== "") {
         // Categories holds IDs, map to category names
         initialValue = (initialValue as NonNullable<typeof recipe.categories>).map(
-          c => (categories.get(+c) as Category).name,
+          c => (categories?.get(+c) as Category).name,
         );
       }
       if (valueChanged(initialValue, v)) {
-        await executeAddRecipe(recipe);
+        await addRecipeMutation.mutateAsync(recipe);
         break;
       }
     }
@@ -198,7 +244,7 @@ export default ({ editMode }: AddFormProps): ReactElement => {
           <MultiSelect
             label="Categories"
             placeholder="Select and/or create"
-            data={Array.from(categories)
+            data={Array.from(categories || [])
               .sort(([, { name: name1 }], [, { name: name2 }]) =>
                 name1.toLowerCase() >= name2.toLowerCase() ? 1 : -1,
               )
@@ -253,23 +299,20 @@ export default ({ editMode }: AddFormProps): ReactElement => {
             name="scrapeUrl"
             {...form.getInputProps("urlToScrape")}
           />
-          <LoadingOverlay
-            visible={scrapeRequest.status === AsyncRequestStatus.PENDING}
-            sx={({ fn }) => fn.cover(-10)}
-          />
+          <LoadingOverlay visible={scrapeQuery.isLoading} sx={({ fn }) => fn.cover(-10)} />
         </Group>
         <Group position="right" mt="md">
           <Button
             variant="outline"
             size="md"
-            color={scrapeRequest.status === AsyncRequestStatus.ERROR ? "red" : ""}
-            onClick={() => executeScrape(form.values.urlToScrape)}
-            loading={scrapeRequest.status === AsyncRequestStatus.PENDING}
+            color={scrapeQuery.isError ? "red" : ""}
+            onClick={() => scrapeQuery.refetch()}
+            loading={scrapeQuery.isLoading}
             disabled={form.values.urlToScrape === "" || requestInProgress}
             leftIcon={
-              scrapeRequest.status === AsyncRequestStatus.SUCCESS ? (
+              scrapeQuery.isSuccess ? (
                 <CheckCircledIcon />
-              ) : scrapeRequest.status === AsyncRequestStatus.ERROR ? (
+              ) : scrapeQuery.isError ? (
                 <CrossCircledIcon />
               ) : (
                 ""
@@ -282,7 +325,7 @@ export default ({ editMode }: AddFormProps): ReactElement => {
           <FlipButton
             type="submit"
             size="md"
-            loading={addRecipeRequest.status === AsyncRequestStatus.PENDING}
+            loading={addRecipeMutation.isLoading}
             disabled={form.values.name === "" || requestInProgress}
             sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
             border

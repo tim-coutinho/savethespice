@@ -1,18 +1,13 @@
 import { ColorSchemeProvider, MantineProvider, Paper } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 import { ReactElement, useEffect, useRef } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 import { prefix, SignedInState, UNSET, View } from "../lib/common";
 import { useRenderTimeout } from "../lib/hooks";
 import { refreshIdToken } from "../lib/operations";
-import {
-  allRecipesState,
-  categoriesState,
-  currentViewState,
-  selectedRecipeIdState,
-  signedInState,
-} from "../store";
+import { currentViewState, selectedRecipeIdState, signedInState } from "../store";
 
 import AddForm from "./AddForm";
 // import ShoppingList from "./ShoppingList";
@@ -23,6 +18,9 @@ import Header from "./Header";
 import ImportForm from "./ImportForm";
 import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
+import { ReactQueryDevtools } from "react-query/devtools";
+
+const queryClient = new QueryClient();
 
 export default (): ReactElement => {
   const editMode = useRef(false);
@@ -34,8 +32,6 @@ export default (): ReactElement => {
     key: `${prefix}theme`,
     defaultValue: useColorScheme(),
   });
-  const setAllRecipes = useSetRecoilState(allRecipesState);
-  const setAllCategories = useSetRecoilState(categoriesState);
   const [visible, rendered, setVisible] = useRenderTimeout();
 
   const handleViewChange = (source: typeof View[keyof typeof View]): void =>
@@ -80,14 +76,6 @@ export default (): ReactElement => {
   }, [signedIn]);
 
   useEffect(() => {
-    if (rendered) {
-      return;
-    }
-    setAllRecipes(new Map());
-    setAllCategories(new Map());
-  }, [rendered]);
-
-  useEffect(() => {
     localStorage.setItem(`${prefix}theme`, theme);
   }, [theme]);
 
@@ -109,85 +97,88 @@ export default (): ReactElement => {
   }, []);
 
   return (
-    <ColorSchemeProvider
-      colorScheme={theme}
-      toggleColorScheme={v => setTheme(v ?? theme === "dark" ? "light" : "dark")}
-    >
-      <MantineProvider
-        theme={{
-          headings: { fontWeight: 600 },
-          primaryColor: "violet",
-          fontFamily: "Roboto",
-          colorScheme: theme,
-          other: { buttonLength: 40, transitionDuration: 300, sidebarWidth: 250 },
-        }}
-        styles={{
-          Image: theme => ({
-            placeholder: {
-              backgroundColor: theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
-            },
-          }),
-        }}
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools position="bottom-right" />
+      <ColorSchemeProvider
+        colorScheme={theme}
+        toggleColorScheme={v => setTheme(v ?? theme === "dark" ? "light" : "dark")}
       >
-        <Paper
-          id="app"
-          sx={theme => ({
-            "&[data-themechange], &[data-themechange] *": {
-              transition: `${theme.other.transitionDuration}ms !important`,
-            },
-          })}
+        <MantineProvider
+          theme={{
+            headings: { fontWeight: 600 },
+            primaryColor: "violet",
+            fontFamily: "Roboto",
+            colorScheme: theme,
+            other: { buttonLength: 40, transitionDuration: 300, sidebarWidth: 250 },
+          }}
+          styles={{
+            Image: theme => ({
+              placeholder: {
+                backgroundColor: theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
+              },
+            }),
+          }}
         >
-          <div className={visible ? "visible" : ""}>
-            {rendered && (
-              <>
-                <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
-                <Paper
-                  className={currentView === View.SIDEBAR ? "shifted-right" : ""}
-                  sx={theme => ({
-                    display: "flex",
-                    float: "right",
-                    transitionDuration: `${theme.other.transitionDuration}ms`,
-                    transitionProperty: "width",
-                    width: "100%",
-                    "&.shifted-right": {
-                      width: `calc(100vw - ${theme.other.sidebarWidth}px)`,
-                    },
-                  })}
-                >
+          <Paper
+            id="app"
+            sx={theme => ({
+              "&[data-themechange], &[data-themechange] *": {
+                transition: `${theme.other.transitionDuration}ms !important`,
+              },
+            })}
+          >
+            <div className={visible ? "visible" : ""}>
+              {rendered && (
+                <>
+                  <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
                   <Paper
-                    radius={0}
+                    className={currentView === View.SIDEBAR ? "shifted-right" : ""}
                     sx={theme => ({
-                      borderRight: `1px solid ${theme.colors.gray[7]}`,
                       display: "flex",
-                      flexDirection: "column",
-                      height: "100vh",
-                      width: 420,
+                      float: "right",
+                      transitionDuration: `${theme.other.transitionDuration}ms`,
+                      transitionProperty: "width",
+                      width: "100%",
+                      "&.shifted-right": {
+                        width: `calc(100vw - ${theme.other.sidebarWidth}px)`,
+                      },
                     })}
                   >
-                    <Header handleViewChange={source => () => handleViewChange(source)} />
-                    <RecipeList />
-                  </Paper>
-                  {selectedRecipeId !== UNSET && (
-                    <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
-                      <Details
-                        handleDeleteRecipe={() => handleViewChange(View.DELETE)}
-                        editRecipe={() => handleViewChange(View.EDIT)}
-                        // shoppingList={shoppingList}
-                        // handleAddToShoppingList={handleAddToShoppingList}
-                        // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
-                      />
+                    <Paper
+                      radius={0}
+                      sx={theme => ({
+                        borderRight: `1px solid ${theme.colors.gray[7]}`,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "100vh",
+                        width: 420,
+                      })}
+                    >
+                      <Header handleViewChange={source => () => handleViewChange(source)} />
+                      <RecipeList />
                     </Paper>
-                  )}
-                </Paper>
-              </>
-            )}
-          </div>
-          <AddForm editMode={editMode.current} />
-          <DeleteForm />
-          <ImportForm />
-          <AuthForm />
-        </Paper>
-      </MantineProvider>
-    </ColorSchemeProvider>
+                    {selectedRecipeId !== UNSET && (
+                      <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
+                        <Details
+                          handleDeleteRecipe={() => handleViewChange(View.DELETE)}
+                          editRecipe={() => handleViewChange(View.EDIT)}
+                          // shoppingList={shoppingList}
+                          // handleAddToShoppingList={handleAddToShoppingList}
+                          // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
+                        />
+                      </Paper>
+                    )}
+                  </Paper>
+                </>
+              )}
+            </div>
+            <AddForm editMode={editMode.current} />
+            <DeleteForm />
+            <ImportForm />
+            <AuthForm />
+          </Paper>
+        </MantineProvider>
+      </ColorSchemeProvider>
+    </QueryClientProvider>
   );
 };
