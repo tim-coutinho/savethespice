@@ -16,13 +16,14 @@ import { MouseEventHandler, ReactElement, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { View } from "../lib/common";
 import {
-  categoriesState,
   currentViewState,
   filterOptionsState,
   filterState,
   selectedCategoryIdState,
 } from "../store";
 import { FlipButton } from "./FlipButton";
+import { useQueryClient } from "react-query";
+import { Category } from "../types";
 
 interface HeaderProps {
   handleViewChange: (source: typeof View[keyof typeof View]) => MouseEventHandler;
@@ -35,9 +36,11 @@ export default ({ handleViewChange }: HeaderProps): ReactElement => {
   const [filter, setFilter] = useRecoilState(filterState);
   const [filterOptions, setFilterOptions] = useRecoilState(filterOptionsState);
   const currentView = useRecoilValue(currentViewState);
-  const allCategories = useRecoilValue(categoriesState);
   const selectedCategoryId = useRecoilValue(selectedCategoryIdState);
   const theme = useMantineTheme();
+
+  const queryClient = useQueryClient();
+  const categories = queryClient.getQueryData<Map<number, Category>>("categories");
 
   const filterExpanded = filter !== "" || popoverOpened || filterFocused;
   const allChecked = Object.values(filterOptions).every(v => v);
@@ -89,7 +92,7 @@ export default ({ handleViewChange }: HeaderProps): ReactElement => {
           opacity: filterExpanded ? 0 : 1,
         })}
       >
-        {allCategories.get(selectedCategoryId)?.name ?? "All Recipes"}
+        {categories?.get(selectedCategoryId)?.name ?? "All Recipes"}
       </Title>
       <div>
         <FlipButton

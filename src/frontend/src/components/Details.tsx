@@ -17,16 +17,11 @@ import { ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 import { UNSET } from "../lib/common";
-import {
-  categoriesState,
-  filteredRecipesState,
-  itemToDeleteState,
-  selectedCategoryIdState,
-  selectedRecipeIdState,
-} from "../store";
+import { itemToDeleteState, selectedCategoryIdState, selectedRecipeIdState } from "../store";
 import { Category, Recipe } from "../types";
 
 import { FlipButton } from "./FlipButton";
+import { useQueryClient } from "react-query";
 
 interface DetailsProps {
   handleDeleteRecipe: () => void;
@@ -38,15 +33,17 @@ interface DetailsProps {
 
 export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement | null => {
   const [recipe, setRecipe] = useState({} as Recipe);
-  const allCategories = useRecoilValue(categoriesState);
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
-  const recipes = useRecoilValue(filteredRecipesState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
   const setItemToDelete = useSetRecoilState(itemToDeleteState);
   const theme = useMantineTheme();
 
+  const queryClient = useQueryClient();
+  const recipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+  const categories = queryClient.getQueryData<Map<number, Category>>("categories");
+
   useEffect(() => {
-    const selectedRecipe = recipes.find(([id]) => id === selectedRecipeId)?.[1];
+    const selectedRecipe = recipes?.get(selectedRecipeId);
     selectedRecipe && setRecipe(selectedRecipe);
   }, [recipes, selectedRecipeId]);
 
@@ -168,7 +165,7 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
                     }
                   }}
                 >
-                  {(allCategories.get(c) as Category).name}
+                  {(categories?.get(c) as Category).name}
                 </Chip>
               ))}
             </Chips>

@@ -1,22 +1,51 @@
 import { JsonInput, Modal } from "@mantine/core";
 import { ReactElement, useEffect, useMemo } from "react";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState } from "recoil";
 import { View } from "../lib/common";
-import { AsyncRequestStatus, useAsync } from "../lib/hooks";
 import { addRecipes } from "../lib/operations";
-import { allRecipesState, currentViewState } from "../store";
+import { currentViewState } from "../store";
 import { Recipe } from "../types";
 
 import { FlipButton } from "./FlipButton";
 import { useInputState } from "@mantine/hooks";
+import { useMutation, useQueryClient } from "react-query";
 
 export default (): ReactElement => {
   const [value, setValue] = useInputState("");
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
-  const setAllRecipes = useSetRecoilState(allRecipesState);
-  const [execute, request] = useAsync(addRecipes);
+  const queryClient = useQueryClient();
+  const addRecipesMutation = useMutation(addRecipes, {
+    onMutate: async (recipes: Recipe[]) => {
+      await queryClient.cancelQueries("recipes");
 
-  const handleClose = () => setCurrentView(View.HOME);
+      const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+      if (previousRecipes) {
+        const newRecipes = new Map(previousRecipes);
+        recipes.forEach(r => {
+          const recipeId = Math.random();
+          newRecipes.set(recipeId, {
+            ...r,
+            recipeId,
+            createTime: new Date().toISOString(),
+            updateTime: new Date().toISOString(),
+          });
+        });
+      }
+
+      setCurrentView(View.HOME);
+      return { previousRecipes };
+    },
+    onSuccess: data => {
+      data.recipes &&
+        queryClient.setQueryData(
+          "recipes",
+          data.recipes.map(r => [r.recipeId, r]),
+        );
+    },
+    onError: (_, __, context) => {
+      context?.previousRecipes && queryClient.setQueryData("recipes", context.previousRecipes);
+    },
+  });
 
   const formVisible = useMemo(() => currentView === View.IMPORT, [currentView]);
   const invalidForm = useMemo(() => {
@@ -29,12 +58,6 @@ export default (): ReactElement => {
   }, [value]);
 
   useEffect(() => {
-    if (request.status === AsyncRequestStatus.SUCCESS && request.value?.recipes) {
-      setAllRecipes(new Map(request.value.recipes.map(r => [r.recipeId, r])));
-    }
-  }, [request.status]);
-
-  useEffect(() => {
     if (!formVisible) {
       return;
     }
@@ -42,7 +65,7 @@ export default (): ReactElement => {
   }, [formVisible]);
 
   return (
-    <Modal title="Paste JSON" opened={formVisible} onClose={handleClose}>
+    <Modal title="Paste JSON" opened={formVisible} onClose={() => setCurrentView(View.HOME)}>
       <JsonInput
         validationError="Invalid JSON"
         value={value}
@@ -53,9 +76,9 @@ export default (): ReactElement => {
       <FlipButton
         onClick={() => {
           const recipes: Recipe[] = JSON.parse(value);
-          execute(recipes).finally(handleClose);
+          addRecipesMutation.mutate(recipes);
         }}
-        disabled={request.status === AsyncRequestStatus.PENDING || invalidForm}
+        disabled={addRecipesMutation.isLoading || invalidForm}
         mt="md"
         sx={theme => ({
           float: "right",
