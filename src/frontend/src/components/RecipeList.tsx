@@ -6,17 +6,16 @@ import {
   selectedCategoryIdState,
   selectedRecipeIdState,
 } from "../store";
-import { getAllRecipes } from "../lib/operations";
 import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
 import { UNSET } from "../lib/common";
-import { useQuery } from "react-query";
 import { Recipe } from "../types";
+import { useRecipes } from "../lib/hooks";
 
 export default (): ReactElement => {
   const ref = useRef<HTMLUListElement>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
   const [filteredRecipes, setFilteredRecipes] = useState<[number, Recipe][]>([]);
-  const recipesQuery = useQuery("recipes", getAllRecipes);
+  const recipesQuery = useRecipes();
 
   const filter = useRecoilValue(filterState);
   const filterOptions = useRecoilValue(filterOptionsState);

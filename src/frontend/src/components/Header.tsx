@@ -22,8 +22,7 @@ import {
   selectedCategoryIdState,
 } from "../store";
 import { FlipButton } from "./FlipButton";
-import { useQueryClient } from "react-query";
-import { Category } from "../types";
+import { useCategories } from "../lib/hooks";
 
 interface HeaderProps {
   handleViewChange: (source: typeof View[keyof typeof View]) => MouseEventHandler;
@@ -39,8 +38,7 @@ export default ({ handleViewChange }: HeaderProps): ReactElement => {
   const selectedCategoryId = useRecoilValue(selectedCategoryIdState);
   const theme = useMantineTheme();
 
-  const queryClient = useQueryClient();
-  const categories = queryClient.getQueryData<Map<number, Category>>("categories");
+  const { data: categories } = useCategories();
 
   const filterExpanded = filter !== "" || popoverOpened || filterFocused;
   const allChecked = Object.values(filterOptions).every(v => v);

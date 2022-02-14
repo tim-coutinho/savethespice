@@ -1,11 +1,11 @@
 import { ColorSchemeProvider, MantineProvider, Paper } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 import { ReactElement, useEffect, useRef } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClientProvider } from "react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { prefix, SignedInState, UNSET, View } from "../lib/common";
-import { useRenderTimeout } from "../lib/hooks";
+import { queryClient, useRenderTimeout } from "../lib/hooks";
 import { refreshIdToken } from "../lib/operations";
 import { currentViewState, selectedRecipeIdState, signedInState } from "../store";
 
@@ -19,8 +19,6 @@ import ImportForm from "./ImportForm";
 import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
 import { ReactQueryDevtools } from "react-query/devtools";
-
-const queryClient = new QueryClient();
 
 export default (): ReactElement => {
   const editMode = useRef(false);

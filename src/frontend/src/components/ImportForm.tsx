@@ -8,44 +8,13 @@ import { Recipe } from "../types";
 
 import { FlipButton } from "./FlipButton";
 import { useInputState } from "@mantine/hooks";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation } from "react-query";
+import { queryClient, useAddRecipes } from "../lib/hooks";
 
 export default (): ReactElement => {
   const [value, setValue] = useInputState("");
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
-  const queryClient = useQueryClient();
-  const addRecipesMutation = useMutation(addRecipes, {
-    onMutate: async (recipes: Recipe[]) => {
-      await queryClient.cancelQueries("recipes");
-
-      const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-      if (previousRecipes) {
-        const newRecipes = new Map(previousRecipes);
-        recipes.forEach(r => {
-          const recipeId = Math.random();
-          newRecipes.set(recipeId, {
-            ...r,
-            recipeId,
-            createTime: new Date().toISOString(),
-            updateTime: new Date().toISOString(),
-          });
-        });
-      }
-
-      setCurrentView(View.HOME);
-      return { previousRecipes };
-    },
-    onSuccess: data => {
-      data.recipes &&
-        queryClient.setQueryData(
-          "recipes",
-          data.recipes.map(r => [r.recipeId, r]),
-        );
-    },
-    onError: (_, __, context) => {
-      context?.previousRecipes && queryClient.setQueryData("recipes", context.previousRecipes);
-    },
-  });
+  const addRecipesMutation = useAddRecipes();
 
   const formVisible = useMemo(() => currentView === View.IMPORT, [currentView]);
   const invalidForm = useMemo(() => {
@@ -77,6 +46,7 @@ export default (): ReactElement => {
         onClick={() => {
           const recipes: Recipe[] = JSON.parse(value);
           addRecipesMutation.mutate(recipes);
+          setCurrentView(View.HOME);
         }}
         disabled={addRecipesMutation.isLoading || invalidForm}
         mt="md"

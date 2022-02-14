@@ -14,13 +14,13 @@ import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { ClipboardEventHandler, ReactElement, useEffect, useMemo, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { UNSET, View } from "../lib/common";
-import { addRecipe, FormFields, scrape } from "../lib/operations";
+import { View } from "../lib/common";
+import { FormFields } from "../lib/operations";
 import { currentViewState, selectedRecipeIdState } from "../store";
-import { Category, Recipe } from "../types";
+import { Category } from "../types";
 
 import { FlipButton } from "./FlipButton";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useAddRecipe, useCategories, useRecipes, useScrape, useUpdateRecipe } from "../lib/hooks";
 
 const baseForm = {
   name: "",
@@ -41,99 +41,34 @@ interface AddFormProps {
 }
 
 export default ({ editMode }: AddFormProps): ReactElement => {
-  const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
-  const recipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-  const categories = queryClient.getQueryData<Map<number, Category>>("categories");
+  const { data: recipes } = useRecipes();
+  const { data: categories } = useCategories();
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
   const initialValues = useRef({ ...baseForm });
   const form = useForm({ initialValues: { ...initialValues.current } });
 
-  const addRecipeMutation = useMutation(
-    recipe => addRecipe(recipe, editMode ? selectedRecipeId : undefined),
-    {
-      onMutate: async (recipe: FormFields) => {
-        await queryClient.cancelQueries("recipes");
-        await queryClient.cancelQueries("categories");
+  const addRecipeMutation = useAddRecipe();
+  const updateRecipeMutation = useUpdateRecipe();
 
-        const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-        const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
-
-        if (previousCategories) {
-          const newCategories = new Map(previousCategories);
-          const categoryNamesToIds = new Map(
-            Array.from(newCategories).map(([id, { name }]) => [name, id]),
-          );
-          recipe.categories.forEach(c => {
-            if (!categoryNamesToIds.has(c)) {
-              const categoryId = Math.random();
-              newCategories.set(Math.random(), {
-                categoryId,
-                name: c,
-                createTime: new Date().toISOString(),
-                updateTime: new Date().toISOString(),
-                userId: "",
-              });
-              categoryNamesToIds.set(c, categoryId);
-            }
-          });
-          queryClient.setQueryData("categories", newCategories);
-
-          if (previousRecipes) {
-            const newRecipes = new Map(previousRecipes);
-            const recipeId = Math.random();
-            newRecipes.set(recipeId, {
-              recipeId,
-              ...recipe,
-              categories: recipe.categories.map(c => categoryNamesToIds.get(c) || UNSET),
-              createTime: new Date().toISOString(),
-              updateTime: new Date().toISOString(),
-              userId: "",
-            });
-            queryClient.setQueryData("recipes", newRecipes);
-          }
-        }
-
-        setCurrentView(View.HOME);
-        return { previousRecipes, previousCategories };
-      },
-      onSuccess: data => {
-        const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-        const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
-        previousRecipes &&
-          queryClient.setQueryData("recipes", previousRecipes.set(data.recipeId, data));
-        data.newCategories &&
-          previousCategories &&
-          queryClient.setQueryData("categories", () => {
-            data.newCategories?.forEach(c => previousCategories.set(c.categoryId, c));
-            return new Map(previousCategories);
-          });
-      },
-      onError: (_, __, context) => {
-        context?.previousRecipes && queryClient.setQueryData("recipes", context.previousRecipes);
-        context?.previousCategories &&
-          queryClient.setQueryData("categories", context.previousCategories);
-      },
+  const scrapeQuery = useScrape({
+    url: form.values.urlToScrape,
+    onSuccess: data => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      form.setValues({ ...form.values, ...data });
     },
-  );
-  const scrapeQuery = useQuery(
-    ["scrape", form.values.urlToScrape],
-    () => scrape(form.values.urlToScrape),
-    {
-      enabled: false,
-      onSuccess: data => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        form.setValues({ ...form.values, ...data });
-      },
-    },
-  );
+  });
 
+  const addRecipeLoading = useMemo(
+    () => addRecipeMutation.isLoading || updateRecipeMutation.isLoading,
+    [addRecipeMutation.isLoading, updateRecipeMutation.isLoading],
+  );
   const formVisible = useMemo(() => currentView === View.ADD, [currentView]);
 
   const requestInProgress = useMemo(
-    () => addRecipeMutation.isLoading || scrapeQuery.isLoading,
-    [addRecipeMutation.status, scrapeQuery.status],
+    () => addRecipeLoading || scrapeQuery.isLoading,
+    [addRecipeLoading, scrapeQuery.isLoading],
   );
 
   useEffect(() => {
@@ -191,8 +126,11 @@ export default ({ editMode }: AddFormProps): ReactElement => {
         );
       }
       if (valueChanged(initialValue, v)) {
-        await addRecipeMutation.mutateAsync(recipe);
-        break;
+        editMode
+          ? updateRecipeMutation
+              .mutateAsync({ recipe, recipeId: selectedRecipeId })
+              .then(() => setCurrentView(View.HOME))
+          : addRecipeMutation.mutateAsync(recipe).then(() => setCurrentView(View.HOME));
       }
     }
   };
@@ -325,7 +263,7 @@ export default ({ editMode }: AddFormProps): ReactElement => {
           <FlipButton
             type="submit"
             size="md"
-            loading={addRecipeMutation.isLoading}
+            loading={addRecipeLoading}
             disabled={form.values.name === "" || requestInProgress}
             sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
             border

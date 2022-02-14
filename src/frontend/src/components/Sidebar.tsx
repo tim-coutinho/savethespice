@@ -27,7 +27,7 @@ import { MouseEvent, ReactElement, useEffect, useRef, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 
 import { getById, SignedInState, UNSET, View } from "../lib/common";
-import { addCategory, getAllCategories, signOut } from "../lib/operations";
+import { signOut } from "../lib/operations";
 import {
   currentViewState,
   itemToDeleteState,
@@ -35,9 +35,9 @@ import {
   selectedRecipeIdState,
   signedInState,
 } from "../store";
-import { Category, Recipe } from "../types";
+import { Category } from "../types";
 import { FlipButton } from "./FlipButton";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useAddCategory, useCategories, useRecipes } from "../lib/hooks";
 
 interface SidebarProps {
   handleDeleteCategory: () => void;
@@ -58,57 +58,14 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const theme = useMantineTheme();
 
-  const queryClient = useQueryClient();
-  const recipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-  const categoriesQuery = useQuery("categories", getAllCategories);
-  const categoriesMutation = useMutation(addCategory, {
-    onMutate: async (categoryName: string) => {
-      await queryClient.cancelQueries("categories");
-      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
-      const categoryId = Math.random();
-
-      previousCategories &&
-        queryClient.setQueryData(
-          "categories",
-          previousCategories?.set(categoryId, {
-            categoryId,
-            name: categoryName,
-            createTime: new Date().toISOString(),
-            updateTime: new Date().toISOString(),
-            userId: "",
-          }),
-        );
-      return { previousCategories };
-    },
-    onSuccess: category => {
-      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
-      previousCategories &&
-        queryClient.setQueryData(
-          "categories",
-          previousCategories.set(category.categoryId, category),
-        );
-      setNewCategoryName("");
-      toggleShiftedLeft();
-    },
-    onError: (_, __, context) => {
-      context?.previousCategories &&
-        queryClient.setQueryData("categories", context.previousCategories);
-    },
-  });
+  const { data: recipes } = useRecipes();
+  const categoriesQuery = useCategories();
+  const addCategoryMutation = useAddCategory();
 
   useEffect(() => {
     shiftedLeft &&
       setTimeout(() => newCategoryNameInputRef.current?.focus(), theme.other.transitionDuration);
   }, [shiftedLeft]);
-
-  // useEffect(() => {
-  //   if (!categoriesMutation.isSuccess) {
-  //     return;
-  //   }
-  //   setAllCategories(categories => new Map(categories.set(value.categoryId, value)));
-  //   setNewCategoryName("");
-  //   toggleShiftedLeft();
-  // }, [categoriesMutation.status]);
 
   useEffect(() => {
     if (clipboard.copied && copyTextRef.current) {
@@ -194,11 +151,15 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
             <form
               onSubmit={e => {
                 e.preventDefault();
-                (categoriesQuery.isSuccess &&
-                  Array.from(categoriesQuery.data).some(
-                    ([, { name }]) => name === newCategoryName,
-                  )) ||
-                  categoriesMutation.mutate(newCategoryName);
+                if (
+                  Array.from(categoriesQuery.data || []).every(
+                    ([, { name }]) => name !== newCategoryName,
+                  )
+                ) {
+                  addCategoryMutation.mutate(newCategoryName);
+                  setNewCategoryName("");
+                  toggleShiftedLeft();
+                }
               }}
               style={{ position: "absolute", left: "100%", width: "100%", padding: 5 }}
             >

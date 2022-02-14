@@ -21,7 +21,7 @@ import { itemToDeleteState, selectedCategoryIdState, selectedRecipeIdState } fro
 import { Category, Recipe } from "../types";
 
 import { FlipButton } from "./FlipButton";
-import { useQueryClient } from "react-query";
+import { useCategories, useRecipes } from "../lib/hooks";
 
 interface DetailsProps {
   handleDeleteRecipe: () => void;
@@ -38,9 +38,8 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
   const setItemToDelete = useSetRecoilState(itemToDeleteState);
   const theme = useMantineTheme();
 
-  const queryClient = useQueryClient();
-  const recipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-  const categories = queryClient.getQueryData<Map<number, Category>>("categories");
+  const { data: recipes } = useRecipes();
+  const { data: categories } = useCategories();
 
   useEffect(() => {
     const selectedRecipe = recipes?.get(selectedRecipeId);
