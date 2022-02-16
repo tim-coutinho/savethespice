@@ -40,7 +40,7 @@ interface AddFormProps {
   editMode: boolean;
 }
 
-export default ({ editMode }: AddFormProps): ReactElement => {
+export default function AddForm({ editMode }: AddFormProps): ReactElement {
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const { data: recipes } = useRecipes();
   const { data: categories } = useCategories();
@@ -274,4 +274,4 @@ export default ({ editMode }: AddFormProps): ReactElement => {
       </Box>
     </Modal>
   );
-};
+}

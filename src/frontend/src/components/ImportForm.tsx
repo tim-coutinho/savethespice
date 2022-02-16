@@ -2,16 +2,14 @@ import { JsonInput, Modal } from "@mantine/core";
 import { ReactElement, useEffect, useMemo } from "react";
 import { useRecoilState } from "recoil";
 import { View } from "../lib/common";
-import { addRecipes } from "../lib/operations";
 import { currentViewState } from "../store";
 import { Recipe } from "../types";
 
 import { FlipButton } from "./FlipButton";
 import { useInputState } from "@mantine/hooks";
-import { useMutation } from "react-query";
-import { queryClient, useAddRecipes } from "../lib/hooks";
+import { useAddRecipes } from "../lib/hooks";
 
-export default (): ReactElement => {
+export default function ImportForm(): ReactElement {
   const [value, setValue] = useInputState("");
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const addRecipesMutation = useAddRecipes();
@@ -60,4 +58,4 @@ export default (): ReactElement => {
       </FlipButton>
     </Modal>
   );
-};
+}

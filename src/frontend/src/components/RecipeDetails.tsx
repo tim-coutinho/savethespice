@@ -26,12 +26,12 @@ import { useCategories, useRecipes } from "../lib/hooks";
 interface DetailsProps {
   handleDeleteRecipe: () => void;
   editRecipe: () => void;
-  // shoppingList,
-  // handleAddToShoppingList,
-  // handleRemoveFromShoppingList,
 }
 
-export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement | null => {
+export default function RecipeDetails({
+  handleDeleteRecipe,
+  editRecipe,
+}: DetailsProps): ReactElement | null {
   const [recipe, setRecipe] = useState({} as Recipe);
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
@@ -151,7 +151,6 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
               variant="outline"
               value={`${selectedCategoryId}`}
               onChange={c => setSelectedCategoryId(+c)}
-              // sx={{ transition: `${theme.other.transitionDuration}ms` }}
             >
               {recipe.categories.map(c => (
                 <Chip
@@ -176,24 +175,6 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
             .map((ingredient, i) => (
               <List.Item key={`${ingredient + i}`}>{ingredient}</List.Item>
             ))}
-          {/*{recipe.ingredients.map((ingredient, i) => {*/}
-          {/*  const ingredientInList = shoppingList.includes(ingredient);*/}
-          {/*  return (*/}
-          {/*    <li key={`${ingredient + i}`} className="ingredient">*/}
-          {/*      <span*/}
-          {/*        className="ingredient-span"*/}
-          {/*        onClick={() =>*/}
-          {/*          ingredientInList*/}
-          {/*            ? handleRemoveFromShoppingList(ingredient)*/}
-          {/*            : handleAddToShoppingList(ingredient)*/}
-          {/*        }*/}
-          {/*      >*/}
-          {/*        {ingredientInList ? "X" : "O"}*/}
-          {/*      </span>{" "}*/}
-          {/*      {ingredient}*/}
-          {/*    </li>*/}
-          {/*  );*/}
-          {/*})}*/}
         </List>
         <List spacing="md" type="order" sx={{ gridArea: "br", maxWidth: "60ch" }}>
           {recipe.instructions
@@ -205,4 +186,4 @@ export default ({ handleDeleteRecipe, editRecipe }: DetailsProps): ReactElement 
       </Box>
     </Paper>
   ) : null;
-};
+}

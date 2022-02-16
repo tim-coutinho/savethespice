@@ -28,7 +28,7 @@ interface HeaderProps {
   handleViewChange: (source: typeof View[keyof typeof View]) => MouseEventHandler;
 }
 
-export default ({ handleViewChange }: HeaderProps): ReactElement => {
+export default function Header({ handleViewChange }: HeaderProps): ReactElement {
   const [popoverOpened, togglePopoverOpened] = useBooleanToggle(false);
   const [filterFocused, toggleFilterFocused] = useBooleanToggle(false);
   const ref = useRef<HTMLInputElement>(null);
@@ -206,4 +206,4 @@ export default ({ handleViewChange }: HeaderProps): ReactElement => {
       </FlipButton>
     </Paper>
   );
-};
+}

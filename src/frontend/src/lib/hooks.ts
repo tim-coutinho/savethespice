@@ -36,7 +36,14 @@ export const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },
 });
 
-export const useRecipes = () => useQuery("recipes", getAllRecipes);
+export const useRecipes = () =>
+  useQuery("recipes", getAllRecipes, {
+    placeholderData: new Map<number, Recipe>(
+      Array(8)
+        .fill(0)
+        .map((_, i) => [i, { userId: "", recipeId: -1, name: "", createTime: "", updateTime: "" }]),
+    ),
+  });
 
 export const useCategories = () => useQuery("categories", getAllCategories);
 

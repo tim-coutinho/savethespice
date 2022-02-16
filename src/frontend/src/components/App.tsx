@@ -2,6 +2,7 @@ import { ColorSchemeProvider, MantineProvider, Paper } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 import { ReactElement, useEffect, useRef } from "react";
 import { QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { prefix, SignedInState, UNSET, View } from "../lib/common";
@@ -10,19 +11,16 @@ import { refreshIdToken } from "../lib/operations";
 import { currentViewState, selectedRecipeIdState, signedInState } from "../store";
 
 import AddForm from "./AddForm";
-// import ShoppingList from "./ShoppingList";
 import AuthForm from "./AuthForm";
 import DeleteForm from "./DeleteForm";
-import Details from "./Details";
 import Header from "./Header";
 import ImportForm from "./ImportForm";
+import Details from "./RecipeDetails";
 import RecipeList from "./RecipeList";
 import Sidebar from "./Sidebar";
-import { ReactQueryDevtools } from "react-query/devtools";
 
-export default (): ReactElement => {
+export default function App(): ReactElement {
   const editMode = useRef(false);
-  // const [shoppingList, setShoppingList] = useState([]);
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
   const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
@@ -51,14 +49,6 @@ export default (): ReactElement => {
           return View.HOME;
       }
     });
-
-  // const handleAddToShoppingList = ingredient => {
-  //   setShoppingList(Array.from(new Set(shoppingList).add(ingredient)));
-  // };
-  //
-  // const handleRemoveFromShoppingList = ingredient => {
-  //   setShoppingList(shoppingList.filter(other => other !== ingredient));
-  // };
 
   useEffect(() => {
     if (signedIn === SignedInState.REFRESHING_ID_TOKEN) {
@@ -160,9 +150,6 @@ export default (): ReactElement => {
                         <Details
                           handleDeleteRecipe={() => handleViewChange(View.DELETE)}
                           editRecipe={() => handleViewChange(View.EDIT)}
-                          // shoppingList={shoppingList}
-                          // handleAddToShoppingList={handleAddToShoppingList}
-                          // handleRemoveFromShoppingList={handleRemoveFromShoppingList}
                         />
                       </Paper>
                     )}
@@ -179,4 +166,4 @@ export default (): ReactElement => {
       </ColorSchemeProvider>
     </QueryClientProvider>
   );
-};
+}

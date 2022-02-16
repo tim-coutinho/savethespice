@@ -43,7 +43,7 @@ interface SidebarProps {
   handleDeleteCategory: () => void;
 }
 
-export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
+export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactElement {
   const newCategoryNameInputRef = useRef<HTMLInputElement>(null);
   const copyTextRef = useRef<HTMLDivElement>(null);
   const [shiftedLeft, toggleShiftedLeft] = useBooleanToggle(false);
@@ -299,4 +299,4 @@ export default ({ handleDeleteCategory }: SidebarProps): ReactElement => {
       </Navbar>
     </Paper>
   );
-};
+}

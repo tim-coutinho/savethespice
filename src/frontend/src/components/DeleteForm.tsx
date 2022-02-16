@@ -12,7 +12,7 @@ import {
 import { FlipButton } from "./FlipButton";
 import { useDeleteCategory, useDeleteRecipe } from "../lib/hooks";
 
-export default (): ReactElement => {
+export default function DeleteForm(): ReactElement {
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
@@ -53,4 +53,4 @@ export default (): ReactElement => {
       </Group>
     </Modal>
   );
-};
+}

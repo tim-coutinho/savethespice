@@ -15,7 +15,7 @@ enum Mode {
   FORGOT_PASSWORD,
 }
 
-export default (): ReactElement => {
+export default function AuthForm(): ReactElement {
   const [authResponse, setAuthResponse] = useState("");
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
   const currentView = useRecoilValue(currentViewState);
@@ -208,4 +208,4 @@ export default (): ReactElement => {
       </form>
     </Modal>
   );
-};
+}
