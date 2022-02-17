@@ -1,13 +1,14 @@
 import { JsonInput, Modal } from "@mantine/core";
+import { useInputState } from "@mantine/hooks";
 import { ReactElement, useEffect, useMemo } from "react";
 import { useRecoilState } from "recoil";
-import { View } from "../lib/common";
-import { currentViewState } from "../store";
-import { Recipe } from "../types";
+
+import { View } from "@/lib/common";
+import { useAddRecipes } from "@/lib/hooks";
+import { currentViewState } from "@/store";
+import { Recipe } from "@/types";
 
 import { FlipButton } from "./FlipButton";
-import { useInputState } from "@mantine/hooks";
-import { useAddRecipes } from "../lib/hooks";
 
 export default function ImportForm(): ReactElement {
   const [value, setValue] = useInputState("");

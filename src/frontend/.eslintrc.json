@@ -1,35 +1,78 @@
 {
-  "parser": "@typescript-eslint/parser",
+  "root": true,
   "env": {
-    "es6": true,
-    "browser": true
+    "node": true,
+    "es6": true
   },
-  "extends": [
-    "eslint:recommended",
-    "prettier",
-    "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
-  ],
-  "plugins": ["prettier", "react"],
   "parserOptions": {
     "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
+    "ecmaVersion": 12
   },
-  "rules": {
-    "linebreak-style": ["error", "unix"],
-    // React 17 baby
-    "react/jsx-uses-react": "off",
-    "react/react-in-jsx-scope": "off",
-    "react/display-name": "off"
-  },
-  "settings": {
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+  "ignorePatterns": ["node_modules/*"],
+  "extends": ["eslint:recommended"],
+  "plugins": ["prettier", "react"],
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "settings": {
+        "react": { "version": "detect" },
+        "import/resolver": {
+          "typescript": {}
+        }
+      },
+      "env": {
+        "browser": true,
+        "node": true,
+        "es6": true
+      },
+      "extends": [
+        "eslint:recommended",
+        "prettier",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/errors",
+        "plugin:import/typescript",
+        "plugin:import/warnings",
+        "plugin:prettier/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:react/recommended"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": ["@/features/*/*"]
+          }
+        ],
+        "linebreak-style": ["error", "unix"],
+
+        "import/order": [
+          "error",
+          {
+            "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object"],
+            "newlines-between": "always",
+            "alphabetize": { "order": "asc", "caseInsensitive": true }
+          }
+        ],
+        "import/default": "off",
+        "import/no-named-as-default": "off",
+        "import/no-named-as-default-member": "off",
+
+        "react/prop-types": "off",
+        // React 17 baby
+        "react/jsx-uses-react": "off",
+        "react/react-in-jsx-scope": "off",
+
+        "react-hooks/exhaustive-deps": "off",
+
+        "@typescript-eslint/explicit-function-return-type": ["off"],
+        "@typescript-eslint/explicit-module-boundary-types": ["off"],
+        "@typescript-eslint/no-empty-function": ["off"],
+        "@typescript-eslint/no-explicit-any": ["off"],
+        "@typescript-eslint/no-unused-vars": ["error"],
+
+        "prettier/prettier": ["error", {}, { "usePrettierrc": true }]
       }
     }
-  }
+  ]
 }

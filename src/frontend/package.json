@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@craco/craco": "^6.4.3",
     "@mantine/core": "^3.6.6",
     "@mantine/hooks": "^3.6.6",
-    "@mantine/notifications": "^3.6.8",
+    "@mantine/notifications": "^3.6.6",
     "@radix-ui/react-icons": "^1.0.3",
     "@types/node": "^16.11.22",
     "@types/react": "^17.0.39",
@@ -28,19 +29,21 @@
     "@typescript-eslint/parser": "^5.11.0",
     "customize-cra": "^1.0.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "prettier": "^2.5.1",
     "react-app-rewired": "^2.1.11",
     "type-fest": "^2.11.1"
   },
   "scripts": {
-    "start": "PORT=5001 TSC_WATCHFILE=UseFsEventsWithFallbackDynamicPolling react-scripts start",
+    "start": "PORT=5001 TSC_WATCHFILE=UseFsEventsWithFallbackDynamicPolling craco start",
     "build": "tsc",
-    "test": "node_modules/.bin/react-scripts test --env=jsdom",
-    "eject": "node_modules/.bin/react-scripts eject",
-    "deploy": "npm run build && surge -p build -d tim-recipes.surge.sh",
-    "lint": "eslint 'src/**/*.ts' --fix"
+    "test": "craco test --env=jsdom",
+    "eject": "react-scripts eject",
+    "lint": "eslint --fix --ext .js,.ts,.tsx ./src --ignore-path ../../.gitignore"
   },
   "esLintConfig": {
     "extends": [

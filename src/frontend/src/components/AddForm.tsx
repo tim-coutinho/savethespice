@@ -9,18 +9,17 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/hooks";
-// import { RichTextEditor } from "@mantine/rte";
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { ClipboardEventHandler, ReactElement, useEffect, useMemo, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { View } from "../lib/common";
-import { FormFields } from "../lib/operations";
-import { currentViewState, selectedRecipeIdState } from "../store";
-import { Category } from "../types";
+import { View } from "@/lib/common";
+import { useAddRecipe, useCategories, useRecipes, useScrape, useUpdateRecipe } from "@/lib/hooks";
+import { FormFields } from "@/lib/operations";
+import { currentViewState, selectedRecipeIdState } from "@/store";
+import { Category } from "@/types";
 
 import { FlipButton } from "./FlipButton";
-import { useAddRecipe, useCategories, useRecipes, useScrape, useUpdateRecipe } from "../lib/hooks";
 
 const baseForm = {
   name: "",

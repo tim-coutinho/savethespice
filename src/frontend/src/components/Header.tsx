@@ -14,15 +14,17 @@ import { useBooleanToggle } from "@mantine/hooks";
 import { GearIcon, MagnifyingGlassIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import { MouseEventHandler, ReactElement, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { View } from "../lib/common";
+
+import { View } from "@/lib/common";
+import { useCategories } from "@/lib/hooks";
 import {
   currentViewState,
   filterOptionsState,
   filterState,
   selectedCategoryIdState,
-} from "../store";
+} from "@/store";
+
 import { FlipButton } from "./FlipButton";
-import { useCategories } from "../lib/hooks";
 
 interface HeaderProps {
   handleViewChange: (source: typeof View[keyof typeof View]) => MouseEventHandler;

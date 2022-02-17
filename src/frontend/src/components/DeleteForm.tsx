@@ -1,17 +1,18 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
 import { useNotifications } from "@mantine/notifications";
-import { ReactElement, useEffect } from "react";
+import { ReactElement } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { UNSET, View } from "../lib/common";
+import { UNSET, View } from "@/lib/common";
+import { useDeleteCategory, useDeleteRecipe } from "@/lib/hooks";
 import {
   currentViewState,
   itemToDeleteState,
   selectedCategoryIdState,
   selectedRecipeIdState,
-} from "../store";
+} from "@/store";
+
 import { FlipButton } from "./FlipButton";
-import { useDeleteCategory, useDeleteRecipe } from "../lib/hooks";
 
 export default function DeleteForm(): ReactElement {
   const [currentView, setCurrentView] = useRecoilState(currentViewState);

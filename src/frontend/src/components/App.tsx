@@ -4,9 +4,9 @@ import { NotificationsProvider } from "@mantine/notifications";
 import { ReactElement, useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { prefix, SignedInState, UNSET, View } from "../lib/common";
-import { useRefreshIdToken, useRenderTimeout } from "../lib/hooks";
-import { currentViewState, selectedRecipeIdState, signedInState } from "../store";
+import { prefix, SignedInState, UNSET, View } from "@/lib/common";
+import { useRefreshIdToken, useRenderTimeout } from "@/lib/hooks";
+import { currentViewState, selectedRecipeIdState, signedInState } from "@/store";
 
 import AddForm from "./AddForm";
 import AuthForm from "./AuthForm";
@@ -60,7 +60,7 @@ export default function App(): ReactElement {
       setVisible(true);
       setCurrentView(View.HOME);
     }
-  }, [signedIn, refreshIdTokenMutation.status]);
+  }, [signedIn, refreshIdTokenMutation.isLoading]);
 
   useEffect(() => {
     localStorage.setItem(`${prefix}theme`, theme);

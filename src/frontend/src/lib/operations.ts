@@ -1,5 +1,6 @@
+import { Category, CategoryMap, Recipe, RecipeMap } from "@/types";
+
 import { api, prefix } from "./common";
-import { Category, CategoryMap, Recipe, RecipeMap } from "../types";
 
 interface RefreshIdTokenResponseData {
   refreshTokenExpired: boolean;

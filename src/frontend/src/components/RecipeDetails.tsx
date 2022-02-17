@@ -16,12 +16,12 @@ import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { ReactElement, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
-import { UNSET } from "../lib/common";
-import { itemToDeleteState, selectedCategoryIdState, selectedRecipeIdState } from "../store";
-import { Category, Recipe } from "../types";
+import { UNSET } from "@/lib/common";
+import { useCategories, useRecipes } from "@/lib/hooks";
+import { itemToDeleteState, selectedCategoryIdState, selectedRecipeIdState } from "@/store";
+import { Category, Recipe } from "@/types";
 
 import { FlipButton } from "./FlipButton";
-import { useCategories, useRecipes } from "../lib/hooks";
 
 interface DetailsProps {
   handleDeleteRecipe: () => void;

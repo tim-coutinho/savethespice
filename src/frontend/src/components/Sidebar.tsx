@@ -27,17 +27,18 @@ import {
 import { MouseEvent, ReactElement, useEffect, useRef, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 
-import { SignedInState, UNSET, View } from "../lib/common";
-import { useAddCategory, useCategories, useRecipes } from "../lib/hooks";
-import { signOut } from "../lib/operations";
+import { SignedInState, UNSET, View } from "@/lib/common";
+import { useAddCategory, useCategories, useRecipes } from "@/lib/hooks";
+import { signOut } from "@/lib/operations";
 import {
   currentViewState,
   itemToDeleteState,
   selectedCategoryIdState,
   selectedRecipeIdState,
   signedInState,
-} from "../store";
-import { Category } from "../types";
+} from "@/store";
+import { Category } from "@/types";
+
 import { FlipButton } from "./FlipButton";
 
 interface SidebarProps {

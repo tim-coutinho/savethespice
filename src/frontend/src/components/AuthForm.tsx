@@ -5,9 +5,10 @@ import { Cross2Icon, EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-
 import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { SignedInState, View } from "../lib/common";
-import { useForgotPassword, useSignIn, useSignUp } from "../lib/hooks";
-import { currentViewState, signedInState } from "../store";
+import { SignedInState, View } from "@/lib/common";
+import { useForgotPassword, useSignIn, useSignUp } from "@/lib/hooks";
+import { currentViewState, signedInState } from "@/store";
+
 import { FlipButton } from "./FlipButton";
 
 enum Mode {

@@ -1,5 +1,6 @@
 import { atom } from "recoil";
-import { SignedInState, UNSET, View } from "../lib/common";
+
+import { SignedInState, UNSET, View } from "@/lib/common";
 
 export const filterState = atom({ key: "filterState", default: "" });
 

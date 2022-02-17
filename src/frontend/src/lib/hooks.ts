@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import { QueryClient, useMutation, useQuery } from "react-query";
-import { CategoryMap, Recipe, RecipeMap } from "../types";
+
+import { CategoryMap, Recipe, RecipeMap } from "@/types";
+
 import { UNSET } from "./common";
 import {
   addCategory,
