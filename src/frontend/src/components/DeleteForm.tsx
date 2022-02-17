@@ -1,5 +1,6 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
-import { ReactElement } from "react";
+import { useNotifications } from "@mantine/notifications";
+import { ReactElement, useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { UNSET, View } from "../lib/common";
@@ -17,8 +18,9 @@ export default function DeleteForm(): ReactElement {
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
   const itemToDelete = useRecoilValue(itemToDeleteState);
-  const { mutate: deleteRecipe } = useDeleteRecipe();
-  const { mutate: deleteCategory } = useDeleteCategory();
+  const { showNotification } = useNotifications();
+  const deleteRecipeMutation = useDeleteRecipe();
+  const deleteCategoryMutation = useDeleteCategory();
 
   return (
     <Modal
@@ -37,10 +39,18 @@ export default function DeleteForm(): ReactElement {
             const { id, type } = itemToDelete;
             if (id !== -1) {
               if (type === "recipe") {
-                deleteRecipe(id);
+                deleteRecipeMutation.mutate(id, {
+                  onSuccess: () => {
+                    showNotification({ message: "Recipe deleted!" });
+                  },
+                });
                 id === selectedRecipeId && setSelectedRecipeId(UNSET);
               } else {
-                deleteCategory(id);
+                deleteCategoryMutation.mutate(id, {
+                  onSuccess: () => {
+                    showNotification({ message: "Category deleted!" });
+                  },
+                });
                 id === selectedCategoryId && setSelectedCategoryId(UNSET);
               }
             }

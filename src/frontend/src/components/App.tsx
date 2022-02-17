@@ -1,5 +1,6 @@
 import { ColorSchemeProvider, MantineProvider, Paper } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
+import { NotificationsProvider } from "@mantine/notifications";
 import { ReactElement, useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
@@ -94,62 +95,64 @@ export default function App(): ReactElement {
           }),
         }}
       >
-        <Paper
-          id="app"
-          sx={theme => ({
-            "&[data-themechange], &[data-themechange] *": {
-              transition: `${theme.other.transitionDuration}ms !important`,
-            },
-          })}
-        >
-          <div className={visible ? "visible" : ""}>
-            {rendered && (
-              <>
-                <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
-                <Paper
-                  className={currentView === View.SIDEBAR ? "shifted-right" : ""}
-                  sx={theme => ({
-                    display: "flex",
-                    float: "right",
-                    transitionDuration: `${theme.other.transitionDuration}ms`,
-                    transitionProperty: "width",
-                    width: "100%",
-                    "&.shifted-right": {
-                      width: `calc(100vw - ${theme.other.sidebarWidth}px)`,
-                    },
-                  })}
-                >
+        <NotificationsProvider>
+          <Paper
+            id="app"
+            sx={theme => ({
+              "&[data-themechange], &[data-themechange] *": {
+                transition: `${theme.other.transitionDuration}ms !important`,
+              },
+            })}
+          >
+            <div className={visible ? "visible" : ""}>
+              {rendered && (
+                <>
+                  <Sidebar handleDeleteCategory={() => handleViewChange(View.DELETE)} />
                   <Paper
-                    radius={0}
+                    className={currentView === View.SIDEBAR ? "shifted-right" : ""}
                     sx={theme => ({
-                      borderRight: `1px solid ${theme.colors.gray[7]}`,
                       display: "flex",
-                      flexDirection: "column",
-                      height: "100vh",
-                      // [`@media (max-width: ${theme.breakpoints.md}px)`]: { width: "100vw" },
-                      width: 420,
+                      float: "right",
+                      transitionDuration: `${theme.other.transitionDuration}ms`,
+                      transitionProperty: "width",
+                      width: "100%",
+                      "&.shifted-right": {
+                        width: `calc(100vw - ${theme.other.sidebarWidth}px)`,
+                      },
                     })}
                   >
-                    <Header handleViewChange={source => () => handleViewChange(source)} />
-                    <RecipeList />
-                  </Paper>
-                  {selectedRecipeId !== UNSET && (
-                    <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
-                      <Details
-                        handleDeleteRecipe={() => handleViewChange(View.DELETE)}
-                        editRecipe={() => handleViewChange(View.EDIT)}
-                      />
+                    <Paper
+                      radius={0}
+                      sx={theme => ({
+                        borderRight: `1px solid ${theme.colors.gray[7]}`,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "100vh",
+                        // [`@media (max-width: ${theme.breakpoints.md}px)`]: { width: "100vw" },
+                        width: 420,
+                      })}
+                    >
+                      <Header handleViewChange={source => () => handleViewChange(source)} />
+                      <RecipeList />
                     </Paper>
-                  )}
-                </Paper>
-              </>
-            )}
-          </div>
-          <AddForm editMode={editMode.current} />
-          <DeleteForm />
-          <ImportForm />
-          <AuthForm />
-        </Paper>
+                    {selectedRecipeId !== UNSET && (
+                      <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
+                        <Details
+                          handleDeleteRecipe={() => handleViewChange(View.DELETE)}
+                          editRecipe={() => handleViewChange(View.EDIT)}
+                        />
+                      </Paper>
+                    )}
+                  </Paper>
+                </>
+              )}
+            </div>
+            <AddForm editMode={editMode.current} />
+            <DeleteForm />
+            <ImportForm />
+            <AuthForm />
+          </Paper>
+        </NotificationsProvider>
       </MantineProvider>
     </ColorSchemeProvider>
   );

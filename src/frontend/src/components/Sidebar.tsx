@@ -14,6 +14,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useBooleanToggle, useClipboard, useInputState } from "@mantine/hooks";
+import { useNotifications } from "@mantine/notifications";
 import {
   ClipboardIcon,
   CopyIcon,
@@ -57,9 +58,10 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
   const clipboard = useClipboard();
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const theme = useMantineTheme();
+  const { showNotification } = useNotifications();
 
   const { data: recipes } = useRecipes();
-  const categoriesQuery = useCategories();
+  const { data: categories } = useCategories();
   const addCategoryMutation = useAddCategory();
 
   useEffect(() => {
@@ -152,11 +154,15 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
               onSubmit={e => {
                 e.preventDefault();
                 if (
-                  Array.from(categoriesQuery.data || []).every(
-                    ([, { name }]) => name !== newCategoryName,
-                  )
+                  Array.from(categories || []).every(([, { name }]) => name !== newCategoryName)
                 ) {
-                  addCategoryMutation.mutate(newCategoryName);
+                  addCategoryMutation.mutate(newCategoryName, {
+                    onSuccess: ({ name }) => {
+                      showNotification({
+                        message: `Category ${name} created!`,
+                      });
+                    },
+                  });
                   setNewCategoryName("");
                   toggleShiftedLeft();
                 }
@@ -184,7 +190,7 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
             <TriangleRightIcon className="arrow" />
             <span style={{ position: "absolute", left: theme.spacing.lg }}>All Recipes</span>
           </Group>
-          {Array.from(categoriesQuery.data || [])
+          {Array.from(categories || [])
             .sort(([, { name: name1 }], [, { name: name2 }]) =>
               name1.toLowerCase() >= name2.toLowerCase() ? 1 : -1,
             )
@@ -231,7 +237,7 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
                         ? {
                             ...recipe,
                             categories: recipe.categories.map(
-                              c => (categoriesQuery.data?.get(c) as Category).name,
+                              c => (categories?.get(c) as Category).name,
                             ),
                             recipeId: undefined,
                             createTime: undefined,

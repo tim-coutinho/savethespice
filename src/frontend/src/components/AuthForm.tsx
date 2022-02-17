@@ -1,6 +1,7 @@
 import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs, Text } from "@mantine/core";
 import { useForm } from "@mantine/hooks";
-import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
+import { useNotifications } from "@mantine/notifications";
+import { Cross2Icon, EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
 import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
@@ -23,6 +24,8 @@ export default function AuthForm(): ReactElement {
   const form = useForm({
     initialValues: { email: "", password: "", confirmPassword: "" },
   });
+  const { showNotification } = useNotifications();
+
   const signInMutation = useSignIn();
   const signUpMutation = useSignUp();
   const forgotPasswordMutation = useForgotPassword();
@@ -35,7 +38,8 @@ export default function AuthForm(): ReactElement {
           {
             onSuccess: () => setSignedIn(SignedInState.SIGNED_IN),
             onError: e => {
-              e instanceof Error && setAuthResponse(e.message);
+              e instanceof Error &&
+                showNotification({ message: e.message, icon: <Cross2Icon />, color: "red" });
             },
           },
         );
@@ -43,18 +47,24 @@ export default function AuthForm(): ReactElement {
         return signUpMutation.mutate(
           { email, password },
           {
-            onSuccess: ([res]) => setAuthResponse(res),
+            onSuccess: ([message]) => {
+              showNotification({ message, icon: <EnvelopeClosedIcon /> });
+            },
             onError: e => {
-              e instanceof Error && setAuthResponse(e.message);
+              e instanceof Error &&
+                showNotification({ message: e.message, icon: <Cross2Icon />, color: "red" });
             },
             onSettled: () => setSignedIn(SignedInState.SIGNED_OUT),
           },
         );
       case Mode.FORGOT_PASSWORD:
         return forgotPasswordMutation.mutate(email, {
-          onSuccess: setAuthResponse,
+          onSuccess: message => {
+            showNotification({ message, icon: <EnvelopeClosedIcon /> });
+          },
           onError: e => {
-            e instanceof Error && setAuthResponse(e.message);
+            e instanceof Error &&
+              showNotification({ message: e.message, icon: <Cross2Icon />, color: "red" });
           },
           onSettled: () => setSignedIn(SignedInState.SIGNED_OUT),
         });

@@ -5,6 +5,7 @@
   "dependencies": {
     "@mantine/core": "^3.6.6",
     "@mantine/hooks": "^3.6.6",
+    "@mantine/notifications": "^3.6.8",
     "@radix-ui/react-icons": "^1.0.3",
     "@types/node": "^16.11.22",
     "@types/react": "^17.0.39",
