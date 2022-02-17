@@ -51,14 +51,7 @@ export default function AddForm({ editMode }: AddFormProps): ReactElement {
   const addRecipeMutation = useAddRecipe();
   const updateRecipeMutation = useUpdateRecipe();
 
-  const scrapeQuery = useScrape({
-    url: form.values.urlToScrape,
-    onSuccess: data => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      form.setValues({ ...form.values, ...data });
-    },
-  });
+  const scrapeQuery = useScrape(form.values.urlToScrape);
 
   const addRecipeLoading = useMemo(
     () => addRecipeMutation.isLoading || updateRecipeMutation.isLoading,
@@ -70,6 +63,12 @@ export default function AddForm({ editMode }: AddFormProps): ReactElement {
     () => addRecipeLoading || scrapeQuery.isLoading,
     [addRecipeLoading, scrapeQuery.isLoading],
   );
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    scrapeQuery.isSuccess && form.setValues({ ...form.values, ...scrapeQuery.data });
+  }, [scrapeQuery.isSuccess]);
 
   useEffect(() => {
     if (!formVisible) {
@@ -104,7 +103,7 @@ export default function AddForm({ editMode }: AddFormProps): ReactElement {
     // Value not initially present, new value present
     (initialValue === undefined && newValue);
 
-  const handleSubmit = async (values: typeof form.values) => {
+  const handleSubmit = (values: typeof form.values) => {
     const recipe = {
       ...values,
       ingredients: [values.ingredients],

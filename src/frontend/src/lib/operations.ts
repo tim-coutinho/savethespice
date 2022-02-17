@@ -1,5 +1,5 @@
 import { api, prefix } from "./common";
-import { Category, Recipe } from "../types";
+import { Category, CategoryMap, Recipe, RecipeMap } from "../types";
 
 interface RefreshIdTokenResponseData {
   refreshTokenExpired: boolean;
@@ -20,7 +20,6 @@ export const refreshIdToken = (): Promise<string> => {
       if (status >= 400) {
         if (res.data?.refreshTokenExpired) {
           localStorage.removeItem(`${prefix}refreshToken`);
-          return "";
         }
         throw new Error(res.message);
       }
@@ -61,12 +60,9 @@ export const signIn = (email: string, password: string): Promise<string> => {
   });
 };
 
-export const signOut = (): Promise<void> => {
-  return new Promise<void>(resolve => {
-    localStorage.removeItem(`${prefix}refreshToken`);
-    sessionStorage.removeItem(`${prefix}idToken`);
-    resolve();
-  });
+export const signOut = (): void => {
+  localStorage.removeItem(`${prefix}refreshToken`);
+  sessionStorage.removeItem(`${prefix}idToken`);
 };
 
 export const forgotPassword = (email: string): Promise<string> => {
@@ -96,7 +92,7 @@ interface GetAllRecipesResponseData {
   recipes: Recipe[];
 }
 
-export const getAllRecipes = (): Promise<Map<number, Recipe>> =>
+export const getAllRecipes = (): Promise<RecipeMap> =>
   api.get<GetAllRecipesResponseData>("recipes").then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);
@@ -108,7 +104,7 @@ interface GetAllCategoriesResponseData {
   categories: Category[];
 }
 
-export const getAllCategories = (): Promise<Map<number, Category>> =>
+export const getAllCategories = (): Promise<CategoryMap> =>
   api.get<GetAllCategoriesResponseData>("categories").then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);

@@ -1,18 +1,22 @@
 import { useRef, useState } from "react";
-import { QueryClient, useMutation, useQuery, UseQueryOptions } from "react-query";
+import { QueryClient, useMutation, useQuery } from "react-query";
+import { CategoryMap, Recipe, RecipeMap } from "../types";
+import { UNSET } from "./common";
 import {
   addCategory,
   addRecipe,
   addRecipes,
   deleteCategory,
   deleteRecipe,
+  forgotPassword,
   FormFields,
   getAllCategories,
   getAllRecipes,
+  refreshIdToken,
   scrape,
+  signIn,
+  signUp,
 } from "./operations";
-import { Category, Recipe } from "../types";
-import { UNSET } from "./common";
 
 export const useRenderTimeout = (timeout = 300): [boolean, boolean, (inView: boolean) => void] => {
   const inFlight = useRef<boolean>(false);
@@ -47,19 +51,14 @@ export const useRecipes = () =>
 
 export const useCategories = () => useQuery("categories", getAllCategories);
 
-type UseScrapeOptions = { url: string; onSuccess: UseQueryOptions["onSuccess"] };
-
-export const useScrape = ({ url, onSuccess }: UseScrapeOptions) =>
-  useQuery(["scrape", url], () => scrape(url), {
-    onSuccess,
-    enabled: false,
-  });
+export const useScrape = (url: string) =>
+  useQuery(["scrape", url], () => scrape(url), { enabled: false });
 
 export const useAddRecipe = () =>
   useMutation(addRecipe, {
-    onMutate: async (recipe: FormFields) => {
-      const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
+    onMutate: (recipe: FormFields) => {
+      const previousRecipes = queryClient.getQueryData<RecipeMap>("recipes");
+      const previousCategories = queryClient.getQueryData<CategoryMap>("categories");
 
       if (previousCategories) {
         const newCategories = new Map(previousCategories);
@@ -98,11 +97,9 @@ export const useAddRecipe = () =>
 
       return { previousRecipes, previousCategories };
     },
-    onSuccess: async data => {
-      await queryClient.invalidateQueries("categories");
-
-      const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
-      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
+    onSuccess: data => {
+      const previousRecipes = queryClient.getQueryData<RecipeMap>("recipes");
+      const previousCategories = queryClient.getQueryData<CategoryMap>("categories");
       previousRecipes &&
         queryClient.setQueryData("recipes", previousRecipes.set(data.recipeId, data));
       data.newCategories &&
@@ -126,8 +123,8 @@ export const useUpdateRecipe = () =>
 
 export const useDeleteRecipe = () =>
   useMutation(deleteRecipe, {
-    onMutate: async (recipeId: number) => {
-      const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+    onMutate: (recipeId: number) => {
+      const previousRecipes = queryClient.getQueryData<RecipeMap>("recipes");
       if (previousRecipes) {
         const newRecipes = new Map(previousRecipes);
         newRecipes.delete(recipeId);
@@ -142,17 +139,17 @@ export const useDeleteRecipe = () =>
 
 export const useDeleteCategory = () =>
   useMutation(deleteCategory, {
-    onMutate: async (categoryId: number) => {
-      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
+    onMutate: (categoryId: number) => {
+      const previousCategories = queryClient.getQueryData<CategoryMap>("categories");
       if (previousCategories) {
         const newCategories = new Map(previousCategories);
         newCategories.delete(categoryId);
         queryClient.setQueryData("categories", newCategories);
+        return { previousCategories, categoryId };
       }
-      return { previousCategories, categoryId };
     },
-    onSuccess: async (responseData, _, context) => {
-      const recipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+    onSuccess: (responseData, _, context) => {
+      const recipes = queryClient.getQueryData<RecipeMap>("recipes");
       if (recipes && responseData?.updatedRecipes) {
         responseData.updatedRecipes.forEach(recipeId => {
           const recipe = recipes.get(recipeId) as Recipe;
@@ -169,11 +166,11 @@ export const useDeleteCategory = () =>
 
 export const useAddCategory = () =>
   useMutation(addCategory, {
-    onMutate: async (categoryName: string) => {
-      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
-      const categoryId = Math.random();
+    onMutate: (categoryName: string) => {
+      const previousCategories = queryClient.getQueryData<CategoryMap>("categories");
 
       if (previousCategories) {
+        const categoryId = Math.random();
         const newCategories = new Map(previousCategories);
         queryClient.setQueryData(
           "categories",
@@ -185,18 +182,14 @@ export const useAddCategory = () =>
             userId: "",
           }),
         );
+        return { previousCategories, newCategoryId: categoryId };
       }
-      return { previousCategories };
     },
-    onSuccess: async category => {
-      await queryClient.invalidateQueries("categories");
-
-      const previousCategories = queryClient.getQueryData<Map<number, Category>>("categories");
-      previousCategories &&
-        queryClient.setQueryData(
-          "categories",
-          previousCategories.set(category.categoryId, category),
-        );
+    onSuccess: (category, _, context) => {
+      queryClient.setQueryData("categories", () => {
+        context.previousCategories.delete(context.newCategoryId);
+        return context.previousCategories.set(category.categoryId, category);
+      });
     },
     onError: (_, __, context) => {
       context?.previousCategories &&
@@ -206,8 +199,8 @@ export const useAddCategory = () =>
 
 export const useAddRecipes = () =>
   useMutation(addRecipes, {
-    onMutate: async (recipes: Recipe[]) => {
-      const previousRecipes = queryClient.getQueryData<Map<number, Recipe>>("recipes");
+    onMutate: (recipes: Recipe[]) => {
+      const previousRecipes = queryClient.getQueryData<RecipeMap>("recipes");
       if (previousRecipes) {
         const newRecipes = new Map(previousRecipes);
         recipes.forEach(r => {
@@ -222,9 +215,7 @@ export const useAddRecipes = () =>
       }
       return { previousRecipes };
     },
-    onSuccess: async data => {
-      await queryClient.invalidateQueries("recipes");
-
+    onSuccess: data => {
       data.recipes &&
         queryClient.setQueryData(
           "recipes",
@@ -235,3 +226,17 @@ export const useAddRecipes = () =>
       context?.previousRecipes && queryClient.setQueryData("recipes", context.previousRecipes);
     },
   });
+
+export const useRefreshIdToken = () => useMutation(refreshIdToken);
+
+type UseSignInOptions = { email: string; password: string };
+
+export const useSignIn = () =>
+  useMutation(({ email, password }: UseSignInOptions) => signIn(email, password));
+
+type UseSignUpOptions = { email: string; password: string };
+
+export const useSignUp = () =>
+  useMutation(({ email, password }: UseSignUpOptions) => signUp(email, password));
+
+export const useForgotPassword = () => useMutation(forgotPassword);

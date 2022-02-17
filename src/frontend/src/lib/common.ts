@@ -26,8 +26,6 @@ export const View: Record<
 
 export enum SignedInState {
   SIGNED_IN = "signed_in",
-  PENDING = "pending",
-  REFRESHING_ID_TOKEN = "refreshing_id_token",
   SIGNED_OUT = "signed_out",
 }
 
@@ -52,18 +50,18 @@ interface FetchResponse<T> {
 
 const wrapFetch = <T = undefined>(
   resource: string,
-  options: { options?: RequestInit; params?: string | Record<string, unknown> } = {
+  config: { options?: RequestInit; params?: string | Record<string, unknown> } = {
     options: { method: "GET" },
     params: "",
   },
 ): Promise<[FetchResponse<T>, number]> =>
-  fetch(`${endpoint}/${resource}${serialize(options.params)}`, {
+  fetch(`${endpoint}/${resource}${serialize(config.params)}`, {
     headers: {
       Authorization: sessionStorage.getItem(`${prefix}idToken`) as string,
       "Content-Type": "application/json",
     },
-    ...options.options,
-    body: options.options?.body ?? null,
+    ...config.options,
+    body: config.options?.body ?? null,
   })
     .then(async res => {
       if (res.status === 204) {
@@ -85,12 +83,4 @@ export const api = {
   put: <T, S>(resource: string, body: S) =>
     wrapFetch<T>(resource, { options: { method: "PUT", body: JSON.stringify(body) } }),
   delete: <T>(resource: string) => wrapFetch<T>(resource, { options: { method: "DELETE" } }),
-};
-
-export const getById = (elementId: string): HTMLElement => {
-  const elem = document.getElementById(elementId);
-  if (!elem) {
-    throw ReferenceError(`${elementId} does not exist`);
-  }
-  return elem;
 };

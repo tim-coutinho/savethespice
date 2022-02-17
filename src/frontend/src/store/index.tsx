@@ -35,5 +35,5 @@ export const currentViewState = atom({
 
 export const signedInState = atom({
   key: "signedInState",
-  default: SignedInState.REFRESHING_ID_TOKEN,
+  default: SignedInState.SIGNED_IN,
 });

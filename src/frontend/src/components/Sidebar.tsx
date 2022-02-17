@@ -26,7 +26,8 @@ import {
 import { MouseEvent, ReactElement, useEffect, useRef, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 
-import { getById, SignedInState, UNSET, View } from "../lib/common";
+import { SignedInState, UNSET, View } from "../lib/common";
+import { useAddCategory, useCategories, useRecipes } from "../lib/hooks";
 import { signOut } from "../lib/operations";
 import {
   currentViewState,
@@ -37,7 +38,6 @@ import {
 } from "../store";
 import { Category } from "../types";
 import { FlipButton } from "./FlipButton";
-import { useAddCategory, useCategories, useRecipes } from "../lib/hooks";
 
 interface SidebarProps {
   handleDeleteCategory: () => void;
@@ -271,9 +271,12 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
 
           <Group
             onClick={() => {
-              getById("app").setAttribute("data-themechange", "");
+              document.querySelector("#app")?.setAttribute("data-themechange", "");
               toggleColorScheme();
-              setTimeout(() => getById("app").removeAttribute("data-themechange"), 300);
+              setTimeout(
+                () => document.querySelector("#app")?.removeAttribute("data-themechange"),
+                300,
+              );
             }}
             className="sidebar-item"
           >

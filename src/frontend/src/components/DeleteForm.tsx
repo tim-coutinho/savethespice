@@ -17,8 +17,8 @@ export default function DeleteForm(): ReactElement {
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
   const itemToDelete = useRecoilValue(itemToDeleteState);
-  const deleteRecipeMutation = useDeleteRecipe();
-  const deleteCategoryMutation = useDeleteCategory();
+  const { mutate: deleteRecipe } = useDeleteRecipe();
+  const { mutate: deleteCategory } = useDeleteCategory();
 
   return (
     <Modal
@@ -34,13 +34,14 @@ export default function DeleteForm(): ReactElement {
         <FlipButton
           color="red"
           onClick={() => {
-            if (itemToDelete.id !== -1) {
-              if (itemToDelete.type === "recipe") {
-                deleteRecipeMutation.mutate(itemToDelete.id);
-                itemToDelete.id === selectedRecipeId && setSelectedRecipeId(UNSET);
+            const { id, type } = itemToDelete;
+            if (id !== -1) {
+              if (type === "recipe") {
+                deleteRecipe(id);
+                id === selectedRecipeId && setSelectedRecipeId(UNSET);
               } else {
-                deleteCategoryMutation.mutate(itemToDelete.id);
-                itemToDelete.id === selectedCategoryId && setSelectedCategoryId(UNSET);
+                deleteCategory(id);
+                id === selectedCategoryId && setSelectedCategoryId(UNSET);
               }
             }
             setCurrentView(View.HOME);

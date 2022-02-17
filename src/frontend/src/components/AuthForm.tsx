@@ -5,7 +5,7 @@ import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { SignedInState, View } from "../lib/common";
-import { forgotPassword, signIn, signUp } from "../lib/operations";
+import { useForgotPassword, useSignIn, useSignUp } from "../lib/hooks";
 import { currentViewState, signedInState } from "../store";
 import { FlipButton } from "./FlipButton";
 
@@ -23,64 +23,41 @@ export default function AuthForm(): ReactElement {
   const form = useForm({
     initialValues: { email: "", password: "", confirmPassword: "" },
   });
+  const signInMutation = useSignIn();
+  const signUpMutation = useSignUp();
+  const forgotPasswordMutation = useForgotPassword();
 
-  const handleSignIn = (email: string, password: string) => {
-    setSignedIn(SignedInState.PENDING);
-    return signIn(email, password)
-      .then(userId => {
-        if (!userId) {
-          setSignedIn(SignedInState.SIGNED_OUT);
-          return "";
-        }
-        setSignedIn(SignedInState.SIGNED_IN);
-        return userId;
-      })
-      .catch(e => {
-        setSignedIn(SignedInState.SIGNED_OUT);
-        throw e;
-      });
-  };
-
-  const handleSignUp = (email: string, password: string) => {
-    setSignedIn(SignedInState.PENDING);
-    return signUp(email, password)
-      .then(([res]) => {
-        setSignedIn(SignedInState.SIGNED_OUT);
-        return res;
-      })
-      .catch(e => {
-        setSignedIn(SignedInState.SIGNED_OUT);
-        throw e;
-      });
-  };
-
-  const handleForgotPassword = (email: string) => {
-    setSignedIn(SignedInState.PENDING);
-    return forgotPassword(email)
-      .then(res => {
-        setSignedIn(SignedInState.SIGNED_OUT);
-        return res;
-      })
-      .catch(e => {
-        setSignedIn(SignedInState.SIGNED_OUT);
-        throw e;
-      });
-  };
-
-  const handleSubmit = (values: typeof form.values) => {
+  const handleSubmit = ({ email, password }: typeof form.values) => {
     switch (activeTab.current) {
       case Mode.SIGN_IN:
-        return handleSignIn(values.email, values.password).catch(({ message }) =>
-          setAuthResponse(message),
+        return signInMutation.mutate(
+          { email, password },
+          {
+            onSuccess: () => setSignedIn(SignedInState.SIGNED_IN),
+            onError: e => {
+              e instanceof Error && setAuthResponse(e.message);
+            },
+          },
         );
       case Mode.SIGN_UP:
-        return handleSignUp(values.email, values.password)
-          .then(res => setAuthResponse(res))
-          .catch(res => setAuthResponse(res.message));
+        return signUpMutation.mutate(
+          { email, password },
+          {
+            onSuccess: ([res]) => setAuthResponse(res),
+            onError: e => {
+              e instanceof Error && setAuthResponse(e.message);
+            },
+            onSettled: () => setSignedIn(SignedInState.SIGNED_OUT),
+          },
+        );
       case Mode.FORGOT_PASSWORD:
-        return handleForgotPassword(values.email)
-          .then(res => setAuthResponse(res))
-          .catch(({ message }) => setAuthResponse(message));
+        return forgotPasswordMutation.mutate(email, {
+          onSuccess: setAuthResponse,
+          onError: e => {
+            e instanceof Error && setAuthResponse(e.message);
+          },
+          onSettled: () => setSignedIn(SignedInState.SIGNED_OUT),
+        });
     }
   };
 
@@ -92,6 +69,11 @@ export default function AuthForm(): ReactElement {
       (activeTab.current !== Mode.FORGOT_PASSWORD && form.values.password.length < 8) ||
       (activeTab.current === Mode.SIGN_UP && form.values.confirmPassword !== form.values.password),
     [form.values.email, form.values.password, form.values.confirmPassword],
+  );
+
+  const requestInProgress = useMemo(
+    () => signInMutation.isLoading || signUpMutation.isLoading || forgotPasswordMutation.isLoading,
+    [signInMutation.isLoading, signUpMutation.isLoading, forgotPasswordMutation.isLoading],
   );
 
   useEffect(() => {
@@ -193,7 +175,7 @@ export default function AuthForm(): ReactElement {
           </Text>
           <FlipButton
             type="submit"
-            loading={signedIn === SignedInState.PENDING}
+            loading={requestInProgress}
             disabled={invalidForm || signedIn === SignedInState.SIGNED_IN}
             sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
             border
