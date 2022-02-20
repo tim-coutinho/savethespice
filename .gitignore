@@ -12,7 +12,6 @@ cdk.out
 
 # misc
 __pycache__
-secrets.*
 .DS_Store
 src/frontend/.env
 npm-debug.log*

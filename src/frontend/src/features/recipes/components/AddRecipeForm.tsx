@@ -13,13 +13,17 @@ import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { ClipboardEventHandler, ReactElement, useEffect, useMemo, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { View } from "@/lib/common";
-import { useAddRecipe, useCategories, useRecipes, useScrape, useUpdateRecipe } from "@/lib/hooks";
-import { FormFields } from "@/lib/operations";
-import { currentViewState, selectedRecipeIdState } from "@/store";
-import { Category } from "@/types";
-
-import { FlipButton } from "./FlipButton";
+import { FlipButton } from "@/components/Elements";
+import { Category, useCategories } from "@/features/categories";
+import {
+  FormFields,
+  useCreateRecipe,
+  useRecipes,
+  useScrape,
+  useUpdateRecipe,
+} from "@/features/recipes";
+import { currentViewState, selectedRecipeIdState } from "@/stores";
+import { View } from "@/utils/common";
 
 const baseForm = {
   name: "",
@@ -39,7 +43,7 @@ interface AddFormProps {
   editMode: boolean;
 }
 
-export default function AddForm({ editMode }: AddFormProps): ReactElement {
+export function AddRecipeForm({ editMode }: AddFormProps): ReactElement {
   const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const { data: recipes } = useRecipes();
   const { data: categories } = useCategories();
@@ -47,7 +51,7 @@ export default function AddForm({ editMode }: AddFormProps): ReactElement {
   const initialValues = useRef({ ...baseForm });
   const form = useForm({ initialValues: { ...initialValues.current } });
 
-  const addRecipeMutation = useAddRecipe();
+  const addRecipeMutation = useCreateRecipe();
   const updateRecipeMutation = useUpdateRecipe();
 
   const scrapeQuery = useScrape(form.values.urlToScrape);

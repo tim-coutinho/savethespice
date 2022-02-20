@@ -5,11 +5,10 @@ import { Cross2Icon, EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-
 import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { SignedInState, View } from "@/lib/common";
-import { useForgotPassword, useSignIn, useSignUp } from "@/lib/hooks";
-import { currentViewState, signedInState } from "@/store";
-
-import { FlipButton } from "./FlipButton";
+import { FlipButton } from "@/components/Elements/FlipButton";
+import { useForgotPassword, useSignIn, useSignUp } from "@/features/auth";
+import { currentViewState, signedInState } from "@/stores";
+import { SignedInState, View } from "@/utils/common";
 
 enum Mode {
   SIGN_IN,
@@ -17,7 +16,7 @@ enum Mode {
   FORGOT_PASSWORD,
 }
 
-export default function AuthForm(): ReactElement {
+export function AuthForm(): ReactElement {
   const [authResponse, setAuthResponse] = useState("");
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
   const currentView = useRecoilValue(currentViewState);

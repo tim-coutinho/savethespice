@@ -1,13 +1,8 @@
 import { atom } from "recoil";
 
-import { SignedInState, UNSET, View } from "@/lib/common";
+import { SignedInState, UNSET, View } from "@/utils/common";
 
 export const filterState = atom({ key: "filterState", default: "" });
-
-export const itemToDeleteState = atom<{ type: "category" | "recipe"; id: number }>({
-  key: "itemToDeleteState",
-  default: { type: "recipe", id: UNSET },
-});
 
 export const selectedCategoryIdState = atom({
   key: "selectedCategoryIdState",
