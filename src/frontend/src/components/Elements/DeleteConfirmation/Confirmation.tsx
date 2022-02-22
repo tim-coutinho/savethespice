@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
-import { cloneElement, ReactElement, useEffect, useState } from "react";
+import { cloneElement, MouseEvent, ReactElement, useEffect, useState } from "react";
 
 interface ConfirmationProps {
   title: string;
@@ -33,7 +33,13 @@ export function Confirmation({
       <Modal title={title} opened={visible} onClose={() => setVisible(false)}>
         {message && <Text size="sm">{message}</Text>}
         <Group position="right" mt="md">
-          <Button variant="default" onClick={() => setVisible(false)}>
+          <Button
+            variant="default"
+            onClick={(e: MouseEvent) => {
+              e.stopPropagation();
+              setVisible(false);
+            }}
+          >
             Cancel
           </Button>
           {confirmButton}

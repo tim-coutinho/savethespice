@@ -96,7 +96,7 @@ export default function App(): ReactElement {
                   display: "flex",
                   flexDirection: "column",
                   height: "100vh",
-                  // [`@media (max-width: ${theme.breakpoints.md}px)`]: { width: "100vw" },
+                  // [theme.fn.smallerThan("md")]: { width: "100vw" },
                   width: 420,
                 })}
               >

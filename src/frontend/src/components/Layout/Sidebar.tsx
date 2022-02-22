@@ -24,7 +24,7 @@ import {
   TrashIcon,
   TriangleRightIcon,
 } from "@radix-ui/react-icons";
-import { MouseEvent, ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 
 import { FlipButton } from "@/components/Elements";
@@ -198,7 +198,15 @@ export function Sidebar(): ReactElement {
             .map(([categoryId, { name }]) => (
               <Group
                 key={categoryId}
-                onClick={() => setSelectedCategoryId(categoryId)}
+                onClick={({ target }) => {
+                  // I hate this
+                  if (
+                    !((target as HTMLElement).tagName === "svg") &&
+                    !(target as HTMLElement).className.includes("mantine-Modal")
+                  ) {
+                    setSelectedCategoryId(categoryId);
+                  }
+                }}
                 className={`sidebar-item${selectedCategoryId === categoryId ? " selected" : ""}`}
               >
                 <Group>
