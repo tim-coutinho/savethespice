@@ -14,21 +14,22 @@ import { useBooleanToggle } from "@mantine/hooks";
 import { GearIcon, MagnifyingGlassIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import { MouseEventHandler, ReactElement, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { View } from "../lib/common";
+
+import { FlipButton } from "@/components/Elements";
+import { useCategories } from "@/features/categories";
 import {
   currentViewState,
   filterOptionsState,
   filterState,
   selectedCategoryIdState,
-} from "../store";
-import { FlipButton } from "./FlipButton";
-import { useCategories } from "../lib/hooks";
+} from "@/stores";
+import { View } from "@/utils/common";
 
 interface HeaderProps {
   handleViewChange: (source: typeof View[keyof typeof View]) => MouseEventHandler;
 }
 
-export default function Header({ handleViewChange }: HeaderProps): ReactElement {
+export function Header({ handleViewChange }: HeaderProps): ReactElement {
   const [popoverOpened, togglePopoverOpened] = useBooleanToggle(false);
   const [filterFocused, toggleFilterFocused] = useBooleanToggle(false);
   const ref = useRef<HTMLInputElement>(null);

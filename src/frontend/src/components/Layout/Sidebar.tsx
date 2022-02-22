@@ -24,34 +24,34 @@ import {
   TrashIcon,
   TriangleRightIcon,
 } from "@radix-ui/react-icons";
-import { MouseEvent, ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 
-import { SignedInState, UNSET, View } from "../lib/common";
-import { useAddCategory, useCategories, useRecipes } from "../lib/hooks";
-import { signOut } from "../lib/operations";
+import { FlipButton } from "@/components/Elements";
+import { Confirmation } from "@/components/Elements/DeleteConfirmation/Confirmation";
+import { signOut } from "@/features/auth";
+import {
+  Category,
+  useCategories,
+  useCreateCategory,
+  useDeleteCategory,
+} from "@/features/categories";
+import { useRecipes } from "@/features/recipes";
 import {
   currentViewState,
-  itemToDeleteState,
   selectedCategoryIdState,
   selectedRecipeIdState,
   signedInState,
-} from "../store";
-import { Category } from "../types";
-import { FlipButton } from "./FlipButton";
+} from "@/stores";
+import { SignedInState, UNSET, View } from "@/utils/common";
 
-interface SidebarProps {
-  handleDeleteCategory: () => void;
-}
-
-export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactElement {
+export function Sidebar(): ReactElement {
   const newCategoryNameInputRef = useRef<HTMLInputElement>(null);
   const copyTextRef = useRef<HTMLDivElement>(null);
   const [shiftedLeft, toggleShiftedLeft] = useBooleanToggle(false);
   const [newCategoryName, setNewCategoryName] = useInputState("");
   const [selectedCategoryId, setSelectedCategoryId] = useRecoilState(selectedCategoryIdState);
   const setSelectedRecipeId = useSetRecoilState(selectedRecipeIdState);
-  const setItemToDelete = useSetRecoilState(itemToDeleteState);
   const setCurrentView = useSetRecoilState(currentViewState);
   const setSignedIn = useSetRecoilState(signedInState);
   const { toggleColorScheme } = useMantineColorScheme();
@@ -62,7 +62,8 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
 
   const { data: recipes } = useRecipes();
   const { data: categories } = useCategories();
-  const addCategoryMutation = useAddCategory();
+  const deleteCategoryMutation = useDeleteCategory();
+  const addCategoryMutation = useCreateCategory();
 
   useEffect(() => {
     shiftedLeft &&
@@ -197,26 +198,53 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
             .map(([categoryId, { name }]) => (
               <Group
                 key={categoryId}
-                onClick={() => setSelectedCategoryId(categoryId)}
+                onClick={({ target }) => {
+                  // I hate this
+                  if (
+                    !((target as HTMLElement).tagName === "svg") &&
+                    !(target as HTMLElement).className.includes("mantine-Modal")
+                  ) {
+                    setSelectedCategoryId(categoryId);
+                  }
+                }}
                 className={`sidebar-item${selectedCategoryId === categoryId ? " selected" : ""}`}
               >
                 <Group>
                   <TriangleRightIcon className="arrow" />
                   <span style={{ position: "absolute", left: theme.spacing.lg }}>{name}</span>
                 </Group>
-                <FlipButton
-                  onClick={(e: MouseEvent) => {
-                    e.stopPropagation();
-                    setItemToDelete({ type: "category", id: categoryId });
-                    handleDeleteCategory();
-                  }}
-                  border
-                  size="xs"
-                  color="red"
-                  sx={{ padding: "0 10px", position: "absolute", right: theme.spacing.xl }}
-                >
-                  <TrashIcon width={20} height={20} />
-                </FlipButton>
+                <Confirmation
+                  active={!deleteCategoryMutation.isSuccess}
+                  title="Permanently delete category?"
+                  message="This cannot be undone."
+                  triggerButton={
+                    <FlipButton
+                      border
+                      size="xs"
+                      color="red"
+                      sx={{ padding: "0 10px", position: "absolute", right: theme.spacing.xl }}
+                    >
+                      <TrashIcon width={20} height={20} />
+                    </FlipButton>
+                  }
+                  confirmButton={
+                    <FlipButton
+                      color="red"
+                      onClick={() => {
+                        deleteCategoryMutation.mutate(categoryId, {
+                          onSuccess: () => {
+                            showNotification({ message: "Category deleted!" });
+                          },
+                        });
+                        categoryId === selectedCategoryId && setSelectedCategoryId(UNSET);
+                      }}
+                      sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
+                      border
+                    >
+                      Delete
+                    </FlipButton>
+                  }
+                />
               </Group>
             ))}
         </Navbar.Section>
@@ -293,8 +321,8 @@ export default function Sidebar({ handleDeleteCategory }: SidebarProps): ReactEl
             />
           </Group>
           <Group
-            onClick={async () => {
-              await signOut();
+            onClick={() => {
+              signOut();
               setSignedIn(SignedInState.SIGNED_OUT);
               setSelectedCategoryId(UNSET);
               setSelectedRecipeId(UNSET);

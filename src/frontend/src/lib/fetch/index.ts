@@ -1,4 +1,10 @@
-import { endpoint } from "./secrets";
+import { endpoint } from "@/config";
+import { prefix } from "@/utils/common";
+
+interface FetchResponse<T> {
+  data: T;
+  message: string;
+}
 
 const serialize = (obj?: Record<string, unknown> | string) =>
   encodeURI(
@@ -7,46 +13,6 @@ const serialize = (obj?: Record<string, unknown> | string) =>
       "",
     ),
   );
-
-export const prefix = "SaveTheSpice-";
-export const UNSET = -1;
-
-export const View: Record<
-  "ADD" | "DELETE" | "EDIT" | "HOME" | "IMPORT" | "SIDEBAR" | "AUTH",
-  { modal: boolean }
-> = {
-  ADD: { modal: true },
-  DELETE: { modal: true },
-  EDIT: { modal: true },
-  HOME: { modal: false },
-  IMPORT: { modal: true },
-  SIDEBAR: { modal: false },
-  AUTH: { modal: false },
-};
-
-export enum SignedInState {
-  SIGNED_IN = "signed_in",
-  SIGNED_OUT = "signed_out",
-}
-
-export enum Color {
-  OD_RED = "#e06c75",
-  OD_DARK_RED = "#be5046",
-  OD_GREEN = "#98c379",
-  OD_YELLOW = "#e5c07b",
-  OD_DARK_YELLOW = "#d19a66",
-  OD_BLUE = "#61afef",
-  OD_PURPLE = "#c678dd",
-  OD_CYAN = "#56b6c2",
-  OD_WHITE = "#abb2bf",
-  OD_BLACK = "#282c34",
-  WHITE = "#ffffff",
-}
-
-interface FetchResponse<T> {
-  data: T;
-  message: string;
-}
 
 const wrapFetch = <T = undefined>(
   resource: string,
@@ -76,11 +42,15 @@ const wrapFetch = <T = undefined>(
     }) as Promise<[FetchResponse<T>, number]>; // Fetch only rejects on network errors
 
 export const api = {
-  get: <T>(resource: string, params?: Record<string, unknown>) =>
+  get: <T>(
+    resource: string,
+    params?: Record<string, unknown>,
+  ): Promise<[FetchResponse<T>, number]> =>
     wrapFetch<T>(resource, { options: { method: "GET" }, params }),
-  post: <T, S>(resource: string, body: S) =>
+  post: <T, S>(resource: string, body: S): Promise<[FetchResponse<T>, number]> =>
     wrapFetch<T>(resource, { options: { method: "POST", body: JSON.stringify(body) } }),
-  put: <T, S>(resource: string, body: S) =>
+  put: <T, S>(resource: string, body: S): Promise<[FetchResponse<T>, number]> =>
     wrapFetch<T>(resource, { options: { method: "PUT", body: JSON.stringify(body) } }),
-  delete: <T>(resource: string) => wrapFetch<T>(resource, { options: { method: "DELETE" } }),
+  delete: <T>(resource: string): Promise<[FetchResponse<T>, number]> =>
+    wrapFetch<T>(resource, { options: { method: "DELETE" } }),
 };

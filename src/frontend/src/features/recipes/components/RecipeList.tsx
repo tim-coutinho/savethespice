@@ -1,17 +1,17 @@
+import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
+
+import { useRecipes, Recipe } from "@/features/recipes";
 import {
   filterOptionsState,
   filterState,
   selectedCategoryIdState,
   selectedRecipeIdState,
-} from "../store";
-import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
-import { UNSET } from "../lib/common";
-import { Recipe } from "../types";
-import { useRecipes } from "../lib/hooks";
+} from "@/stores";
+import { UNSET } from "@/utils/common";
 
-export default function RecipeList(): ReactElement {
+export function RecipeList(): ReactElement {
   const ref = useRef<HTMLUListElement>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
   const [filteredRecipes, setFilteredRecipes] = useState<[number, Recipe][]>([]);
