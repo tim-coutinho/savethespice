@@ -178,13 +178,13 @@ export const RecipeDetails: FC = () => {
                 {recipe.categories && (
                   <Chips
                     variant="outline"
-                    value={searchParams.get("categories")?.split(",") ?? []}
+                    value={searchParams.get("categories")?.split("|") ?? []}
                     onChange={categories => {
                       if (categories.length === 0) {
                         searchParams.delete("categories");
                         setSearchParams(searchParams);
                       } else {
-                        setSearchParams({ ...searchParams, categories: categories.join(",") });
+                        setSearchParams({ ...searchParams, categories: categories.join("|") });
                       }
                     }}
                     multiple

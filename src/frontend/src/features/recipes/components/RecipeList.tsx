@@ -22,7 +22,7 @@ export const RecipeList: FC = () => {
     if (!recipesQuery.data) {
       return;
     }
-    const categoryFilter = searchParams.get("categories")?.split(",");
+    const categoryFilter = searchParams.get("categories")?.split("|");
     setFilteredRecipes(
       Array.from(recipesQuery.data)
         .filter(([, recipe]) => {

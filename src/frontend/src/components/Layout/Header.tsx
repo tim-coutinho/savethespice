@@ -34,7 +34,7 @@ export const Header: FC = () => {
   const { data: categories } = useCategories();
 
   const headerTitle = useMemo(() => {
-    const categoryFilter = searchParams.get("categories")?.split(",") ?? [];
+    const categoryFilter = searchParams.get("categories")?.split("|") ?? [];
     if (categoryFilter.length === 0) {
       return "All Recipes";
     } else if (categoryFilter.length === 1) {

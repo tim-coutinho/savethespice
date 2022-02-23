@@ -203,7 +203,7 @@ export const Sidebar: FC = () => {
                 }
               }}
               className={`sidebar-item${
-                searchParams.get("categories")?.split(",").includes(`${categoryId}`)
+                searchParams.get("categories")?.split("|").includes(`${categoryId}`)
                   ? " selected"
                   : ""
               }`}
@@ -235,7 +235,7 @@ export const Sidebar: FC = () => {
                           showNotification({ message: "Category deleted!" });
                         },
                       });
-                      if (searchParams.get("categories")?.split(",").includes(`${categoryId}`)) {
+                      if (searchParams.get("categories")?.split("|").includes(`${categoryId}`)) {
                         searchParams.delete("categories");
                         setSearchParams(searchParams);
                       }
