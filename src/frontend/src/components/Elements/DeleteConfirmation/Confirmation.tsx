@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
-import { cloneElement, MouseEvent, ReactElement, useEffect, useState } from "react";
+import { cloneElement, FC, MouseEvent, ReactElement, useEffect, useState } from "react";
 
 interface ConfirmationProps {
   title: string;
@@ -9,13 +9,13 @@ interface ConfirmationProps {
   confirmButton: ReactElement;
 }
 
-export function Confirmation({
+export const Confirmation: FC<ConfirmationProps> = ({
   title,
   message,
   triggerButton,
   confirmButton,
   active,
-}: ConfirmationProps): ReactElement {
+}) => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -47,4 +47,4 @@ export function Confirmation({
       </Modal>
     </>
   );
-}
+};

@@ -6,7 +6,7 @@ export * from "./api/getRecipes";
 export * from "./api/updateRecipe";
 
 export * from "./components/ImportRecipesForm";
-export * from "./components/AddRecipeForm";
+export * from "./components/CreateRecipeForm";
 export * from "./components/RecipeDetails";
 export * from "./components/RecipeList";
 

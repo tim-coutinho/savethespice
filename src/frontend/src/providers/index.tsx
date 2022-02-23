@@ -1,19 +1,16 @@
 import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 import { NotificationsProvider } from "@mantine/notifications";
-import { ReactElement, StrictMode } from "react";
+import { FC, StrictMode } from "react";
 import { QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
+import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 
 import { queryClient } from "@/lib/react-query";
 import { prefix } from "@/utils/common";
 
-interface AppProviderProps {
-  children: ReactElement;
-}
-
-export const AppProvider = ({ children }: AppProviderProps) => {
+export const AppProvider: FC = ({ children }) => {
   const [colorScheme, setColorScheme] = useLocalStorageValue({
     key: `${prefix}theme`,
     defaultValue: useColorScheme(),
@@ -45,7 +42,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
                 }),
               }}
             >
-              <NotificationsProvider>{children}</NotificationsProvider>
+              <NotificationsProvider>
+                <BrowserRouter>{children}</BrowserRouter>
+              </NotificationsProvider>
             </MantineProvider>
           </ColorSchemeProvider>
         </QueryClientProvider>

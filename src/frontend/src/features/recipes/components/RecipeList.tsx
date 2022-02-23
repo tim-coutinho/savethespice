@@ -1,34 +1,32 @@
 import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
-import { ReactElement, useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { FC, useEffect, useRef, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 
-import { useRecipes, Recipe } from "@/features/recipes";
-import {
-  filterOptionsState,
-  filterState,
-  selectedCategoryIdState,
-  selectedRecipeIdState,
-} from "@/stores";
+import { Recipe, useRecipes } from "@/features/recipes";
+import { filterOptionsState, filterState } from "@/stores";
 import { UNSET } from "@/utils/common";
 
-export function RecipeList(): ReactElement {
+export const RecipeList: FC = () => {
   const ref = useRef<HTMLUListElement>(null);
-  const [selectedRecipeId, setSelectedRecipeId] = useRecoilState(selectedRecipeIdState);
   const [filteredRecipes, setFilteredRecipes] = useState<[number, Recipe][]>([]);
+  const [searchParams] = useSearchParams();
+  const selectedRecipeId = +(useParams().recipeId ?? UNSET);
+
   const recipesQuery = useRecipes();
 
   const filter = useRecoilValue(filterState);
   const filterOptions = useRecoilValue(filterOptionsState);
-  const selectedCategoryId = useRecoilValue(selectedCategoryIdState);
 
   useEffect(() => {
     if (!recipesQuery.data) {
       return;
     }
+    const selectedCategoryId2 = searchParams.get("categories");
     setFilteredRecipes(
       Array.from(recipesQuery.data)
         .filter(([, recipe]) => {
-          if (selectedCategoryId !== UNSET && !recipe.categories?.includes(selectedCategoryId)) {
+          if (selectedCategoryId2 !== null && !recipe.categories?.includes(+selectedCategoryId2)) {
             return false;
           }
           if (filter === "") {
@@ -55,7 +53,7 @@ export function RecipeList(): ReactElement {
         })
         .sort(([, { createTime: time1 }], [, { createTime: time2 }]) => (time1 <= time2 ? 1 : -1)),
     );
-  }, [recipesQuery.data, filter, filterOptions, selectedCategoryId]);
+  }, [recipesQuery.data, filter, filterOptions, searchParams]);
 
   useEffect(() => {
     if (filteredRecipes.length === 0) {
@@ -78,14 +76,22 @@ export function RecipeList(): ReactElement {
     <Group
       direction="column"
       spacing={0}
-      sx={{ overflowX: "hidden", overflowY: "auto" }}
+      sx={theme => ({
+        overflowX: "hidden",
+        overflowY: "auto",
+        a: {
+          textDecoration: "none",
+          color: theme.colorScheme === "light" ? theme.black : theme.colors.dark[0],
+        },
+      })}
       grow
       noWrap
     >
       {filteredRecipes.map(([recipeId, recipe]) => (
         <Box
           key={recipeId}
-          onClick={() => setSelectedRecipeId(recipeId)}
+          component={Link}
+          to={`/recipes/${recipeId}?${searchParams}`}
           className={selectedRecipeId === recipeId ? "selected" : ""}
           sx={theme => ({
             cursor: "pointer",
@@ -142,4 +148,4 @@ export function RecipeList(): ReactElement {
       ))}
     </Group>
   );
-}
+};

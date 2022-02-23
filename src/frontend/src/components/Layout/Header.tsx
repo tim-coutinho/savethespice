@@ -12,35 +12,37 @@ import {
 } from "@mantine/core";
 import { useBooleanToggle } from "@mantine/hooks";
 import { GearIcon, MagnifyingGlassIcon, PlusCircledIcon } from "@radix-ui/react-icons";
-import { MouseEventHandler, ReactElement, useRef } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { FC, useMemo, useRef } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useRecoilState } from "recoil";
 
 import { FlipButton } from "@/components/Elements";
 import { useCategories } from "@/features/categories";
-import {
-  currentViewState,
-  filterOptionsState,
-  filterState,
-  selectedCategoryIdState,
-} from "@/stores";
-import { View } from "@/utils/common";
+import { filterOptionsState, filterState, sidebarOpenedState } from "@/stores";
 
-interface HeaderProps {
-  handleViewChange: (source: typeof View[keyof typeof View]) => MouseEventHandler;
-}
-
-export function Header({ handleViewChange }: HeaderProps): ReactElement {
+export const Header: FC = () => {
   const [popoverOpened, togglePopoverOpened] = useBooleanToggle(false);
   const [filterFocused, toggleFilterFocused] = useBooleanToggle(false);
   const ref = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useRecoilState(filterState);
   const [filterOptions, setFilterOptions] = useRecoilState(filterOptionsState);
-  const currentView = useRecoilValue(currentViewState);
-  const selectedCategoryId = useRecoilValue(selectedCategoryIdState);
+  const [sidebarOpened, setSidebarOpened] = useRecoilState(sidebarOpenedState);
   const theme = useMantineTheme();
+
+  const [searchParams] = useSearchParams();
 
   const { data: categories } = useCategories();
 
+  const headerTitle = useMemo(() => {
+    const categoryFilter = searchParams.get("categories")?.split(",") ?? [];
+    if (categoryFilter.length === 0) {
+      return "All Recipes";
+    } else if (categoryFilter.length === 1) {
+      return categories?.get(+categoryFilter[0])?.name;
+    } else {
+      return categoryFilter.map(c => categories?.get(+c)?.name).join(", ");
+    }
+  }, [searchParams]);
   const filterExpanded = filter !== "" || popoverOpened || filterFocused;
   const allChecked = Object.values(filterOptions).every(v => v);
   const switchProps = (optionName: keyof typeof filterOptions) => ({
@@ -64,7 +66,7 @@ export function Header({ handleViewChange }: HeaderProps): ReactElement {
       <FlipButton
         size="md"
         component="div"
-        onClick={handleViewChange(View.SIDEBAR)}
+        onClick={() => setSidebarOpened(!sidebarOpened)}
         sx={theme => ({
           transitionDuration: `${theme.other.transitionDuration}ms`,
           ".mantine-Burger-burger:not(.mantine-Burger-opened), .mantine-Burger-burger::before, .mantine-Burger-burger::after":
@@ -78,7 +80,7 @@ export function Header({ handleViewChange }: HeaderProps): ReactElement {
         border
         square
       >
-        <Burger opened={currentView === View.SIDEBAR} />
+        <Burger opened={sidebarOpened} />
       </FlipButton>
       <Title
         order={4}
@@ -91,7 +93,7 @@ export function Header({ handleViewChange }: HeaderProps): ReactElement {
           opacity: filterExpanded ? 0 : 1,
         })}
       >
-        {categories?.get(selectedCategoryId)?.name ?? "All Recipes"}
+        {headerTitle}
       </Title>
       <div>
         <FlipButton
@@ -196,8 +198,10 @@ export function Header({ handleViewChange }: HeaderProps): ReactElement {
         />
       </div>
       <FlipButton
+        component={Link}
+        to={`/create?${searchParams}`}
         size="md"
-        onClick={handleViewChange(View.ADD)}
+        onClick={() => setSidebarOpened(false)}
         sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
         length={theme.other.buttonLength}
         border
@@ -207,4 +211,4 @@ export function Header({ handleViewChange }: HeaderProps): ReactElement {
       </FlipButton>
     </Paper>
   );
-}
+};

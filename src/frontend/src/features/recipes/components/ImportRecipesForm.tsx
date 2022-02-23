@@ -1,19 +1,19 @@
 import { JsonInput, Modal } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import { ReactElement, useEffect, useMemo } from "react";
-import { useRecoilState } from "recoil";
+import { FC, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { FlipButton } from "@/components/Elements";
-import { useCreateRecipes, Recipe } from "@/features/recipes";
-import { currentViewState } from "@/stores";
-import { View } from "@/utils/common";
+import { Recipe, useCreateRecipes } from "@/features/recipes";
 
-export function ImportRecipesForm(): ReactElement {
+export const ImportRecipesForm: FC = () => {
   const [value, setValue] = useInputState("");
-  const [currentView, setCurrentView] = useRecoilState(currentViewState);
   const addRecipesMutation = useCreateRecipes();
 
-  const formVisible = useMemo(() => currentView === View.IMPORT, [currentView]);
+  const navigate = useNavigate();
+  const { pathname, search } = useLocation();
+  const formVisible = pathname.endsWith("import");
+
   const invalidForm = useMemo(() => {
     try {
       const importObject = JSON.parse(value);
@@ -24,14 +24,11 @@ export function ImportRecipesForm(): ReactElement {
   }, [value]);
 
   useEffect(() => {
-    if (!formVisible) {
-      return;
-    }
-    setValue("");
+    formVisible && setValue("");
   }, [formVisible]);
 
   return (
-    <Modal title="Paste JSON" opened={formVisible} onClose={() => setCurrentView(View.HOME)}>
+    <Modal title="Paste JSON" opened={formVisible} onClose={() => navigate(`/${search}`)}>
       <JsonInput
         validationError="Invalid JSON"
         value={value}
@@ -40,12 +37,12 @@ export function ImportRecipesForm(): ReactElement {
         formatOnBlur
       />
       <FlipButton
-        onClick={() => {
+        onClick={async () => {
           const recipes: Recipe[] = JSON.parse(value);
-          addRecipesMutation.mutate(recipes);
-          setCurrentView(View.HOME);
+          await addRecipesMutation.mutateAsync(recipes).then(() => navigate(`/${search}`));
         }}
-        disabled={addRecipesMutation.isLoading || invalidForm}
+        loading={addRecipesMutation.isLoading}
+        disabled={invalidForm}
         mt="md"
         sx={theme => ({
           float: "right",
@@ -57,4 +54,4 @@ export function ImportRecipesForm(): ReactElement {
       </FlipButton>
     </Modal>
   );
-}
+};
