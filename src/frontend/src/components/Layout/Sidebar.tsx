@@ -25,7 +25,6 @@ import {
 } from "@radix-ui/react-icons";
 import { FC, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSetRecoilState } from "recoil";
 
 import { FlipButton } from "@/components/Elements";
 import { Confirmation } from "@/components/Elements/DeleteConfirmation/Confirmation";
@@ -37,21 +36,18 @@ import {
   useDeleteCategory,
 } from "@/features/categories";
 import { useRecipes } from "@/features/recipes";
-import { signedInState } from "@/stores";
-import { SignedInState } from "@/utils/common";
 
 export const Sidebar: FC = () => {
   const newCategoryNameInputRef = useRef<HTMLInputElement>(null);
   const copyTextRef = useRef<HTMLDivElement>(null);
   const [shiftedLeft, toggleShiftedLeft] = useBooleanToggle(false);
   const [newCategoryName, setNewCategoryName] = useInputState("");
-  const setSignedIn = useSetRecoilState(signedInState);
   const { toggleColorScheme } = useMantineColorScheme();
   const clipboard = useClipboard();
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const theme = useMantineTheme();
-  const navigate = useNavigate();
   const { showNotification } = useNotifications();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { data: recipes } = useRecipes();
@@ -325,7 +321,6 @@ export const Sidebar: FC = () => {
         <Group
           onClick={() => {
             signOut();
-            setSignedIn(SignedInState.SIGNED_OUT);
             navigate("/auth");
           }}
           className="sidebar-item"

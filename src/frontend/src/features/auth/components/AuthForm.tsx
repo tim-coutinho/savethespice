@@ -1,14 +1,17 @@
 import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs, Text } from "@mantine/core";
 import { useForm } from "@mantine/hooks";
 import { useNotifications } from "@mantine/notifications";
-import { Cross2Icon, EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  CheckCircledIcon,
+  Cross2Icon,
+  EnvelopeClosedIcon,
+  LockClosedIcon,
+} from "@radix-ui/react-icons";
+import { FC, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { FlipButton } from "@/components/Elements/FlipButton";
 import { useForgotPassword, useSignIn, useSignUp } from "@/features/auth";
-import { currentViewState, signedInState } from "@/stores";
-import { SignedInState, View } from "@/utils/common";
 
 enum Mode {
   SIGN_IN,
@@ -18,13 +21,12 @@ enum Mode {
 
 export const AuthForm: FC = () => {
   const [authResponse, setAuthResponse] = useState("");
-  const [signedIn, setSignedIn] = useRecoilState(signedInState);
-  const currentView = useRecoilValue(currentViewState);
   const activeTab = useRef(Mode.SIGN_IN);
   const form = useForm({
     initialValues: { email: "", password: "", confirmPassword: "" },
   });
   const { showNotification } = useNotifications();
+  const navigate = useNavigate();
 
   const signInMutation = useSignIn();
   const signUpMutation = useSignUp();
@@ -36,7 +38,9 @@ export const AuthForm: FC = () => {
         return signInMutation.mutate(
           { email, password },
           {
-            onSuccess: () => setSignedIn(SignedInState.SIGNED_IN),
+            onSuccess: () => {
+              setTimeout(() => navigate("/"), 500);
+            },
             onError: e => {
               e instanceof Error &&
                 showNotification({ message: e.message, icon: <Cross2Icon />, color: "red" });
@@ -54,7 +58,6 @@ export const AuthForm: FC = () => {
               e instanceof Error &&
                 showNotification({ message: e.message, icon: <Cross2Icon />, color: "red" });
             },
-            onSettled: () => setSignedIn(SignedInState.SIGNED_OUT),
           },
         );
       case Mode.FORGOT_PASSWORD:
@@ -66,7 +69,6 @@ export const AuthForm: FC = () => {
             e instanceof Error &&
               showNotification({ message: e.message, icon: <Cross2Icon />, color: "red" });
           },
-          onSettled: () => setSignedIn(SignedInState.SIGNED_OUT),
         });
     }
   };
@@ -85,10 +87,6 @@ export const AuthForm: FC = () => {
     () => signInMutation.isLoading || signUpMutation.isLoading || forgotPasswordMutation.isLoading,
     [signInMutation.isLoading, signUpMutation.isLoading, forgotPasswordMutation.isLoading],
   );
-
-  useEffect(() => {
-    currentView !== View.AUTH && setTimeout(form.reset, 500);
-  }, [currentView]);
 
   return (
     <Modal opened={true} onClose={() => null} closeOnClickOutside={false} hideCloseButton>
@@ -181,7 +179,8 @@ export const AuthForm: FC = () => {
           <FlipButton
             type="submit"
             loading={requestInProgress}
-            disabled={invalidForm || signedIn === SignedInState.SIGNED_IN}
+            disabled={invalidForm}
+            leftIcon={signInMutation.isSuccess && <CheckCircledIcon width={20} height={20} />}
             sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
             border
           >

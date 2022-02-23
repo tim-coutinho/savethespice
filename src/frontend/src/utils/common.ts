@@ -1,24 +1,6 @@
 export const prefix = "SaveTheSpice-";
 export const UNSET = -1;
 
-export const View: Record<
-  "CREATE" | "DELETE" | "EDIT" | "HOME" | "IMPORT" | "SIDEBAR" | "AUTH",
-  { modal: boolean }
-> = {
-  CREATE: { modal: true },
-  DELETE: { modal: true },
-  EDIT: { modal: true },
-  HOME: { modal: false },
-  IMPORT: { modal: true },
-  SIDEBAR: { modal: false },
-  AUTH: { modal: false },
-};
-
-export enum SignedInState {
-  SIGNED_IN = "signed_in",
-  SIGNED_OUT = "signed_out",
-}
-
 export enum Color {
   OD_RED = "#e06c75",
   OD_DARK_RED = "#be5046",

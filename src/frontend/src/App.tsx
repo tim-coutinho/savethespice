@@ -1,26 +1,20 @@
 import { Paper, useMantineTheme } from "@mantine/core";
 import { ReactElement, useEffect } from "react";
-import { Outlet } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 
 import { Header, Sidebar } from "@/components/Layout";
 import { useRefreshIdToken } from "@/features/auth";
 import { CreateRecipeForm, ImportRecipesForm, RecipeList } from "@/features/recipes";
-import { currentViewState, sidebarOpenedState, signedInState } from "@/stores";
-import { prefix, SignedInState, View } from "@/utils/common";
+import { sidebarOpenedState } from "@/stores";
+import { prefix } from "@/utils/common";
 
 export default function App(): ReactElement {
-  const [, setCurrentView] = useRecoilState(currentViewState);
-  const [signedIn, setSignedIn] = useRecoilState(signedInState);
   const sidebarOpened = useRecoilValue(sidebarOpenedState);
   const theme = useMantineTheme();
+  const navigate = useNavigate();
 
   const refreshIdTokenMutation = useRefreshIdToken();
-
-  useEffect(() => {
-    !refreshIdTokenMutation.isLoading &&
-      setCurrentView(signedIn !== SignedInState.SIGNED_IN ? View.AUTH : View.HOME);
-  }, [signedIn, refreshIdTokenMutation.isLoading]);
 
   useEffect(() => {
     localStorage.setItem(`${prefix}theme`, theme.colorScheme);
@@ -28,8 +22,7 @@ export default function App(): ReactElement {
 
   useEffect(() => {
     refreshIdTokenMutation.mutate(undefined, {
-      onSuccess: () => setSignedIn(SignedInState.SIGNED_IN),
-      onError: () => setSignedIn(SignedInState.SIGNED_OUT),
+      onError: () => navigate("/auth"),
     });
   }, []);
 
