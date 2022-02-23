@@ -191,7 +191,7 @@ export const RecipeDetails: FC = () => {
                   >
                     {recipe.categories.map(c => (
                       <Chip key={c} value={`${c}`}>
-                        {(categories?.get(c) as Category).name}
+                        {categories?.get(c)?.name ?? ""}
                       </Chip>
                     ))}
                   </Chips>

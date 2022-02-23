@@ -38,11 +38,12 @@ export const Header: FC = () => {
     if (categoryFilter.length === 0) {
       return "All Recipes";
     } else if (categoryFilter.length === 1) {
-      return categories?.get(+categoryFilter[0])?.name;
+      return categories?.get(+categoryFilter[0])?.name ?? "";
     } else {
-      return categoryFilter.map(c => categories?.get(+c)?.name).join(", ");
+      return categories ? categoryFilter.map(c => categories.get(+c)?.name).join(", ") : "";
     }
-  }, [searchParams]);
+  }, [searchParams, categories]);
+
   const filterExpanded = filter !== "" || popoverOpened || filterFocused;
   const allChecked = Object.values(filterOptions).every(v => v);
   const switchProps = (optionName: keyof typeof filterOptions) => ({
