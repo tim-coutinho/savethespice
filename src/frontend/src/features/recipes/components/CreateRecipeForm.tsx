@@ -94,7 +94,7 @@ export const CreateRecipeForm: FC = () => {
       initialValues.current = { ...baseForm };
     }
     form.setValues({ ...initialValues.current });
-  }, [formVisible, editMode]);
+  }, [recipes, formVisible, editMode]);
 
   const valueChanged = (initialValue: keyof FormFields, newValue: FormFields[keyof FormFields]) =>
     // Value is list, new value altered
