@@ -22,11 +22,11 @@ export const RecipeList: FC = () => {
     if (!recipesQuery.data) {
       return;
     }
-    const selectedCategoryId2 = searchParams.get("categories");
+    const categoryFilter = searchParams.get("categories")?.split(",");
     setFilteredRecipes(
       Array.from(recipesQuery.data)
         .filter(([, recipe]) => {
-          if (selectedCategoryId2 !== null && !recipe.categories?.includes(+selectedCategoryId2)) {
+          if (categoryFilter && !categoryFilter.every(c => recipe.categories?.includes(+c))) {
             return false;
           }
           if (filter === "") {
@@ -103,7 +103,7 @@ export const RecipeList: FC = () => {
               backgroundColor:
                 theme.colorScheme === "light" ? theme.colors.gray[4] : theme.colors.dark[4],
               "> div:first-of-type": { borderTopColor: "transparent" },
-              "+ div > div:first-of-type": { borderTopColor: "transparent" },
+              "+ a > div:first-of-type": { borderTopColor: "transparent" },
             },
             "&:hover:not(.selected)": {
               backgroundColor:
