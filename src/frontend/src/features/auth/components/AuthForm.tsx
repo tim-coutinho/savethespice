@@ -2,7 +2,7 @@ import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs, Text } from "@man
 import { useForm } from "@mantine/hooks";
 import { useNotifications } from "@mantine/notifications";
 import { Cross2Icon, EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
-import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { FlipButton } from "@/components/Elements/FlipButton";
@@ -16,7 +16,7 @@ enum Mode {
   FORGOT_PASSWORD,
 }
 
-export function AuthForm(): ReactElement {
+export const AuthForm: FC = () => {
   const [authResponse, setAuthResponse] = useState("");
   const [signedIn, setSignedIn] = useRecoilState(signedInState);
   const currentView = useRecoilValue(currentViewState);
@@ -91,12 +91,7 @@ export function AuthForm(): ReactElement {
   }, [currentView]);
 
   return (
-    <Modal
-      opened={currentView === View.AUTH}
-      onClose={() => null}
-      closeOnClickOutside={false}
-      hideCloseButton
-    >
+    <Modal opened={true} onClose={() => null} closeOnClickOutside={false} hideCloseButton>
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Tabs
           active={activeTab.current}
@@ -200,4 +195,4 @@ export function AuthForm(): ReactElement {
       </form>
     </Modal>
   );
-}
+};

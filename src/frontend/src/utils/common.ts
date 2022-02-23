@@ -2,10 +2,10 @@ export const prefix = "SaveTheSpice-";
 export const UNSET = -1;
 
 export const View: Record<
-  "ADD" | "DELETE" | "EDIT" | "HOME" | "IMPORT" | "SIDEBAR" | "AUTH",
+  "CREATE" | "DELETE" | "EDIT" | "HOME" | "IMPORT" | "SIDEBAR" | "AUTH",
   { modal: boolean }
 > = {
-  ADD: { modal: true },
+  CREATE: { modal: true },
   DELETE: { modal: true },
   EDIT: { modal: true },
   HOME: { modal: false },

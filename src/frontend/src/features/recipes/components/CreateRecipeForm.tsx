@@ -10,8 +10,8 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/hooks";
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
-import { ClipboardEventHandler, ReactElement, useEffect, useMemo, useRef } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { ClipboardEventHandler, FC, useEffect, useMemo, useRef } from "react";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { FlipButton } from "@/components/Elements";
 import { Category, useCategories } from "@/features/categories";
@@ -22,8 +22,7 @@ import {
   useScrape,
   useUpdateRecipe,
 } from "@/features/recipes";
-import { currentViewState, selectedRecipeIdState } from "@/stores";
-import { View } from "@/utils/common";
+import { UNSET } from "@/utils/common";
 
 const baseForm = {
   name: "",
@@ -39,32 +38,31 @@ const baseForm = {
   urlToScrape: "",
 };
 
-interface AddFormProps {
-  editMode: boolean;
-}
-
-export function AddRecipeForm({ editMode }: AddFormProps): ReactElement {
-  const [currentView, setCurrentView] = useRecoilState(currentViewState);
-  const { data: recipes } = useRecipes();
-  const { data: categories } = useCategories();
-  const selectedRecipeId = useRecoilValue(selectedRecipeIdState);
+export const CreateRecipeForm: FC = () => {
   const initialValues = useRef({ ...baseForm });
   const form = useForm({ initialValues: { ...initialValues.current } });
 
-  const addRecipeMutation = useCreateRecipe();
-  const updateRecipeMutation = useUpdateRecipe();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const selectedRecipeId = +(useParams().recipeId ?? UNSET);
+  const { pathname } = useLocation();
+  const editMode = pathname.endsWith("edit");
+  const formVisible = pathname.endsWith("create") || editMode;
 
+  const { data: recipes } = useRecipes();
+  const { data: categories } = useCategories();
+  const updateRecipeMutation = useUpdateRecipe();
+  const createRecipeMutation = useCreateRecipe();
   const scrapeQuery = useScrape(form.values.urlToScrape);
 
-  const addRecipeLoading = useMemo(
-    () => addRecipeMutation.isLoading || updateRecipeMutation.isLoading,
-    [addRecipeMutation.isLoading, updateRecipeMutation.isLoading],
+  const createRecipeLoading = useMemo(
+    () => createRecipeMutation.isLoading || updateRecipeMutation.isLoading,
+    [createRecipeMutation.isLoading, updateRecipeMutation.isLoading],
   );
-  const formVisible = useMemo(() => currentView === View.ADD, [currentView]);
 
   const requestInProgress = useMemo(
-    () => addRecipeLoading || scrapeQuery.isLoading,
-    [addRecipeLoading, scrapeQuery.isLoading],
+    () => createRecipeLoading || scrapeQuery.isLoading,
+    [createRecipeLoading, scrapeQuery.isLoading],
   );
 
   useEffect(() => {
@@ -131,8 +129,8 @@ export function AddRecipeForm({ editMode }: AddFormProps): ReactElement {
         editMode
           ? updateRecipeMutation
               .mutateAsync({ recipe, recipeId: selectedRecipeId })
-              .then(() => setCurrentView(View.HOME))
-          : addRecipeMutation.mutateAsync(recipe).then(() => setCurrentView(View.HOME));
+              .then(() => navigate(`/?${searchParams}`))
+          : createRecipeMutation.mutateAsync(recipe).then(() => navigate(`/?${searchParams}`));
       }
     }
   };
@@ -151,7 +149,7 @@ export function AddRecipeForm({ editMode }: AddFormProps): ReactElement {
     <Modal
       title={`${editMode ? "Edit" : "New"} Recipe`}
       opened={formVisible}
-      onClose={() => setCurrentView(View.HOME)}
+      onClose={() => navigate(-1)}
       overflow="inside"
       centered
     >
@@ -265,7 +263,7 @@ export function AddRecipeForm({ editMode }: AddFormProps): ReactElement {
           <FlipButton
             type="submit"
             size="md"
-            loading={addRecipeLoading}
+            loading={createRecipeLoading}
             disabled={form.values.name === "" || requestInProgress}
             sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
             border
@@ -276,4 +274,4 @@ export function AddRecipeForm({ editMode }: AddFormProps): ReactElement {
       </Box>
     </Modal>
   );
-}
+};
