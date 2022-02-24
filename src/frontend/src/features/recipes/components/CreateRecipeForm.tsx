@@ -22,6 +22,7 @@ import {
   useScrape,
   useUpdateRecipe,
 } from "@/features/recipes";
+import { usePrevious } from "@/hooks";
 import { UNSET } from "@/utils/common";
 
 const baseForm = {
@@ -46,7 +47,9 @@ export const CreateRecipeForm: FC = () => {
   const [searchParams] = useSearchParams();
   const selectedRecipeId = +(useParams().recipeId ?? UNSET);
   const { pathname } = useLocation();
+  // Need both so as to keep text updated during animation when navigating away from /edit
   const editMode = pathname.endsWith("edit");
+  const prevEditMode = usePrevious(editMode);
   const formVisible = pathname.endsWith("create") || editMode;
 
   const { data: recipes } = useRecipes();
@@ -147,7 +150,7 @@ export const CreateRecipeForm: FC = () => {
 
   return (
     <Modal
-      title={`${editMode ? "Edit" : "New"} Recipe`}
+      title={`${editMode || prevEditMode ? "Edit" : "New"} Recipe`}
       opened={formVisible}
       onClose={() => navigate(-1)}
       overflow="inside"
@@ -268,7 +271,7 @@ export const CreateRecipeForm: FC = () => {
             sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
             border
           >
-            Save Recipe
+            {editMode || prevEditMode ? "Update" : "Save"} Recipe
           </FlipButton>
         </Group>
       </Box>
