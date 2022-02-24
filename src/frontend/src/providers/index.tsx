@@ -40,6 +40,11 @@ export const AppProvider: FC = ({ children }) => {
                       theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
                   },
                 }),
+                Text: theme => ({
+                  root: {
+                    color: theme.colorScheme === "light" ? theme.black : theme.colors.dark[0],
+                  },
+                }),
               }}
             >
               <NotificationsProvider>

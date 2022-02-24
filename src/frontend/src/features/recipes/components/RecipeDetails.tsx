@@ -8,25 +8,29 @@ import {
   Image,
   List,
   Paper,
+  Popover,
   Text,
+  TextInput,
   Title,
   useMantineTheme,
 } from "@mantine/core";
+import { useBooleanToggle } from "@mantine/hooks";
 import { useNotifications } from "@mantine/notifications";
-import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { Pencil1Icon, Share1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { FC, useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 
 import { FlipButton } from "@/components/Elements";
 import { Confirmation } from "@/components/Elements/DeleteConfirmation/Confirmation";
-import { Category, useCategories } from "@/features/categories";
+import { useCategories } from "@/features/categories";
 import { Recipe, useDeleteRecipe, useRecipes } from "@/features/recipes";
 import { sidebarOpenedState } from "@/stores";
 import { UNSET } from "@/utils/common";
 
 export const RecipeDetails: FC = () => {
   const [recipe, setRecipe] = useState({} as Recipe);
+  const [popoverOpened, togglePopoverOpened] = useBooleanToggle(false);
   const setSidebarOpened = useSetRecoilState(sidebarOpenedState);
   const theme = useMantineTheme();
   const { showNotification } = useNotifications();
@@ -50,6 +54,29 @@ export const RecipeDetails: FC = () => {
         {recipe.recipeId && (
           <>
             <Group spacing="sm" sx={{ position: "absolute", right: 10 }}>
+              <Popover
+                opened={popoverOpened}
+                onClose={() => togglePopoverOpened()}
+                position="bottom"
+                placement="end"
+                transition="scale-y"
+                target={
+                  <FlipButton
+                    onClick={() => togglePopoverOpened()}
+                    sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
+                    length={theme.other.buttonLength}
+                    border
+                    square
+                  >
+                    <Share1Icon width={30} height={30} />
+                  </FlipButton>
+                }
+                styles={{ inner: { display: "flex", alignItems: "center" } }}
+              >
+                {/* TODO: Create shareId on recipe and switch to that */}
+                <Text mr="xs">Share URL: </Text>
+                <TextInput value={`${window.origin}/share/${recipe.recipeId}`} readOnly />
+              </Popover>
               <FlipButton
                 component={Link}
                 to={`edit?${searchParams}`}
@@ -89,7 +116,7 @@ export const RecipeDetails: FC = () => {
                         navigate(`/?${searchParams}`);
                       }
                     }}
-                    sx={theme => ({ transitionDuration: `${theme.other.transitionDuration}ms` })}
+                    sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
                     border
                   >
                     Delete
