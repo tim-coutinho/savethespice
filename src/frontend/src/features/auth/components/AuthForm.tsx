@@ -8,7 +8,7 @@ import {
   LockClosedIcon,
 } from "@radix-ui/react-icons";
 import { FC, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { FlipButton } from "@/components/Elements/FlipButton";
 import { useForgotPassword, useSignIn, useSignUp } from "@/features/auth";
@@ -27,6 +27,7 @@ export const AuthForm: FC = () => {
   });
   const { showNotification } = useNotifications();
   const navigate = useNavigate();
+  const redirectLocation = (useLocation().state as { from?: string })?.from ?? "/";
 
   const signInMutation = useSignIn();
   const signUpMutation = useSignUp();
@@ -39,7 +40,7 @@ export const AuthForm: FC = () => {
           { email, password },
           {
             onSuccess: () => {
-              setTimeout(() => navigate("/"), 500);
+              setTimeout(() => navigate(redirectLocation, { replace: true }), 500);
             },
             onError: e => {
               e instanceof Error &&

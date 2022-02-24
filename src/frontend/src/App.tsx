@@ -1,6 +1,6 @@
 import { Paper, useMantineTheme } from "@mantine/core";
 import { ReactElement, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
 import { Header, Sidebar } from "@/components/Layout";
@@ -12,6 +12,7 @@ import { prefix } from "@/utils/common";
 export default function App(): ReactElement {
   const sidebarOpened = useRecoilValue(sidebarOpenedState);
   const theme = useMantineTheme();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const refreshIdTokenMutation = useRefreshIdToken();
@@ -22,7 +23,11 @@ export default function App(): ReactElement {
 
   useEffect(() => {
     refreshIdTokenMutation.mutate(undefined, {
-      onError: () => navigate("/auth"),
+      onError: () =>
+        navigate("/auth", {
+          state: { from: `${location.pathname}${location.search}` },
+          replace: true,
+        }),
     });
   }, []);
 
