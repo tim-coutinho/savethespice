@@ -148,7 +148,7 @@ export const RecipeDetails: FC = () => {
                 src={recipe.imgSrc}
                 alt={recipe.name}
                 sx={{ gridArea: "tl" }}
-                withPlaceholder
+                withPlaceholder={!recipe.imgSrc}
               />
               <Box
                 sx={{
