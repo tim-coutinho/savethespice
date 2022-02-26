@@ -172,7 +172,7 @@ class SaveTheSpiceStack(Stack):
             function_name=main_lambda_name,
             entry="src/backend",
             handler="app",
-            runtime=Runtime.PYTHON_3_8,
+            runtime=Runtime.PYTHON_3_9,
             timeout=Duration.minutes(1),
             environment={
                 "images_bucket_name": images_bucket_name.lower(),
