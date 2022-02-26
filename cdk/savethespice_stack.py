@@ -150,7 +150,7 @@ class SaveTheSpiceStack(Stack):
             function_name=auth_lambda_name,
             entry="src/backend",
             handler="app",
-            runtime=Runtime.PYTHON_3_8,
+            runtime=Runtime.PYTHON_3_9,
             timeout=Duration.minutes(1),
             environment={
                 "meta_table_name": meta_table_name,
