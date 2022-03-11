@@ -19,5 +19,5 @@ yarn-debug.log*
 yarn-error.log*
 .idea
 *.sublime*
-src/backend/requirements.txt
+src/backend/savethespice/requirements.txt
 .eslintcache

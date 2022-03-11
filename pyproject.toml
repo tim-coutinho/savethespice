@@ -1,6 +1,6 @@
 [tool.isort]
 combine_as_imports = true
-known_first_party = "apis, lib, models, core"
+known_first_party = "savethespice"
 line_length = 100
 multi_line_output = 3
 profile = "black"
@@ -11,13 +11,12 @@ line-length = 100
 
 [tool.taskipy.tasks]
 deploy = "poetry export -f requirements.txt --without-hashes > src/backend/requirements.txt && task format && (cd src/frontend && npm run build) && cdk deploy --require-approval never"
-format = "echo 'isort:' && isort .; echo 'black:' && black .; echo 'flake8:' && flake8; echo 'prettier:' && (cd src/frontend && npm run lint)"
+format = "echo 'isort:' && isort .; echo 'black:' && black .; echo 'flake8:' && flake8"
 lint = "task format"
 release = "task format && task test"
 synth = "task format && cdk synth"
 clean = "rm -r cdk.out src/frontend/build"
-server = "images_bucket_name=savethespice-images recipes_table_name=SaveTheSpice-Recipes categories_table_name=SaveTheSpice-Categories meta_table_name=SaveTheSpice-Meta client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm FLASK_APP=src/backend/index FLASK_ENV=development FLASK_RUN_PORT=5000 flask run"
-shell = "client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm FLASK_APP=src/backend/index FLASK_ENV=development FLASK_RUN_PORT=5000 flask shell"
+server = "images_bucket_name=savethespice-images recipes_table_name=SaveTheSpice-Recipes categories_table_name=SaveTheSpice-Categories meta_table_name=SaveTheSpice-Meta client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm UVICORN_PORT=8000 uvicorn savethespice.index:app  --app-dir src/backend --reload"
 
 [tool.poetry]
 name = "SaveTheSpice"
@@ -36,6 +35,8 @@ recipe-scrapers = "^13.0.0"
 requests = "^2.25.1"
 MarkupSafe = "2.0.1"
 itsdangerous = "2.0.1"
+mangum = "^0.13.0"
+fastapi = {extras = ["all"], version = "^0.74.1"}
 
 [tool.poetry.dev-dependencies]
 "aws-cdk.aws-apigateway" = "^1.132.0"

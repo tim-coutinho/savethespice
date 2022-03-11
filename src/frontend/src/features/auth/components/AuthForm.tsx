@@ -1,4 +1,4 @@
-import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs, Text } from "@mantine/core";
+import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs } from "@mantine/core";
 import { useForm } from "@mantine/hooks";
 import { useNotifications } from "@mantine/notifications";
 import {
@@ -7,7 +7,7 @@ import {
   EnvelopeClosedIcon,
   LockClosedIcon,
 } from "@radix-ui/react-icons";
-import { FC, useMemo, useRef, useState } from "react";
+import { FC, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { FlipButton } from "@/components/Elements/FlipButton";
@@ -20,7 +20,6 @@ enum Mode {
 }
 
 export const AuthForm: FC = () => {
-  const [authResponse, setAuthResponse] = useState("");
   const activeTab = useRef(Mode.SIGN_IN);
   const form = useForm({
     initialValues: { email: "", password: "", confirmPassword: "" },
@@ -95,7 +94,6 @@ export const AuthForm: FC = () => {
         <Tabs
           active={activeTab.current}
           onTabChange={i => {
-            setAuthResponse("");
             activeTab.current = i;
             form.reset();
           }}
@@ -174,9 +172,6 @@ export const AuthForm: FC = () => {
           </Tab>
         </Tabs>
         <Group position="apart" mt="md">
-          <Text color="red" size="sm">
-            {authResponse}
-          </Text>
           <FlipButton
             type="submit"
             loading={requestInProgress}

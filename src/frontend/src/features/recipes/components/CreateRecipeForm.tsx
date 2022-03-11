@@ -30,7 +30,7 @@ const baseForm = {
   desc: "",
   imgSrc: "",
   cookTime: "",
-  yield: "",
+  yields: "",
   categories: [] as string[],
   ingredients: "",
   instructions: "",
@@ -86,7 +86,7 @@ export const CreateRecipeForm: FC = () => {
           desc: selectedRecipe.desc ?? "",
           imgSrc: selectedRecipe.imgSrc ?? "",
           cookTime: selectedRecipe.cookTime ?? "",
-          yield: `${selectedRecipe.yield ?? ""}`,
+          yields: `${selectedRecipe.yields ?? ""}`,
           categories:
             selectedRecipe?.categories?.map(c => (categories?.get(c) as Category).name) ?? [],
           ingredients: "",
@@ -121,13 +121,7 @@ export const CreateRecipeForm: FC = () => {
       // No op if nothing to update
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      let initialValue = initialValues.current[k as keyof FormFields];
-      if (k === "categories" && (initialValue as string[])[0] !== "") {
-        // Categories holds IDs, map to category names
-        initialValue = (initialValue as NonNullable<typeof recipe.categories>).map(
-          c => (categories?.get(+c) as Category).name,
-        );
-      }
+      const initialValue = initialValues.current[k as keyof FormFields];
       if (valueChanged(initialValue, v)) {
         editMode
           ? updateRecipeMutation
@@ -181,7 +175,7 @@ export const CreateRecipeForm: FC = () => {
             {...form.getInputProps("imgSrc")}
           />
           <TextInput label="Cook Time (min)" placeholder="30" {...form.getInputProps("cookTime")} />
-          <TextInput label="Yield" placeholder="4 servings" {...form.getInputProps("yield")} />
+          <TextInput label="Yield" placeholder="4 servings" {...form.getInputProps("yields")} />
           <MultiSelect
             label="Categories"
             placeholder="Select and/or create"

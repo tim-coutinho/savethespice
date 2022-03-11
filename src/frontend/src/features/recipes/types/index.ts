@@ -13,7 +13,7 @@ export interface Recipe {
   instructions?: string[];
   categories?: number[];
   adaptedFrom?: string;
-  yield?: number | string;
+  yields?: number | string;
   url?: string;
 }
 
