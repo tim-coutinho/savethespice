@@ -69,6 +69,21 @@ export const Sidebar: FC = () => {
     }
   }, [clipboard.copied]);
 
+  useEffect(() => {
+    // If no categories in search params exist (i.e. deleted elsewhere then refresh)
+    // then remove categories from search params
+    if (
+      categories &&
+      !searchParams
+        .get("categories")
+        ?.split("|")
+        .some(c => categories?.has(+c))
+    ) {
+      searchParams.delete("categories");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams.get("categories"), categories]);
+
   return (
     <Navbar
       width={{ base: `${theme.other.sidebarWidth}px` }}

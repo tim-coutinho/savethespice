@@ -7,7 +7,6 @@ import { queryClient } from "@/lib/react-query";
 
 interface DeleteCategoryResponseData {
   updatedRecipes: number[];
-  failedUpdatedRecipes: number[];
 }
 
 const deleteCategory = (categoryId: number): Promise<DeleteCategoryResponseData | undefined> =>

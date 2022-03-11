@@ -170,10 +170,10 @@ export const RecipeDetails: FC = () => {
                     </Text>
                   </div>
                 )}
-                {recipe.yield && (
+                {recipe.yields && (
                   <div>
-                    <Text component="span">Yield</Text>: {recipe.yield} serving
-                    {recipe.yield === 1 ? "" : "s"}
+                    <Text component="span">Yield</Text>: {recipe.yields} serving
+                    {recipe.yields === 1 ? "" : "s"}
                   </div>
                 )}
                 {recipe.adaptedFrom && (
@@ -216,11 +216,14 @@ export const RecipeDetails: FC = () => {
                     }}
                     multiple
                   >
-                    {recipe.categories.map(c => (
-                      <Chip key={c} value={`${c}`}>
-                        {categories?.get(c)?.name ?? ""}
-                      </Chip>
-                    ))}
+                    {recipe.categories.map(
+                      c =>
+                        categories?.get(c)?.name && (
+                          <Chip key={c} value={`${c}`}>
+                            {categories.get(c)?.name}
+                          </Chip>
+                        ),
+                    )}
                   </Chips>
                 )}
               </Box>
