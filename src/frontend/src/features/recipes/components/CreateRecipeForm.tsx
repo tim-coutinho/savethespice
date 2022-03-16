@@ -241,7 +241,7 @@ export const CreateRecipeForm: FC = () => {
             variant="outline"
             size="md"
             color={scrapeQuery.isError ? "red" : ""}
-            onClick={() => scrapeQuery.refetch()}
+            onClick={scrapeQuery.refetch}
             loading={scrapeQuery.isLoading}
             disabled={form.values.urlToScrape === "" || requestInProgress}
             leftIcon={

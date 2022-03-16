@@ -13,18 +13,18 @@ export const RecipeList: FC = () => {
   const [searchParams] = useSearchParams();
   const selectedRecipeId = +(useParams().recipeId ?? UNSET);
 
-  const recipesQuery = useRecipes();
+  const { data: recipes } = useRecipes();
 
   const filter = useRecoilValue(filterState);
   const filterOptions = useRecoilValue(filterOptionsState);
 
   useEffect(() => {
-    if (!recipesQuery.data) {
+    if (!recipes) {
       return;
     }
     const categoryFilter = searchParams.get("categories")?.split("|");
     setFilteredRecipes(
-      Array.from(recipesQuery.data)
+      Array.from(recipes)
         .filter(([, recipe]) => {
           if (categoryFilter && !categoryFilter.every(c => recipe.categories?.includes(+c))) {
             return false;
@@ -53,7 +53,7 @@ export const RecipeList: FC = () => {
         })
         .sort(([, { createTime: time1 }], [, { createTime: time2 }]) => (time1 <= time2 ? 1 : -1)),
     );
-  }, [recipesQuery.data, filter, filterOptions, searchParams]);
+  }, [recipes, filter, filterOptions, searchParams]);
 
   useEffect(() => {
     if (filteredRecipes.length === 0) {

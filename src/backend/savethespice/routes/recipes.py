@@ -38,10 +38,10 @@ from savethespice.models import (
 
 IMAGE_PREFIX = f"https://{os.environ.get('images_bucket_name', '')}.s3-us-west-2.amazonaws.com/"
 logging = root_logger.getChild(__name__)
-api = APIRouter(prefix="/recipes", tags=["recipes"])
+api = APIRouter(tags=["recipes"])
 
 
-@api.get("", response_model=GetRecipesResponse)
+@api.get("/recipes", response_model=GetRecipesResponse)
 async def get_recipes(req: Request):
     """
     Get all recipes in the database.
@@ -54,7 +54,7 @@ async def get_recipes(req: Request):
     return {"data": {"recipes": recipes}}
 
 
-@api.delete("", response_model=DeleteRecipesResponse)
+@api.delete("/recipes", response_model=DeleteRecipesResponse)
 async def delete_recipes(recipe_ids: DeleteRecipesRequest, req: Request, res: Response):
     """
     Batch delete a list of recipe IDs from the database.
@@ -89,7 +89,7 @@ async def delete_recipes(recipe_ids: DeleteRecipesRequest, req: Request, res: Re
 
 
 # TODO
-# @api.patch("", response_model=PatchRecipesResponse)
+# @api.patch("/recipes", response_model=PatchRecipesResponse)
 # async def patch_recipes(
 #     req: Request,
 #     res: Response,
@@ -122,7 +122,7 @@ async def delete_recipes(recipe_ids: DeleteRecipesRequest, req: Request, res: Re
 #     return {"data": {"failedUpdates": failed_updates}}
 
 
-@api.post("", response_model=PostRecipeResponse, status_code=status.HTTP_201_CREATED)
+@api.post("/recipes", response_model=PostRecipeResponse, status_code=status.HTTP_201_CREATED)
 async def post_recipe(recipe: PostRecipeRequest, req: Request):
     """
     Post a recipe to the database.
@@ -140,7 +140,7 @@ async def post_recipe(recipe: PostRecipeRequest, req: Request):
     return {"data": {**item.dict(), **add_categories_from_recipe_response}}
 
 
-@api.put("", response_model=PutRecipesResponse)
+@api.put("/recipes", response_model=PutRecipesResponse)
 async def put_recipes(recipes: PutRecipesRequest, req: Request):
     """
     Batch put a list of recipes to the database.
@@ -168,7 +168,7 @@ async def put_recipes(recipes: PutRecipesRequest, req: Request):
     return {"data": res_data}
 
 
-@api.get("/{recipe_id}", response_model=GetRecipeResponse)
+@api.get("/recipes/{recipe_id}", response_model=GetRecipeResponse)
 async def get_recipe(recipe_id: int, req: Request, res: Response):
     """
     Get a specific recipe in the database.
@@ -194,7 +194,7 @@ async def get_recipe(recipe_id: int, req: Request, res: Response):
     return {"data": item}
 
 
-@api.delete("/{recipe_id}", response_model=DeleteRecipeResponse)
+@api.delete("/recipes/{recipe_id}", response_model=DeleteRecipeResponse)
 async def delete_recipe(recipe_id: int, req: Request, res: Response):
     """
     Delete a recipe in the database by ID.
@@ -229,7 +229,7 @@ async def delete_recipe(recipe_id: int, req: Request, res: Response):
 
 
 # TODO
-# @api.patch("/{recipe_id}", response_model=PatchRecipeResponse)
+# @api.patch("/recipes/{recipe_id}", response_model=PatchRecipeResponse)
 # async def patch_recipe(
 #     recipe_id: int, patch_request: PatchRecipeRequest, req: Request, res: Response
 # ):
@@ -282,7 +282,7 @@ async def delete_recipe(recipe_id: int, req: Request, res: Response):
 #         )
 #         res_data.update(add_categories_from_recipe_res)
 #
-#     edit_time = datetime.utcnow().replace(microsecond=0).isoformat()
+#     edit_time = datetime.now(tz=timezone.utc).replace(microsecond=0).isoformat()
 #
 #     kwargs[
 #         "UpdateExpression"
@@ -321,7 +321,7 @@ async def delete_recipe(recipe_id: int, req: Request, res: Response):
 #     return {"data": res_data}
 
 
-@api.put("/{recipe_id}", response_model=PutRecipeResponse)
+@api.put("/recipes/{recipe_id}", response_model=PutRecipeResponse)
 async def put_recipe(recipe_id: int, recipe: PutRecipeRequest, req: Request):
     """
     Put a recipe to the database, replacing the specified entry.

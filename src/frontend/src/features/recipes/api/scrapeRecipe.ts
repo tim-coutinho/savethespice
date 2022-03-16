@@ -8,7 +8,7 @@ export interface ScrapeResponseData extends Omit<Recipe, "categories"> {
 }
 
 const scrapeRecipe = (url: string): Promise<ScrapeResponseData | undefined> =>
-  api.get<ScrapeResponseData>("recipes/scrape", { url }).then(([res, status]) => {
+  api.get<ScrapeResponseData>("scrape", { url }).then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);
     }
