@@ -1,5 +1,5 @@
 import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs } from "@mantine/core";
-import { useForm } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
 import { useNotifications } from "@mantine/notifications";
 import {
   CheckCircledIcon,
@@ -89,7 +89,7 @@ export const AuthForm: FC = () => {
   );
 
   return (
-    <Modal opened={true} onClose={() => null} closeOnClickOutside={false} hideCloseButton>
+    <Modal opened={true} onClose={() => null} closeOnClickOutside={false} withCloseButton={false}>
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Tabs
           active={activeTab.current}

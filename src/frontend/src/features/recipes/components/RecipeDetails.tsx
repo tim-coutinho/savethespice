@@ -50,7 +50,7 @@ export const RecipeDetails: FC = () => {
 
   return (
     <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
-      <Paper padding="sm" sx={{ position: "relative", height: "100%", paddingRight: 0 }}>
+      <Paper p="sm" sx={{ position: "relative", height: "100%", paddingRight: 0 }}>
         {recipe.recipeId && (
           <>
             <Group spacing="sm" sx={{ position: "absolute", right: 10 }}>
@@ -234,7 +234,7 @@ export const RecipeDetails: FC = () => {
                     <List.Item key={`${ingredient + i}`}>{ingredient}</List.Item>
                   ))}
               </List>
-              <List spacing="md" type="order" sx={{ gridArea: "br", maxWidth: "60ch" }}>
+              <List spacing="md" type="ordered" sx={{ gridArea: "br", maxWidth: "60ch" }}>
                 {recipe.instructions
                   ?.filter(i => i.trim() !== "")
                   .map((instruction, i) => (

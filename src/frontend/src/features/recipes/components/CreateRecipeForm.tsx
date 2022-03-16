@@ -8,7 +8,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { useForm } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { ClipboardEventHandler, FC, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";

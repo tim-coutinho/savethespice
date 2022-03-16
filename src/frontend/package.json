@@ -4,9 +4,10 @@
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.4.3",
-    "@mantine/core": "^3.6.6",
-    "@mantine/hooks": "^3.6.6",
-    "@mantine/notifications": "^3.6.6",
+    "@mantine/core": "^4.0.0",
+    "@mantine/hooks": "^4.0.0",
+    "@mantine/notifications": "^4.0.0",
+    "@mantine/form": "^4.0.0",
     "@radix-ui/react-icons": "^1.0.3",
     "@types/node": "^16.11.22",
     "@types/react": "^17.0.39",
@@ -24,10 +25,8 @@
     "typescript": "^4.5.5"
   },
   "devDependencies": {
-    "@types/customize-cra": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
-    "customize-cra": "^1.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-typescript": "^2.5.0",
     "eslint-plugin-import": "^2.25.4",

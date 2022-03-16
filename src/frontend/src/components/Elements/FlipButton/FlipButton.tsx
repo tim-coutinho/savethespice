@@ -1,21 +1,28 @@
-import { Button, ButtonProps } from "@mantine/core";
+import { Button, ButtonProps, PolymorphicComponentProps } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import { ElementType, ReactElement } from "react";
 
-type FlipButtonProps<C extends ElementType> = ButtonProps<C> & {
+type FlipButtonProps<C extends ElementType = "button"> = PolymorphicComponentProps<
+  C,
+  ButtonProps<C>
+> & {
   border?: boolean;
   hoverOverride?: boolean;
   length?: number;
   square?: boolean;
 };
 
-export const FlipButton = <C extends ElementType>({
+type FlipButtonComponent = <C extends ElementType = "button">(
+  props: FlipButtonProps<C>,
+) => ReactElement;
+
+export const FlipButton: FlipButtonComponent = ({
   border,
   hoverOverride,
   length,
   square,
   ...props
-}: FlipButtonProps<C>): ReactElement => {
+}) => {
   const { hovered, ref } = useHover<HTMLButtonElement>();
   if (square && length === undefined) {
     throw new Error("FlipButton marked as square but length not provided");
