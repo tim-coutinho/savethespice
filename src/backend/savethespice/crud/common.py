@@ -1,5 +1,5 @@
 from collections import Iterable, Mapping
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import singledispatch
 from typing import Any, Optional, Union
 
@@ -16,7 +16,7 @@ def upsert_to_table(
     item: Optional[Union[RecipeBase, CategoryBase]] = None,
     **kwargs,
 ) -> tuple[str, str]:
-    edit_time = datetime.utcnow().replace(microsecond=0).isoformat()
+    edit_time = datetime.now(tz=timezone.utc).replace(microsecond=0).isoformat()
     item = {k: v for k, v in item.dict().items() if v != "" and v is not None} if item else {}
     update_args = {
         "UpdateExpression": (

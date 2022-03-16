@@ -4,30 +4,42 @@ import { api } from "@/lib/fetch";
 import { prefix } from "@/utils/common";
 
 interface RefreshIdTokenResponseData {
-  refreshTokenExpired: boolean;
-  idToken: string;
   user: string;
+  idToken: string;
+  idTokenExpiryTimestamp: string;
+  refreshTokenExpired?: boolean;
 }
 
-const refreshIdToken = (): Promise<string> => {
+const refreshIdToken = (): Promise<void> => {
   const refreshToken = localStorage.getItem(`${prefix}refreshToken`);
   if (!refreshToken) {
+    localStorage.removeItem(`${prefix}refreshToken`);
+    localStorage.removeItem(`${prefix}idTokenExpiryTimestamp`);
     return Promise.reject("No refresh token");
   }
-  const body = { refreshToken };
 
+  const idTokenExpiryTimestamp = Date.parse(
+    localStorage.getItem(`${prefix}idTokenExpiryTimestamp`) ?? "",
+  );
+  if (isFinite(idTokenExpiryTimestamp) && Date.now() < idTokenExpiryTimestamp) {
+    // No need to refresh
+    return Promise.resolve();
+  }
+
+  const body = { refreshToken };
   return api
     .post<RefreshIdTokenResponseData, typeof body>("auth/refreshidtoken", body)
     .then(([res, status]) => {
       if (status >= 400) {
         if (res.data?.refreshTokenExpired) {
           localStorage.removeItem(`${prefix}refreshToken`);
+          localStorage.removeItem(`${prefix}idTokenExpiryTimestamp`);
         }
         throw new Error(res.message);
       }
-      const { idToken, user } = res.data;
+      const { idToken, idTokenExpiryTimestamp } = res.data;
       sessionStorage.setItem(`${prefix}idToken`, idToken);
-      return user;
+      localStorage.setItem(`${prefix}idTokenExpiryTimestamp`, idTokenExpiryTimestamp);
     });
 };
 

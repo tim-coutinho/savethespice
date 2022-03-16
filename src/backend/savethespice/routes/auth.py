@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from functools import cache
 
 import boto3
@@ -118,16 +119,23 @@ async def sign_in(req: SignInRequest, res: Response):
         return {"message": "This email is not registered."}
 
     cognito_response = cognito_response["AuthenticationResult"]
+    expires_in = cognito_response.get("ExpiresIn")
     access_token = cognito_response.get("AccessToken")
     refresh_token = cognito_response.get("RefreshToken")
     id_token = cognito_response.get("IdToken")
 
+    expiry_timestamp = datetime.now(tz=timezone.utc) + timedelta(seconds=expires_in)
     user = client.get_user(AccessToken=access_token).get("Username")
 
     logging.info("Sign in flow successful.")
     return {
         "message": "You have been signed in.",
-        "data": {"idToken": id_token, "refreshToken": refresh_token, "user": user},
+        "data": {
+            "idToken": id_token,
+            "refreshToken": refresh_token,
+            "idTokenExpiryTimestamp": expiry_timestamp.replace(microsecond=0),
+            "user": user,
+        },
     }
 
 
@@ -155,13 +163,22 @@ async def refresh_id_token(req: RefreshIdTokenRequest, res: Response):
         return {"message": "User is not verified."}
 
     cognito_response = cognito_response["AuthenticationResult"]
+    expires_in = cognito_response.get("ExpiresIn")
     access_token = cognito_response.get("AccessToken")
     id_token = cognito_response.get("IdToken")
 
+    expiry_timestamp = datetime.now(tz=timezone.utc) + timedelta(seconds=expires_in)
     user = client.get_user(AccessToken=access_token).get("Username")
 
     logging.info("Refresh ID token flow successful.")
-    return {"message": "You have been signed in.", "data": {"idToken": id_token, "user": user}}
+    return {
+        "message": "You have been signed in.",
+        "data": {
+            "idToken": id_token,
+            "idTokenExpiryTimestamp": expiry_timestamp.replace(microsecond=0),
+            "user": user,
+        },
+    }
 
 
 @api.post("/resendcode", status_code=status.HTTP_200_OK, response_model=ResendCodeResponse)

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -13,9 +14,10 @@ class ConfirmSignUpResponse(BaseModel):
 
 class SignInResponse(BaseModel):
     class SignInResponseData(BaseModel):
-        idToken: str
-        refreshToken: str
         user: str
+        idToken: str
+        idTokenExpiryTimestamp: Optional[datetime]
+        refreshToken: str
 
     message: str
     data: Optional[SignInResponseData]
@@ -23,8 +25,9 @@ class SignInResponse(BaseModel):
 
 class RefreshIdTokenResponse(BaseModel):
     class RefreshIdTokenResponseData(BaseModel):
-        idToken: Optional[str]
         user: Optional[str]
+        idToken: Optional[str]
+        idTokenExpiryTimestamp: Optional[datetime]
         refreshTokenExpired: Optional[bool] = False
 
     message: str

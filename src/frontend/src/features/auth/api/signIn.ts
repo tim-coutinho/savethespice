@@ -4,22 +4,23 @@ import { api } from "@/lib/fetch";
 import { prefix } from "@/utils/common";
 
 interface SignInResponseData {
-  idToken: string;
-  refreshToken: string;
   user: string;
+  idToken: string;
+  idTokenExpiryTimestamp: string;
+  refreshToken: string;
 }
 
-const signIn = (email: string, password: string): Promise<string> => {
+const signIn = (email: string, password: string): Promise<void> => {
   const body = { email, password };
 
   return api.post<SignInResponseData, typeof body>("auth/signin", body).then(([res, status]) => {
     if (status >= 400) {
       throw new Error(res.message);
     }
-    const { idToken, refreshToken, user } = res.data;
-    localStorage.setItem(`${prefix}refreshToken`, refreshToken);
+    const { idToken, refreshToken, idTokenExpiryTimestamp } = res.data;
     sessionStorage.setItem(`${prefix}idToken`, idToken);
-    return user;
+    localStorage.setItem(`${prefix}idTokenExpiryTimestamp`, idTokenExpiryTimestamp);
+    localStorage.setItem(`${prefix}refreshToken`, refreshToken);
   });
 };
 
