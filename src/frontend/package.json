@@ -39,7 +39,7 @@
   },
   "scripts": {
     "start": "PORT=5001 TSC_WATCHFILE=UseFsEventsWithFallbackDynamicPolling craco start",
-    "build": "tsc",
+    "build": "craco --max_old_space_size=4096 build",
     "test": "craco test --env=jsdom",
     "eject": "react-scripts eject",
     "lint": "eslint --fix --ext .js,.ts,.tsx ./src --ignore-path ../../.gitignore"

@@ -21,7 +21,7 @@ from savethespice.models import (
 )
 
 logging = root_logger.getChild(__name__)
-api = APIRouter(prefix="/categories", tags=["categories"])
+api = APIRouter(prefix="/private/categories", tags=["categories"])
 
 
 @api.get("", response_model=GetCategoriesResponse)

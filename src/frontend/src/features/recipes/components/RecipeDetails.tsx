@@ -7,6 +7,7 @@ import {
   Group,
   Image,
   List,
+  Loader,
   Paper,
   Popover,
   Text,
@@ -14,7 +15,6 @@ import {
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import { useBooleanToggle } from "@mantine/hooks";
 import { useNotifications } from "@mantine/notifications";
 import { Pencil1Icon, Share1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { FC, useEffect, useState } from "react";
@@ -25,12 +25,12 @@ import { FlipButton } from "@/components/Elements";
 import { Confirmation } from "@/components/Elements/DeleteConfirmation/Confirmation";
 import { useCategories } from "@/features/categories";
 import { Recipe, useDeleteRecipe, useRecipes } from "@/features/recipes";
+import { useShareRecipe } from "@/features/share";
 import { sidebarOpenedState } from "@/stores";
 import { UNSET } from "@/utils/common";
 
 export const RecipeDetails: FC = () => {
   const [recipe, setRecipe] = useState({} as Recipe);
-  const [popoverOpened, togglePopoverOpened] = useBooleanToggle(false);
   const setSidebarOpened = useSetRecoilState(sidebarOpenedState);
   const theme = useMantineTheme();
   const { showNotification } = useNotifications();
@@ -42,6 +42,7 @@ export const RecipeDetails: FC = () => {
   const { data: recipes } = useRecipes();
   const { data: categories } = useCategories();
   const deleteRecipeMutation = useDeleteRecipe();
+  const shareRecipeMutation = useShareRecipe();
 
   useEffect(() => {
     const selectedRecipe = recipes?.get(selectedRecipeId);
@@ -55,27 +56,44 @@ export const RecipeDetails: FC = () => {
           <>
             <Group spacing="sm" sx={{ position: "absolute", right: 10 }}>
               <Popover
-                opened={popoverOpened}
-                onClose={() => togglePopoverOpened()}
+                opened={shareRecipeMutation.isSuccess}
+                onClose={shareRecipeMutation.reset}
                 position="bottom"
                 placement="end"
                 transition="scale-y"
                 target={
                   <FlipButton
-                    onClick={() => togglePopoverOpened()}
+                    onClick={() =>
+                      !shareRecipeMutation.isSuccess && shareRecipeMutation.mutate(selectedRecipeId)
+                    }
                     sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
                     length={theme.other.buttonLength}
+                    disabled={shareRecipeMutation.isLoading}
                     border
                     square
                   >
-                    <Share1Icon width={30} height={30} />
+                    {shareRecipeMutation.isLoading ? (
+                      <Loader size="sm" />
+                    ) : (
+                      <Share1Icon width={30} height={30} />
+                    )}
                   </FlipButton>
                 }
-                styles={{ inner: { display: "flex", alignItems: "center" } }}
               >
-                {/* TODO: Create shareId on recipe and switch to that */}
-                <Text mr="xs">Share URL: </Text>
-                <TextInput value={`${window.origin}/share/${recipe.recipeId}`} readOnly />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <Text mr="xs">Share URL: </Text>
+                  <TextInput
+                    value={`${window.origin}/share/${shareRecipeMutation.data?.shareId}`}
+                    readOnly
+                  />
+                </div>
+                <Text size="sm" mt="xs" color={theme.primaryColor}>
+                  Note: This link expires in{" "}
+                  {Math.ceil(
+                    (`${shareRecipeMutation.data?.ttl}000` - Date.now()) / 1000 / 60 / 60 / 24,
+                  )}{" "}
+                  day(s).
+                </Text>
               </Popover>
               <FlipButton
                 component={Link}

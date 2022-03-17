@@ -43,6 +43,7 @@ class SaveTheSpiceStack(Stack):
         meta_table_name = f"{prefix}Meta"
         recipes_table_name = f"{prefix}Recipes"
         categories_table_name = f"{prefix}Categories"
+        share_table_name = f"{prefix}Shares"
         endpoint_name = f"{prefix}Endpoint"
         authorizer_name = f"{prefix}APIAuthorizer"
 
@@ -129,8 +130,8 @@ class SaveTheSpiceStack(Stack):
             partition_key=Attribute(name="userId", type=AttributeType.STRING),
             sort_key=Attribute(name="recipeId", type=AttributeType.NUMBER),
             billing_mode=BillingMode.PROVISIONED,
-            read_capacity=25,
-            write_capacity=25,
+            read_capacity=5,
+            write_capacity=5,
         )
 
         categories_table = Table(
@@ -140,8 +141,18 @@ class SaveTheSpiceStack(Stack):
             partition_key=Attribute(name="userId", type=AttributeType.STRING),
             sort_key=Attribute(name="categoryId", type=AttributeType.NUMBER),
             billing_mode=BillingMode.PROVISIONED,
-            read_capacity=25,
-            write_capacity=25,
+            read_capacity=5,
+            write_capacity=5,
+        )
+
+        share_table = Table(
+            self,
+            share_table_name.lower(),
+            table_name=share_table_name,
+            partition_key=Attribute(name="shareId", type=AttributeType.STRING),
+            billing_mode=BillingMode.PROVISIONED,
+            read_capacity=1,
+            write_capacity=1,
         )
 
         auth_lambda = PythonFunction(
@@ -179,6 +190,7 @@ class SaveTheSpiceStack(Stack):
                 "meta_table_name": meta_table_name,
                 "recipes_table_name": recipes_table_name,
                 "categories_table_name": categories_table_name,
+                "share_table_name": share_table_name,
                 "user_pool_id": user_pool.user_pool_id,
             },
             initial_policy=[
@@ -195,6 +207,7 @@ class SaveTheSpiceStack(Stack):
                         meta_table.table_arn,
                         recipes_table.table_arn,
                         categories_table.table_arn,
+                        share_table.table_arn,
                     ],
                 ),
             ],

@@ -2,7 +2,7 @@ import { useMutation } from "react-query";
 
 import { CategoryMap } from "@/features/categories";
 import { Recipe, RecipeMap } from "@/features/recipes";
-import { api } from "@/lib/fetch";
+import { api, privateEndpointPrefix } from "@/lib/fetch";
 import { queryClient } from "@/lib/react-query";
 
 interface DeleteCategoryResponseData {
@@ -10,12 +10,14 @@ interface DeleteCategoryResponseData {
 }
 
 const deleteCategory = (categoryId: number): Promise<DeleteCategoryResponseData | undefined> =>
-  api.delete<DeleteCategoryResponseData>(`categories/${categoryId}`).then(([res, status]) => {
-    if (status > 204) {
-      throw new Error(res.message);
-    }
-    return res.data;
-  });
+  api
+    .delete<DeleteCategoryResponseData>(`${privateEndpointPrefix}categories/${categoryId}`)
+    .then(([res, status]) => {
+      if (status > 204) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    });
 
 export const useDeleteCategory = () =>
   useMutation(deleteCategory, {

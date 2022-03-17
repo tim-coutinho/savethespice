@@ -27,7 +27,7 @@ from savethespice.models import (
 )
 
 logging = root_logger.getChild(__name__)
-api = APIRouter(prefix="/auth", tags=["auth"])
+api = APIRouter(prefix="/public/auth", tags=["auth"])
 
 
 @cache

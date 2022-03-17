@@ -25,3 +25,8 @@ body {
   font-size: inherit;
   font-weight: inherit;
 }
+
+// https://stackoverflow.com/questions/70368760/react-uncaught-referenceerror-process-is-not-defined
+iframe {
+  pointer-events: none;
+}

@@ -1,6 +1,7 @@
 import os
 from collections import Generator, Iterable
 from functools import cache
+from typing import Optional
 
 import boto3
 from boto3.dynamodb.conditions import Attr
@@ -28,7 +29,7 @@ def _get_table() -> tuple[Table, DynamoDBClient]:
     return table, client
 
 
-def get(user_id: str, category_id: int) -> Recipe:
+def get(user_id: str, recipe_id: int) -> Optional[Recipe]:
     table, _ = _get_table()
     kwargs = format_query_fields(
         [
@@ -47,10 +48,9 @@ def get(user_id: str, category_id: int) -> Recipe:
             "createTime",
         ],
     )
+    item = get_item_from_table(table, key={"userId": user_id, "recipeId": recipe_id}, **kwargs)
 
-    return Recipe(
-        **get_item_from_table(table, key={"userId": user_id, "categoryId": category_id}, **kwargs)
-    )
+    return Recipe(**item) if item else None
 
 
 def get_all(user_id: str) -> Generator[Recipe, None, None]:
@@ -78,7 +78,7 @@ def get_all(user_id: str) -> Generator[Recipe, None, None]:
     return (Recipe(**r) for r in query_table(table, key=("userId", user_id), **kwargs))
 
 
-def upsert(user_id: str, recipe_id: int, body: RecipeBase):
+def upsert(user_id: str, recipe_id: int, body: RecipeBase) -> Recipe:
     table, _ = _get_table()
     if body.categories:
         body.categories = set(body.categories)

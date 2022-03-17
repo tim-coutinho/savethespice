@@ -42,15 +42,24 @@ const wrapFetch = <T = undefined>(
     }) as Promise<[FetchResponse<T>, number]>; // Fetch only rejects on network errors
 
 export const api = {
-  get: <T>(
+  get: <ResponseType>(
     resource: string,
     params?: Record<string, unknown>,
-  ): Promise<[FetchResponse<T>, number]> =>
-    wrapFetch<T>(resource, { options: { method: "GET" }, params }),
-  post: <T, S>(resource: string, body: S): Promise<[FetchResponse<T>, number]> =>
-    wrapFetch<T>(resource, { options: { method: "POST", body: JSON.stringify(body) } }),
-  put: <T, S>(resource: string, body: S): Promise<[FetchResponse<T>, number]> =>
-    wrapFetch<T>(resource, { options: { method: "PUT", body: JSON.stringify(body) } }),
-  delete: <T>(resource: string): Promise<[FetchResponse<T>, number]> =>
-    wrapFetch<T>(resource, { options: { method: "DELETE" } }),
+  ): Promise<[FetchResponse<ResponseType>, number]> =>
+    wrapFetch<ResponseType>(resource, { options: { method: "GET" }, params }),
+  post: <ResponseType, RequestType>(
+    resource: string,
+    body: RequestType,
+  ): Promise<[FetchResponse<ResponseType>, number]> =>
+    wrapFetch<ResponseType>(resource, { options: { method: "POST", body: JSON.stringify(body) } }),
+  put: <ResponseType, RequestType>(
+    resource: string,
+    body: RequestType,
+  ): Promise<[FetchResponse<ResponseType>, number]> =>
+    wrapFetch<ResponseType>(resource, { options: { method: "PUT", body: JSON.stringify(body) } }),
+  delete: <ResponseType>(resource: string): Promise<[FetchResponse<ResponseType>, number]> =>
+    wrapFetch<ResponseType>(resource, { options: { method: "DELETE" } }),
 };
+
+export const privateEndpointPrefix = "private/";
+export const publicEndpointPrefix = "public/";

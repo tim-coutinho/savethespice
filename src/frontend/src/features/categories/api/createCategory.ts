@@ -1,16 +1,14 @@
 import { useMutation } from "react-query";
 
 import { Category, CategoryMap } from "@/features/categories";
-import { api } from "@/lib/fetch";
+import { api, privateEndpointPrefix } from "@/lib/fetch";
 import { queryClient } from "@/lib/react-query";
 
-const createCategory = (categoryName: string, categoryId?: number): Promise<Category> => {
+const createCategory = (categoryName: string): Promise<Category> => {
   const body = { name: categoryName };
-  return (
-    categoryId !== undefined
-      ? api.put<Category, typeof body>(`categories/${categoryId}`, body)
-      : api.post<Category, typeof body>("categories", body)
-  ).then(([res]) => res.data);
+  return api
+    .post<Category, typeof body>(`${privateEndpointPrefix}categories`, body)
+    .then(([res]) => res.data);
 };
 
 export const useCreateCategory = () =>

@@ -1,4 +1,4 @@
-import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
+import { ColorSchemeProvider, MantineProvider, TextStylesParams } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 import { NotificationsProvider } from "@mantine/notifications";
 import { FC, StrictMode } from "react";
@@ -40,9 +40,13 @@ export const AppProvider: FC = ({ children }) => {
                       theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
                   },
                 }),
-                Text: theme => ({
+                Text: (theme, params: TextStylesParams) => ({
                   root: {
-                    color: theme.colorScheme === "light" ? theme.black : theme.colors.dark[0],
+                    color: params.color
+                      ? theme.colors[params.color][6]
+                      : theme.colorScheme === "light"
+                      ? theme.black
+                      : theme.colors.dark[0],
                   },
                 }),
               }}

@@ -11,6 +11,7 @@ from savethespice.lib.common import root_logger as logging
 from savethespice.routes.auth import api as auth
 from savethespice.routes.categories import api as categories
 from savethespice.routes.recipes import api as recipes
+from savethespice.routes.share import api as share
 from savethespice.routes.shopping_list import api as shopping_list
 
 app = FastAPI(
@@ -27,6 +28,7 @@ app = FastAPI(
 app.include_router(auth)
 app.include_router(categories)
 app.include_router(recipes)
+app.include_router(share)
 app.include_router(shopping_list)
 app.add_middleware(
     CORSMiddleware,

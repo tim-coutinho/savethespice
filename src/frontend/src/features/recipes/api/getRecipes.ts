@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 
 import { Recipe, RecipeMap } from "@/features/recipes";
-import { api } from "@/lib/fetch";
+import { api, privateEndpointPrefix } from "@/lib/fetch";
 import { UNSET } from "@/utils/common";
 
 interface GetAllRecipesResponseData {
@@ -9,7 +9,7 @@ interface GetAllRecipesResponseData {
 }
 
 const getRecipes = (): Promise<RecipeMap> =>
-  api.get<GetAllRecipesResponseData>("recipes").then(([res, status]) => {
+  api.get<GetAllRecipesResponseData>(`${privateEndpointPrefix}recipes`).then(([res, status]) => {
     if (status !== 200) {
       throw new Error(res.message);
     }

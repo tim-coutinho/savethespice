@@ -1,11 +1,11 @@
 import { useMutation } from "react-query";
 
 import { RecipeMap } from "@/features/recipes";
-import { api } from "@/lib/fetch";
+import { api, privateEndpointPrefix } from "@/lib/fetch";
 import { queryClient } from "@/lib/react-query";
 
 const deleteRecipe = (recipeId: number): Promise<void> =>
-  api.delete(`recipes/${recipeId}`).then(([res, status]) => {
+  api.delete(`${privateEndpointPrefix}recipes/${recipeId}`).then(([res, status]) => {
     if (status !== 204) {
       throw new Error(res.message);
     }

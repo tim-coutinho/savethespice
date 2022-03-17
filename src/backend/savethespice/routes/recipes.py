@@ -38,7 +38,7 @@ from savethespice.models import (
 
 IMAGE_PREFIX = f"https://{os.environ.get('images_bucket_name', '')}.s3-us-west-2.amazonaws.com/"
 logging = root_logger.getChild(__name__)
-api = APIRouter(tags=["recipes"])
+api = APIRouter(prefix="/private", tags=["recipes"])
 
 
 @api.get("/recipes", response_model=GetRecipesResponse)

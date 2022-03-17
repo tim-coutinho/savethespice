@@ -5,7 +5,7 @@ from savethespice.lib.common import root_logger
 from savethespice.models import ShoppingList, UpdateShoppingListRequest
 
 logging = root_logger.getChild(__name__)
-api = APIRouter(prefix="/shoppinglist", tags=["shoppinglist"])
+api = APIRouter(prefix="/private/shoppinglist", tags=["shoppinglist"])
 
 
 @api.get("", response_model=ShoppingList)
@@ -15,7 +15,6 @@ async def get_shopping_list(req: Request):
     """
     user_id: str = req.scope["USER_ID"]
     logging.info(f"Getting shopping list for user with ID {user_id}.")
-
     shopping_list = meta_table.get_shopping_list(user_id)
     logging.info(f"Found shopping list {shopping_list}")
 

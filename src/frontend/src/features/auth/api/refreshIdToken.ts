@@ -1,6 +1,6 @@
 import { useMutation } from "react-query";
 
-import { api } from "@/lib/fetch";
+import { api, publicEndpointPrefix } from "@/lib/fetch";
 import { prefix } from "@/utils/common";
 
 interface RefreshIdTokenResponseData {
@@ -28,7 +28,10 @@ const refreshIdToken = (): Promise<void> => {
 
   const body = { refreshToken };
   return api
-    .post<RefreshIdTokenResponseData, typeof body>("auth/refreshidtoken", body)
+    .post<RefreshIdTokenResponseData, typeof body>(
+      `${publicEndpointPrefix}auth/refreshidtoken`,
+      body,
+    )
     .then(([res, status]) => {
       if (status >= 400) {
         if (res.data?.refreshTokenExpired) {

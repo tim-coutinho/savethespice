@@ -16,7 +16,7 @@ lint = "task format"
 release = "task format && task test"
 synth = "task format && cdk synth"
 clean = "rm -r cdk.out src/frontend/build"
-server = "images_bucket_name=savethespice-images recipes_table_name=SaveTheSpice-Recipes categories_table_name=SaveTheSpice-Categories meta_table_name=SaveTheSpice-Meta client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm UVICORN_PORT=8000 uvicorn savethespice.index:app  --app-dir src/backend --reload"
+server = "images_bucket_name=savethespice-images recipes_table_name=SaveTheSpice-Recipes categories_table_name=SaveTheSpice-Categories meta_table_name=SaveTheSpice-Meta share_table_name=SaveTheSpice-Shares client_id=4qad1l5mjeq7r8lubp46cmd3cf user_pool_id=us-west-2_XTn0Chpmm UVICORN_PORT=8000 uvicorn savethespice.index:app  --app-dir src/backend --reload"
 
 [tool.poetry]
 name = "SaveTheSpice"

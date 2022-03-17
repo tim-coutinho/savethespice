@@ -2,17 +2,19 @@ import { useMutation } from "react-query";
 
 import { CategoryMap } from "@/features/categories";
 import { AddRecipeResponseData, FormFields, RecipeMap } from "@/features/recipes";
-import { api } from "@/lib/fetch";
+import { api, privateEndpointPrefix } from "@/lib/fetch";
 import { queryClient } from "@/lib/react-query";
 import { UNSET } from "@/utils/common";
 
 const createRecipe = (recipe: FormFields): Promise<AddRecipeResponseData> =>
-  api.post<AddRecipeResponseData, FormFields>("recipes", recipe).then(([res, status]) => {
-    if (status !== 200 && status !== 201) {
-      throw new Error(res.message);
-    }
-    return res.data;
-  });
+  api
+    .post<AddRecipeResponseData, FormFields>(`${privateEndpointPrefix}recipes`, recipe)
+    .then(([res, status]) => {
+      if (status !== 200 && status !== 201) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    });
 
 export const useCreateRecipe = () =>
   useMutation(createRecipe, {

@@ -2,7 +2,7 @@ import os
 from collections import Generator, Iterable
 from functools import cache
 from itertools import count
-from typing import cast
+from typing import Optional, cast
 
 import boto3
 from boto3.dynamodb.conditions import Attr
@@ -30,13 +30,13 @@ def _get_table() -> tuple[Table, DynamoDBClient]:
     return table, client
 
 
-def get(user_id: str, category_id: int) -> Category:
+def get(user_id: str, category_id: int) -> Optional[Category]:
     table, _ = _get_table()
     kwargs = format_query_fields(["categoryId", "name", "updateTime", "createTime"])
 
-    return Category(
-        **get_item_from_table(table, key={"userId": user_id, "categoryId": category_id}, **kwargs)
-    )
+    item = get_item_from_table(table, key={"userId": user_id, "categoryId": category_id}, **kwargs)
+
+    return Category(**item) if item else None
 
 
 def get_all(user_id: str) -> Generator[Category, None, None]:
@@ -47,7 +47,7 @@ def get_all(user_id: str) -> Generator[Category, None, None]:
     return (Category(**c) for c in query_table(table, key=("userId", user_id), **kwargs))
 
 
-def delete(user_id, category_id: int):
+def delete(user_id, category_id: int) -> None:
     table, _ = _get_table()
     remove_item_from_table(
         table,
