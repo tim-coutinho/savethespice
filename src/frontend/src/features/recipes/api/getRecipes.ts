@@ -1,7 +1,9 @@
 import { useQuery } from "react-query";
+import { useRecoilValue } from "recoil";
 
 import { Recipe, RecipeMap } from "@/features/recipes";
 import { api, privateEndpointPrefix } from "@/lib/fetch";
+import { signedInState } from "@/stores";
 import { UNSET } from "@/utils/common";
 
 interface GetAllRecipesResponseData {
@@ -16,8 +18,10 @@ const getRecipes = (): Promise<RecipeMap> =>
     return new Map(res.data.recipes.map(r => [r.recipeId, r]));
   });
 
-export const useRecipes = () =>
-  useQuery("recipes", getRecipes, {
+export const useRecipes = () => {
+  const signedIn = useRecoilValue(signedInState);
+
+  return useQuery("recipes", getRecipes, {
     placeholderData: new Map<number, Recipe>(
       Array(8)
         .fill(0)
@@ -26,4 +30,6 @@ export const useRecipes = () =>
           { userId: "", recipeId: UNSET, name: "", createTime: "", updateTime: "" },
         ]),
     ),
+    enabled: signedIn,
   });
+};

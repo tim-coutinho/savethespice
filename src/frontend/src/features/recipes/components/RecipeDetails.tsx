@@ -21,8 +21,7 @@ import { FC, useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 
-import { FlipButton } from "@/components/Elements";
-import { Confirmation } from "@/components/Elements/DeleteConfirmation/Confirmation";
+import { DeleteConfirmation, FlipButton } from "@/components/Elements";
 import { useCategories } from "@/features/categories";
 import { Recipe, useDeleteRecipe, useRecipes } from "@/features/recipes";
 import { useShareRecipe } from "@/features/share";
@@ -51,7 +50,7 @@ export const RecipeDetails: FC = () => {
 
   return (
     <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
-      <Paper p="sm" sx={{ position: "relative", height: "100%", paddingRight: 0 }}>
+      <Paper radius={0} p="sm" sx={{ position: "relative", height: "100%", paddingRight: 0 }}>
         {recipe.recipeId && (
           <>
             <Group spacing="sm" sx={{ position: "absolute", right: 10 }}>
@@ -106,7 +105,7 @@ export const RecipeDetails: FC = () => {
               >
                 <Pencil1Icon width={30} height={30} />
               </FlipButton>
-              <Confirmation
+              <DeleteConfirmation
                 active={!deleteRecipeMutation.isSuccess}
                 title="Permanently delete recipe?"
                 message="This cannot be undone."

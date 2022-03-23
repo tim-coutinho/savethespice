@@ -7,7 +7,7 @@ from boto3_type_annotations.dynamodb import Client as DynamoDBClient, Table
 
 from savethespice.crud.common import format_query_fields, get_item_from_table, upsert_to_table
 from savethespice.lib.common import root_logger
-from savethespice.models import RecipeBase, ShareRecipeEntry
+from savethespice.models import PostRecipeRequest, RecipeBase, ShareRecipeEntry
 from savethespice.models.requests.share import ShareRecipeBase
 
 logging = root_logger.getChild(__name__)
@@ -21,7 +21,7 @@ def _get_table() -> tuple[Table, DynamoDBClient]:
     return table, client
 
 
-def get(share_id: str) -> Optional[RecipeBase]:
+def get(share_id: str) -> Optional[PostRecipeRequest]:
     table, _ = _get_table()
     kwargs = format_query_fields(
         [
@@ -41,7 +41,7 @@ def get(share_id: str) -> Optional[RecipeBase]:
 
     item = get_item_from_table(table, key={"shareId": share_id}, **kwargs)
 
-    return RecipeBase(**item) if item else None
+    return PostRecipeRequest(**item) if item else None
 
 
 def upsert(share_id: str, body: RecipeBase, ttl: int) -> ShareRecipeEntry:

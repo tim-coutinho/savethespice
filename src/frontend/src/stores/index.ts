@@ -16,3 +16,8 @@ export const sidebarOpenedState = atom({
   key: "sidebarOpenedState",
   default: false,
 });
+
+export const signedInState = atom({
+  key: "signedInState",
+  default: false,
+});

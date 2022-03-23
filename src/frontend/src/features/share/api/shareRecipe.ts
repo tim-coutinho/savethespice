@@ -1,7 +1,11 @@
 import { useMutation } from "react-query";
 
-import { CreateShareLinkResponseData } from "@/features/share";
 import { api, publicEndpointPrefix } from "@/lib/fetch";
+
+interface CreateShareLinkResponseData {
+  shareId: string;
+  ttl: number;
+}
 
 const shareRecipe = (recipeId: number): Promise<CreateShareLinkResponseData> => {
   const body = { recipeId };

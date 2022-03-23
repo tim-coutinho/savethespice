@@ -25,10 +25,9 @@ import {
 } from "@radix-ui/react-icons";
 import { FC, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
 
-import { FlipButton } from "@/components/Elements";
-import { Confirmation } from "@/components/Elements/DeleteConfirmation/Confirmation";
-import { signOut } from "@/features/auth";
+import { DeleteConfirmation, FlipButton } from "@/components/Elements";
 import {
   Category,
   useCategories,
@@ -36,8 +35,11 @@ import {
   useDeleteCategory,
 } from "@/features/categories";
 import { useRecipes } from "@/features/recipes";
+import { signedInState } from "@/stores";
+import { prefix } from "@/utils/common";
 
 export const Sidebar: FC = () => {
+  const setSignedIn = useSetRecoilState(signedInState);
   const newCategoryNameInputRef = useRef<HTMLInputElement>(null);
   const copyTextRef = useRef<HTMLDivElement>(null);
   const [shiftedLeft, toggleShiftedLeft] = useBooleanToggle(false);
@@ -223,7 +225,7 @@ export const Sidebar: FC = () => {
                 <TriangleRightIcon className="arrow" />
                 <span style={{ position: "absolute", left: theme.spacing.lg }}>{name}</span>
               </Group>
-              <Confirmation
+              <DeleteConfirmation
                 active={!deleteCategoryMutation.isSuccess}
                 title="Permanently delete category?"
                 message="This cannot be undone."
@@ -335,7 +337,9 @@ export const Sidebar: FC = () => {
         </Group>
         <Group
           onClick={() => {
-            signOut();
+            localStorage.removeItem(`${prefix}refreshToken`);
+            sessionStorage.removeItem(`${prefix}idToken`);
+            setSignedIn(false);
             navigate("/auth");
           }}
           className="sidebar-item"

@@ -34,6 +34,7 @@ export default function App(): ReactElement {
   return (
     <Paper
       id="app"
+      radius={0}
       sx={theme => ({
         "&[data-themechange], &[data-themechange] *": {
           transition: `${theme.other.transitionDuration}ms !important`,
@@ -42,6 +43,7 @@ export default function App(): ReactElement {
     >
       <Sidebar />
       <Paper
+        radius={0}
         className={sidebarOpened ? "shifted-right" : ""}
         sx={theme => ({
           display: "flex",

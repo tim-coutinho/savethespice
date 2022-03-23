@@ -4,6 +4,7 @@ from collections import Callable
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from mangum import Mangum
 from werkzeug.exceptions import MethodNotAllowed
 
@@ -14,15 +15,22 @@ from savethespice.routes.recipes import api as recipes
 from savethespice.routes.share import api as share
 from savethespice.routes.shopping_list import api as shopping_list
 
+
+def unique_id_function(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
 app = FastAPI(
     title="SaveTheSpice",
     version="0.1.0",
     description="Recipe saver.",
+    generate_unique_id_function=unique_id_function,
     openapi_tags=[
         {"name": "auth", "description": "Authentication related operations."},
-        {"name": "recipes", "description": "Recipe related operations."},
         {"name": "categories", "description": "Category related operations."},
+        {"name": "recipes", "description": "Recipe related operations."},
         {"name": "shoppinglist", "description": "Shopping list related operations."},
+        {"name": "share", "description": "Sharing related operations."},
     ],
 )
 app.include_router(auth)

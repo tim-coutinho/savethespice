@@ -1,6 +1,8 @@
 import { useMutation } from "react-query";
+import { useSetRecoilState } from "recoil";
 
 import { api, publicEndpointPrefix } from "@/lib/fetch";
+import { signedInState } from "@/stores";
 import { prefix } from "@/utils/common";
 
 interface SignInResponseData {
@@ -28,5 +30,10 @@ const signIn = (email: string, password: string): Promise<void> => {
 
 type UseSignInOptions = { email: string; password: string };
 
-export const useSignIn = () =>
-  useMutation(({ email, password }: UseSignInOptions) => signIn(email, password));
+export const useSignIn = () => {
+  const setSignedIn = useSetRecoilState(signedInState);
+
+  return useMutation(({ email, password }: UseSignInOptions) => signIn(email, password), {
+    onSuccess: () => setSignedIn(true),
+  });
+};

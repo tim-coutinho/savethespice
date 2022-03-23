@@ -3,19 +3,19 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Request, Response, status
 
-from savethespice.crud import recipes_table, share_table
+from savethespice.crud import categories_table, recipes_table, share_table
 from savethespice.lib.common import root_logger
 from savethespice.models import (
     CreateShareLinkRequest,
     CreateShareLinkResponse,
-    GetRecipeWithShareLinkResponse,
+    GetRecipeWithShareIdResponse,
 )
 
 logging = root_logger.getChild(__name__)
 api = APIRouter(prefix="/public/share", tags=["share"])
 
 
-@api.get("/{share_id}", response_model=GetRecipeWithShareLinkResponse)
+@api.get("/{share_id}", response_model=GetRecipeWithShareIdResponse)
 async def get(share_id: str, res: Response):
     """
     Get the details for a recipe given a share link.
@@ -46,6 +46,9 @@ async def create_share_link(
         res.status_code = status.HTTP_404_NOT_FOUND
         return {"message": f"User {user_id} does not have a recipe with ID {recipe_id}."}
     logging.info(f"Successfully got recipe with ID {recipe_id}")
+
+    if recipe.categories:
+        recipe.categories = categories_table.get_category_names_by_id(user_id, recipe.categories)
 
     share_id = str(uuid4())
     ttl = int((datetime.now(tz=timezone.utc) + timedelta(days=1)).timestamp())

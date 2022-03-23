@@ -2,12 +2,12 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from savethespice.models.requests.recipes import RecipeBase
+from savethespice.models.requests.recipes import PostRecipeRequest
 
 
-class GetRecipeWithShareLinkResponse(BaseModel):
+class GetRecipeWithShareIdResponse(BaseModel):
     message: Optional[str]
-    data: Optional[RecipeBase]
+    data: Optional[PostRecipeRequest]  # TODO: Create different model
 
 
 class CreateShareLinkResponse(BaseModel):

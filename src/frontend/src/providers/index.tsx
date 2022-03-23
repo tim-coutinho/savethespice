@@ -1,7 +1,7 @@
 import { ColorSchemeProvider, MantineProvider, TextStylesParams } from "@mantine/core";
 import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
 import { NotificationsProvider } from "@mantine/notifications";
-import { FC, StrictMode } from "react";
+import { FC } from "react";
 import { QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { BrowserRouter } from "react-router-dom";
@@ -17,47 +17,44 @@ export const AppProvider: FC = ({ children }) => {
   });
 
   return (
-    <StrictMode>
-      <RecoilRoot>
-        <QueryClientProvider client={queryClient}>
-          <ReactQueryDevtools position="bottom-right" />
-          <ColorSchemeProvider
-            colorScheme={colorScheme}
-            toggleColorScheme={v => setColorScheme(v ?? colorScheme === "dark" ? "light" : "dark")}
+    <RecoilRoot>
+      <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools position="bottom-right" />
+        <ColorSchemeProvider
+          colorScheme={colorScheme}
+          toggleColorScheme={v => setColorScheme(v ?? colorScheme === "dark" ? "light" : "dark")}
+        >
+          <MantineProvider
+            theme={{
+              headings: { fontWeight: 600 },
+              primaryColor: "violet",
+              fontFamily: "Roboto",
+              colorScheme,
+              other: { buttonLength: 40, transitionDuration: 300, sidebarWidth: 250 },
+            }}
+            styles={{
+              Image: theme => ({
+                placeholder: {
+                  backgroundColor: theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
+                },
+              }),
+              Text: (theme, params: TextStylesParams) => ({
+                root: {
+                  color: params.color
+                    ? theme.colors[params.color][6]
+                    : theme.colorScheme === "light"
+                    ? theme.black
+                    : theme.colors.dark[0],
+                },
+              }),
+            }}
           >
-            <MantineProvider
-              theme={{
-                headings: { fontWeight: 600 },
-                primaryColor: "violet",
-                fontFamily: "Roboto",
-                colorScheme,
-                other: { buttonLength: 40, transitionDuration: 300, sidebarWidth: 250 },
-              }}
-              styles={{
-                Image: theme => ({
-                  placeholder: {
-                    backgroundColor:
-                      theme.colorScheme === "light" ? theme.colors.gray[3] : undefined,
-                  },
-                }),
-                Text: (theme, params: TextStylesParams) => ({
-                  root: {
-                    color: params.color
-                      ? theme.colors[params.color][6]
-                      : theme.colorScheme === "light"
-                      ? theme.black
-                      : theme.colors.dark[0],
-                  },
-                }),
-              }}
-            >
-              <NotificationsProvider>
-                <BrowserRouter>{children}</BrowserRouter>
-              </NotificationsProvider>
-            </MantineProvider>
-          </ColorSchemeProvider>
-        </QueryClientProvider>
-      </RecoilRoot>
-    </StrictMode>
+            <NotificationsProvider>
+              <BrowserRouter>{children}</BrowserRouter>
+            </NotificationsProvider>
+          </MantineProvider>
+        </ColorSchemeProvider>
+      </QueryClientProvider>
+    </RecoilRoot>
   );
 };

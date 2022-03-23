@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 from savethespice.models.common import DBItem
@@ -9,6 +11,7 @@ class CreateShareLinkRequest(BaseModel):
 
 
 class ShareRecipeBase(RecipeBase):
+    categories: Optional[list[str]]
     ttl: int
 
 

@@ -1,10 +1,10 @@
 from collections import Iterable, Mapping
 from datetime import datetime, timezone
 from functools import singledispatch
-from typing import Any, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from boto3.dynamodb.conditions import Key
-from boto3_type_annotations.dynamodb import Table
+from boto3_type_annotations.dynamodb import Client as DynamoDBClient, Table
 
 from savethespice.models import CategoryBase, RecipeBase
 
@@ -50,6 +50,26 @@ def remove_item_from_table(table: Table, *, key: dict[str, Any], **kwargs) -> di
 
 def get_item_from_table(table: Table, *, key: dict[str, Any], **kwargs) -> dict[str, Any]:
     return table.get_item(Key=key, **kwargs).get("Item", {})
+
+
+def get_items_from_table(
+    client: DynamoDBClient, table_name: str, *, keys: list[dict[str, Any]], **kwargs
+) -> list[dict[str, dict[Literal["S", "N"], str]]]:
+    return (
+        client.batch_get_item(
+            RequestItems={
+                table_name: {
+                    "Keys": [
+                        {k: {("N" if type(v) == int else "S"): str(v)} for k, v in key.items()}
+                        for key in keys
+                    ],
+                    **kwargs,
+                }
+            }
+        )
+        .get("Responses", {})
+        .get(table_name, [])
+    )
 
 
 def query_table(

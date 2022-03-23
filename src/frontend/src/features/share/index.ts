@@ -1,2 +1,3 @@
 export * from "./api/shareRecipe";
-export * from "./types";
+export * from "./api/getRecipeWithShareLink";
+export * from "./components/ShareComponent";

@@ -1,6 +1,8 @@
 import { useMutation } from "react-query";
+import { useSetRecoilState } from "recoil";
 
 import { api, publicEndpointPrefix } from "@/lib/fetch";
+import { signedInState } from "@/stores";
 import { prefix } from "@/utils/common";
 
 interface RefreshIdTokenResponseData {
@@ -46,4 +48,8 @@ const refreshIdToken = (): Promise<void> => {
     });
 };
 
-export const useRefreshIdToken = () => useMutation(refreshIdToken);
+export const useRefreshIdToken = () => {
+  const setSignedIn = useSetRecoilState(signedInState);
+
+  return useMutation(refreshIdToken, { onSuccess: () => setSignedIn(true) });
+};

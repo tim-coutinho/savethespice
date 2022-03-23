@@ -5,9 +5,9 @@
   "dependencies": {
     "@craco/craco": "^6.4.3",
     "@mantine/core": "^4.0.0",
+    "@mantine/form": "^4.0.0",
     "@mantine/hooks": "^4.0.0",
     "@mantine/notifications": "^4.0.0",
-    "@mantine/form": "^4.0.0",
     "@radix-ui/react-icons": "^1.0.3",
     "@types/node": "^16.11.22",
     "@types/react": "^17.0.39",

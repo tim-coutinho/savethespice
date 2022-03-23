@@ -11,6 +11,7 @@ from boto3_type_annotations.dynamodb import Client as DynamoDBClient, Table
 from savethespice.crud.common import (
     format_query_fields,
     get_item_from_table,
+    get_items_from_table,
     query_table,
     remove_item_from_table,
     upsert_to_table,
@@ -37,6 +38,21 @@ def get(user_id: str, category_id: int) -> Optional[Category]:
     item = get_item_from_table(table, key={"userId": user_id, "categoryId": category_id}, **kwargs)
 
     return Category(**item) if item else None
+
+
+def get_category_names_by_id(user_id: str, category_ids: list[int]) -> list[str]:
+    table, client = _get_table()
+    kwargs = format_query_fields(["name"])
+
+    items = get_items_from_table(
+        client,
+        table.name,
+        keys=[{"userId": user_id, "categoryId": category_id} for category_id in category_ids],
+        **kwargs,
+    )
+
+    # Convert from DDB format
+    return [item["name"]["S"] for item in items]
 
 
 def get_all(user_id: str) -> Generator[Category, None, None]:

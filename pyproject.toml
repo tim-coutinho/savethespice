@@ -36,7 +36,7 @@ requests = "^2.25.1"
 MarkupSafe = "2.0.1"
 itsdangerous = "2.0.1"
 mangum = "^0.13.0"
-fastapi = {extras = ["all"], version = "^0.74.1"}
+fastapi = {extras = ["all"], version = "^0.75.0"}
 
 [tool.poetry.dev-dependencies]
 "aws-cdk.aws-apigateway" = "^1.132.0"

@@ -9,7 +9,7 @@ interface ConfirmationProps {
   confirmButton: ReactElement;
 }
 
-export const Confirmation: FC<ConfirmationProps> = ({
+export const DeleteConfirmation: FC<ConfirmationProps> = ({
   title,
   message,
   triggerButton,
