@@ -1,15 +1,11 @@
 import { useMutation } from "react-query";
 
-import { Category, CategoryMap } from "@/features/categories";
-import { api, privateEndpointPrefix } from "@/lib/fetch";
+import { CategoriesService, Category } from "@/lib/fetch";
 import { queryClient } from "@/lib/react-query";
+import { CategoryMap } from "@/types";
 
-const createCategory = (categoryName: string): Promise<Category> => {
-  const body = { name: categoryName };
-  return api
-    .post<Category, typeof body>(`${privateEndpointPrefix}categories`, body)
-    .then(([res]) => res.data);
-};
+const createCategory = (name: string): Promise<Category> =>
+  CategoriesService.postCategory({ name }).then(({ data }) => data);
 
 export const useCreateCategory = () =>
   useMutation(createCategory, {
@@ -26,7 +22,6 @@ export const useCreateCategory = () =>
             name: categoryName,
             createTime: new Date().toISOString(),
             updateTime: new Date().toISOString(),
-            userId: "",
           }),
         );
         return { previousCategories, newCategoryId: categoryId };

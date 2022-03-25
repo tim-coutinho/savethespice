@@ -1,65 +1,63 @@
-import { endpoint } from "@/config";
-import { prefix } from "@/utils/common";
+/* eslint-disable */
 
-interface FetchResponse<T> {
-  data: T;
-  message: string;
-}
+export type { Category } from "./types/Category";
+export type { CategoryBase } from "./types/CategoryBase";
+export type { ConfirmForgotPasswordRequest } from "./types/ConfirmForgotPasswordRequest";
+export type { ConfirmForgotPasswordResponse } from "./types/ConfirmForgotPasswordResponse";
+export type { ConfirmSignUpRequest } from "./types/ConfirmSignUpRequest";
+export type { ConfirmSignUpResponse } from "./types/ConfirmSignUpResponse";
+export type { CreateShareLinkRequest } from "./types/CreateShareLinkRequest";
+export type { CreateShareLinkResponse } from "./types/CreateShareLinkResponse";
+export type { DeleteCategoriesResponse } from "./types/DeleteCategoriesResponse";
+export type { DeleteCategoriesResponseData } from "./types/DeleteCategoriesResponseData";
+export type { DeleteCategoryResponse } from "./types/DeleteCategoryResponse";
+export type { DeleteCategoryResponseData } from "./types/DeleteCategoryResponseData";
+export type { DeleteRecipeResponse } from "./types/DeleteRecipeResponse";
+export type { DeleteRecipesResponse } from "./types/DeleteRecipesResponse";
+export type { DeleteRecipesResponseData } from "./types/DeleteRecipesResponseData";
+export type { ForgotPasswordRequest } from "./types/ForgotPasswordRequest";
+export type { ForgotPasswordResponse } from "./types/ForgotPasswordResponse";
+export type { GetCategoriesResponse } from "./types/GetCategoriesResponse";
+export type { GetCategoriesResponseData } from "./types/GetCategoriesResponseData";
+export type { GetCategoryResponse } from "./types/GetCategoryResponse";
+export type { GetRecipeResponse } from "./types/GetRecipeResponse";
+export type { GetRecipesResponse } from "./types/GetRecipesResponse";
+export type { GetRecipesResponseData } from "./types/GetRecipesResponseData";
+export type { GetRecipeWithShareIdResponse } from "./types/GetRecipeWithShareIdResponse";
+export type { HTTPValidationError } from "./types/HTTPValidationError";
+export type { PatchCategoriesResponse } from "./types/PatchCategoriesResponse";
+export type { PatchCategoriesResponseData } from "./types/PatchCategoriesResponseData";
+export type { PatchCategoryRequest } from "./types/PatchCategoryRequest";
+export type { PostCategoryRequest } from "./types/PostCategoryRequest";
+export type { PostCategoryResponse } from "./types/PostCategoryResponse";
+export type { PostRecipeRequest } from "./types/PostRecipeRequest";
+export type { PostRecipeResponse } from "./types/PostRecipeResponse";
+export type { PutCategoryRequest } from "./types/PutCategoryRequest";
+export type { PutCategoryResponse } from "./types/PutCategoryResponse";
+export type { PutRecipeRequest } from "./types/PutRecipeRequest";
+export type { PutRecipeResponse } from "./types/PutRecipeResponse";
+export type { PutRecipesResponse } from "./types/PutRecipesResponse";
+export type { PutRecipesResponseData } from "./types/PutRecipesResponseData";
+export type { Recipe } from "./types/Recipe";
+export type { RecipeBase } from "./types/RecipeBase";
+export type { RefreshIdTokenRequest } from "./types/RefreshIdTokenRequest";
+export type { RefreshIdTokenResponse } from "./types/RefreshIdTokenResponse";
+export type { RefreshIdTokenResponseData } from "./types/RefreshIdTokenResponseData";
+export type { ResendCodeRequest } from "./types/ResendCodeRequest";
+export type { ResendCodeResponse } from "./types/ResendCodeResponse";
+export type { ScrapeRecipeResponse } from "./types/ScrapeRecipeResponse";
+export type { ShareRecipeResponseData } from "./types/ShareRecipeResponseData";
+export type { SignInRequest } from "./types/SignInRequest";
+export type { SignInResponse } from "./types/SignInResponse";
+export type { SignInResponseData } from "./types/SignInResponseData";
+export type { SignUpRequest } from "./types/SignUpRequest";
+export type { SignUpResponse } from "./types/SignUpResponse";
+export type { UpsertRecipeResponseData } from "./types/UpsertRecipeResponseData";
+export type { ValidationError } from "./types/ValidationError";
+export type { ApiError } from "./core/ApiError";
 
-const serialize = (obj?: Record<string, unknown> | string) =>
-  encodeURI(
-    Object.entries(obj ?? {}).reduce(
-      (acc, [key, val]) => `${acc}${acc === "" ? "?" : "&"}${key}=${val}`,
-      "",
-    ),
-  );
-
-const wrapFetch = <T = undefined>(
-  resource: string,
-  config: { options?: RequestInit; params?: string | Record<string, unknown> } = {
-    options: { method: "GET" },
-    params: "",
-  },
-): Promise<[FetchResponse<T>, number]> =>
-  fetch(`${endpoint}/${resource}${serialize(config.params)}`, {
-    headers: {
-      Authorization: sessionStorage.getItem(`${prefix}idToken`) as string,
-      "Content-Type": "application/json",
-    },
-    ...config.options,
-    body: config.options?.body ?? null,
-  })
-    .then(async res => {
-      if (res.status === 204) {
-        return [{}, res.status];
-      }
-      const body = await res.json();
-      return [body, res.status];
-    })
-    .catch(e => {
-      console.error(e);
-      return [{}, 500];
-    }) as Promise<[FetchResponse<T>, number]>; // Fetch only rejects on network errors
-
-export const api = {
-  get: <ResponseType>(
-    resource: string,
-    params?: Record<string, unknown>,
-  ): Promise<[FetchResponse<ResponseType>, number]> =>
-    wrapFetch<ResponseType>(resource, { options: { method: "GET" }, params }),
-  post: <ResponseType, RequestType>(
-    resource: string,
-    body: RequestType,
-  ): Promise<[FetchResponse<ResponseType>, number]> =>
-    wrapFetch<ResponseType>(resource, { options: { method: "POST", body: JSON.stringify(body) } }),
-  put: <ResponseType, RequestType>(
-    resource: string,
-    body: RequestType,
-  ): Promise<[FetchResponse<ResponseType>, number]> =>
-    wrapFetch<ResponseType>(resource, { options: { method: "PUT", body: JSON.stringify(body) } }),
-  delete: <ResponseType>(resource: string): Promise<[FetchResponse<ResponseType>, number]> =>
-    wrapFetch<ResponseType>(resource, { options: { method: "DELETE" } }),
-};
-
-export const privateEndpointPrefix = "private/";
-export const publicEndpointPrefix = "public/";
+export { AuthService } from "./services/AuthService";
+export { CategoriesService } from "./services/CategoriesService";
+export { RecipesService } from "./services/RecipesService";
+export { ShareService } from "./services/ShareService";
+export { ShoppinglistService } from "./services/ShoppinglistService";

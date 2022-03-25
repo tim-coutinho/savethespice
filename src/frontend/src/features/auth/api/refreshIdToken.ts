@@ -1,16 +1,9 @@
 import { useMutation } from "react-query";
 import { useSetRecoilState } from "recoil";
 
-import { api, publicEndpointPrefix } from "@/lib/fetch";
+import { ApiError, AuthService, RefreshIdTokenResponse } from "@/lib/fetch";
 import { signedInState } from "@/stores";
 import { prefix } from "@/utils/common";
-
-interface RefreshIdTokenResponseData {
-  user: string;
-  idToken: string;
-  idTokenExpiryTimestamp: string;
-  refreshTokenExpired?: boolean;
-}
 
 const refreshIdToken = (): Promise<void> => {
   const refreshToken = localStorage.getItem(`${prefix}refreshToken`);
@@ -28,23 +21,20 @@ const refreshIdToken = (): Promise<void> => {
     return Promise.resolve();
   }
 
-  const body = { refreshToken };
-  return api
-    .post<RefreshIdTokenResponseData, typeof body>(
-      `${publicEndpointPrefix}auth/refreshidtoken`,
-      body,
-    )
-    .then(([res, status]) => {
-      if (status >= 400) {
-        if (res.data?.refreshTokenExpired) {
-          localStorage.removeItem(`${prefix}refreshToken`);
-          localStorage.removeItem(`${prefix}idTokenExpiryTimestamp`);
-        }
-        throw new Error(res.message);
+  return AuthService.refreshIdToken({ refreshToken })
+    .then(res => {
+      if (!res.data) {
+        return;
       }
       const { idToken, idTokenExpiryTimestamp } = res.data;
       sessionStorage.setItem(`${prefix}idToken`, idToken);
       localStorage.setItem(`${prefix}idTokenExpiryTimestamp`, idTokenExpiryTimestamp);
+    })
+    .catch((e: ApiError<RefreshIdTokenResponse>) => {
+      if (e.body.data?.refreshTokenExpired) {
+        localStorage.removeItem(`${prefix}refreshToken`);
+        localStorage.removeItem(`${prefix}idTokenExpiryTimestamp`);
+      }
     });
 };
 

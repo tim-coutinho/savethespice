@@ -6,6 +6,9 @@ import { AuthForm } from "@/features/auth";
 import { RecipeDetails } from "@/features/recipes";
 import { ShareComponent } from "@/features/share";
 
+// Routes that handle rendering manually within the code rather than by react-router
+const manualRoutes = ["create", "import"];
+
 export const AppRoutes: FC = () =>
   useRoutes([
     {
@@ -13,9 +16,10 @@ export const AppRoutes: FC = () =>
       element: <App />,
       children: [
         { path: "recipes/:recipeId/*", element: <RecipeDetails /> },
-        { path: "share/:shareId", element: <ShareComponent /> },
+        ...manualRoutes.map(r => ({ path: r, element: null })),
         { path: "*", element: <Navigate to="/" /> },
       ],
     },
     { path: "/auth", element: <AuthForm /> },
+    { path: "/share/:shareId", element: <ShareComponent /> },
   ]);

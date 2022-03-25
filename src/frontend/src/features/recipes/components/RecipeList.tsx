@@ -3,7 +3,8 @@ import { FC, useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
-import { Recipe, useRecipes } from "@/features/recipes";
+import { useRecipes } from "@/features/recipes";
+import { Recipe } from "@/lib/fetch";
 import { filterOptionsState, filterState } from "@/stores";
 import { UNSET } from "@/utils/common";
 

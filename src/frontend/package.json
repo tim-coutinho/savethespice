@@ -33,6 +33,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "openapi-typescript-codegen": "^0.20.1",
     "prettier": "^2.5.1",
     "react-app-rewired": "^2.1.11",
     "type-fest": "^2.11.1"
@@ -42,7 +43,8 @@
     "build": "craco --max_old_space_size=4096 build",
     "test": "craco test --env=jsdom",
     "eject": "react-scripts eject",
-    "lint": "eslint --fix --ext .js,.ts,.tsx ./src --ignore-path ../../.gitignore"
+    "lint": "eslint --fix --ext .js,.ts,.tsx ./src --ignore-path ../../.gitignore",
+    "openapi": "curl http://localhost:8000/openapi.json | poetry run python preprocess_spec.py | openapi --exportCore false --input /dev/stdin --output tmp --indent 2"
   },
   "esLintConfig": {
     "extends": [

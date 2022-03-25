@@ -172,11 +172,11 @@ async def refresh_id_token(req: RefreshIdTokenRequest, res: Response):
 
     logging.info("Refresh ID token flow successful.")
     return {
-        "message": "You have been signed in.",
         "data": {
+            "user": user,
             "idToken": id_token,
             "idTokenExpiryTimestamp": expiry_timestamp.replace(microsecond=0),
-            "user": user,
+            "refreshTokenExpired": False,
         },
     }
 

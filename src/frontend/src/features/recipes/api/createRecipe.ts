@@ -1,24 +1,16 @@
 import { useMutation } from "react-query";
 
-import { CategoryMap } from "@/features/categories";
-import { AddRecipeResponseData, FormFields, RecipeMap } from "@/features/recipes";
-import { api, privateEndpointPrefix } from "@/lib/fetch";
+import { PostRecipeRequest, RecipesService, UpsertRecipeResponseData } from "@/lib/fetch";
 import { queryClient } from "@/lib/react-query";
+import { CategoryMap, RecipeMap } from "@/types";
 import { UNSET } from "@/utils/common";
 
-const createRecipe = (recipe: FormFields): Promise<AddRecipeResponseData> =>
-  api
-    .post<AddRecipeResponseData, FormFields>(`${privateEndpointPrefix}recipes`, recipe)
-    .then(([res, status]) => {
-      if (status !== 200 && status !== 201) {
-        throw new Error(res.message);
-      }
-      return res.data;
-    });
+const createRecipe = (recipe: PostRecipeRequest): Promise<UpsertRecipeResponseData> =>
+  RecipesService.postRecipe(recipe).then(({ data }) => data);
 
 export const useCreateRecipe = () =>
   useMutation(createRecipe, {
-    onMutate: (recipe: FormFields) => {
+    onMutate: (recipe: PostRecipeRequest) => {
       const previousRecipes = queryClient.getQueryData<RecipeMap>("recipes");
       const previousCategories = queryClient.getQueryData<CategoryMap>("categories");
 
@@ -27,7 +19,7 @@ export const useCreateRecipe = () =>
         const categoryNamesToIds = new Map(
           Array.from(newCategories).map(([id, { name }]) => [name, id]),
         );
-        recipe.categories.forEach(c => {
+        recipe.categories?.forEach(c => {
           if (!categoryNamesToIds.has(c)) {
             const categoryId = Math.random();
             newCategories.set(Math.random(), {
@@ -35,7 +27,6 @@ export const useCreateRecipe = () =>
               name: c,
               createTime: new Date().toISOString(),
               updateTime: new Date().toISOString(),
-              userId: "",
             });
             categoryNamesToIds.set(c, categoryId);
           }
@@ -48,10 +39,9 @@ export const useCreateRecipe = () =>
           newRecipes.set(recipeId, {
             recipeId,
             ...recipe,
-            categories: recipe.categories.map(c => categoryNamesToIds.get(c) || UNSET),
+            categories: recipe.categories?.map(c => categoryNamesToIds.get(c) || UNSET),
             createTime: new Date().toISOString(),
             updateTime: new Date().toISOString(),
-            userId: "",
           });
           queryClient.setQueryData("recipes", newRecipes);
         }

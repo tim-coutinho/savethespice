@@ -16,7 +16,7 @@ class SignInResponse(BaseModel):
     class SignInResponseData(BaseModel):
         user: str
         idToken: str
-        idTokenExpiryTimestamp: Optional[datetime]
+        idTokenExpiryTimestamp: datetime
         refreshToken: str
 
     message: str
@@ -25,12 +25,12 @@ class SignInResponse(BaseModel):
 
 class RefreshIdTokenResponse(BaseModel):
     class RefreshIdTokenResponseData(BaseModel):
-        user: Optional[str]
-        idToken: Optional[str]
-        idTokenExpiryTimestamp: Optional[datetime]
-        refreshTokenExpired: Optional[bool] = False
+        user: str
+        idToken: str
+        idTokenExpiryTimestamp: datetime
+        refreshTokenExpired: bool
 
-    message: str
+    message: Optional[str]
     data: Optional[RefreshIdTokenResponseData]
 
 

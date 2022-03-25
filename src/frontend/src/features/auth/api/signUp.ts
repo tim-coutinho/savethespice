@@ -1,20 +1,10 @@
 import { useMutation } from "react-query";
 
-import { api, publicEndpointPrefix } from "@/lib/fetch";
+import { AuthService } from "@/lib/fetch";
 
-const signUp = (email: string, password: string): Promise<[string, number]> => {
-  const body = { email, password };
+type SignUpOptions = { email: string; password: string };
 
-  return api
-    .post<undefined, typeof body>(`${publicEndpointPrefix}auth/signup`, body)
-    .then(([res, status]) => {
-      if (status >= 400) {
-        throw new Error(res.message);
-      }
-      return [res.message, status];
-    });
-};
-type UseSignUpOptions = { email: string; password: string };
+const signUp = (body: SignUpOptions): Promise<string> =>
+  AuthService.signUp(body).then(res => res.message);
 
-export const useSignUp = () =>
-  useMutation(({ email, password }: UseSignUpOptions) => signUp(email, password));
+export const useSignUp = () => useMutation(signUp);

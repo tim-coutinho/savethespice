@@ -286,7 +286,7 @@ async def delete_recipe(recipe_id: int, req: Request, res: Response):
 #
 #     kwargs[
 #         "UpdateExpression"
-#     ] += f" SET {', '.join(f'#{k} = :{k}' for k in {**updates.dict(), 'updateTime': edit_time})}"
+#     ] += f" SET {", '.join(f'#{k} = :{k}' for k in {**updates.dict(), 'updateTime': edit_time})}"
 #     kwargs["ExpressionAttributeNames"].update({f"#{k}": k for k in updates.dict()})
 #     kwargs["ExpressionAttributeValues"].update({f":{k}": v for k, v in updates.dict().items()})
 #     kwargs["UpdateExpression"] = kwargs["UpdateExpression"].replace("  ", " ")

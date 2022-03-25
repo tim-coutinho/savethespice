@@ -23,8 +23,9 @@ import { useSetRecoilState } from "recoil";
 
 import { DeleteConfirmation, FlipButton } from "@/components/Elements";
 import { useCategories } from "@/features/categories";
-import { Recipe, useDeleteRecipe, useRecipes } from "@/features/recipes";
+import { useDeleteRecipe, useRecipes } from "@/features/recipes";
 import { useShareRecipe } from "@/features/share";
+import { Recipe } from "@/lib/fetch";
 import { sidebarOpenedState } from "@/stores";
 import { UNSET } from "@/utils/common";
 

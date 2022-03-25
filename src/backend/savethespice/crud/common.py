@@ -60,7 +60,7 @@ def get_items_from_table(
             RequestItems={
                 table_name: {
                     "Keys": [
-                        {k: {("N" if type(v) == int else "S"): str(v)} for k, v in key.items()}
+                        {k: {("N" if isinstance(v, int) else "S"): str(v)} for k, v in key.items()}
                         for key in keys
                     ],
                     **kwargs,

@@ -1,27 +1,11 @@
 import { useMutation } from "react-query";
 
-import { AddRecipeResponseData, Recipe, RecipeMap } from "@/features/recipes";
-import { api } from "@/lib/fetch";
+import { PutRecipesResponse, Recipe, RecipesService } from "@/lib/fetch";
 import { queryClient } from "@/lib/react-query";
+import { RecipeMap } from "@/types";
 
-interface AddRecipesResponseData
-  extends Pick<
-    AddRecipeResponseData,
-    "existingCategories" | "newCategories" | "categoryFailedAdds"
-  > {
-  recipes?: Recipe[];
-  failedAdds?: Recipe[];
-}
-
-const createRecipes = (recipes: Recipe[]): Promise<AddRecipesResponseData> =>
-  api
-    .put<AddRecipesResponseData, { recipes: Recipe[] }>("recipes", { recipes })
-    .then(([res, status]) => {
-      if (status !== 200) {
-        throw new Error(res.message);
-      }
-      return res.data;
-    });
+const createRecipes = (recipes: Recipe[]): Promise<PutRecipesResponse> =>
+  RecipesService.putRecipes(recipes).then(({ data }) => data);
 
 export const useCreateRecipes = () =>
   useMutation(createRecipes, {

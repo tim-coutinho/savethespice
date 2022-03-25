@@ -28,12 +28,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 
 import { DeleteConfirmation, FlipButton } from "@/components/Elements";
-import {
-  Category,
-  useCategories,
-  useCreateCategory,
-  useDeleteCategory,
-} from "@/features/categories";
+import { useCategories, useCreateCategory, useDeleteCategory } from "@/features/categories";
 import { useRecipes } from "@/features/recipes";
 import { signedInState } from "@/stores";
 import { prefix } from "@/utils/common";
@@ -279,19 +274,11 @@ export const Sidebar: FC = () => {
                     recipe.categories
                       ? {
                           ...recipe,
-                          categories: recipe.categories.map(
-                            c => (categories?.get(c) as Category).name,
-                          ),
-                          recipeId: undefined,
-                          createTime: undefined,
-                          updateTime: undefined,
+                          categories: recipe.categories
+                            .map(c => categories?.get(c)?.name ?? "")
+                            .filter(c => c !== ""),
                         }
-                      : {
-                          ...recipe,
-                          recipeId: undefined,
-                          createTime: undefined,
-                          updateTime: undefined,
-                        },
+                      : recipe,
                   ),
                 ),
               );

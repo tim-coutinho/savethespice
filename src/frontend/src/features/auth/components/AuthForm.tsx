@@ -51,7 +51,7 @@ export const AuthForm: FC = () => {
         return signUpMutation.mutate(
           { email, password },
           {
-            onSuccess: ([message]) => {
+            onSuccess: message => {
               showNotification({ message, icon: <EnvelopeClosedIcon /> });
             },
             onError: e => {

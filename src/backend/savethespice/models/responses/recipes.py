@@ -63,7 +63,7 @@ class PutRecipeResponse(BaseModel):
     data: UpsertRecipeResponseData
 
 
-class PutRecipesResponse(Recipe):
+class PutRecipesResponse(BaseModel):
     class PutRecipesResponseData(BaseModel):
         # TODO: Prefer Iterable: https://github.com/tiangolo/fastapi/pull/3913
         recipes: list[Recipe]

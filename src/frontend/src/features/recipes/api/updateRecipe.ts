@@ -1,19 +1,14 @@
 import { useMutation } from "react-query";
 
-import { AddRecipeResponseData, FormFields } from "@/features/recipes";
-import { api } from "@/lib/fetch";
+import { PutRecipeRequest, RecipesService, UpsertRecipeResponseData } from "@/lib/fetch";
 
-const updateRecipe = (recipe: FormFields, recipeId: number): Promise<AddRecipeResponseData> =>
-  api
-    .put<AddRecipeResponseData, FormFields>(`recipes/${recipeId}`, recipe)
-    .then(([res, status]) => {
-      if (status !== 200 && status !== 201) {
-        throw new Error(res.message);
-      }
-      return res.data;
-    });
+const updateRecipe = (
+  recipe: PutRecipeRequest,
+  recipeId: number,
+): Promise<UpsertRecipeResponseData> =>
+  RecipesService.putRecipe(recipeId, recipe).then(({ data }) => data);
 
-type UseUpdateRecipeOptions = { recipe: FormFields; recipeId: number };
+type UseUpdateRecipeOptions = { recipe: PutRecipeRequest; recipeId: number };
 
 export const useUpdateRecipe = () =>
   useMutation(({ recipe, recipeId }: UseUpdateRecipeOptions) => updateRecipe(recipe, recipeId));

@@ -4,7 +4,8 @@ import { FC, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { FlipButton } from "@/components/Elements";
-import { Recipe, useCreateRecipes } from "@/features/recipes";
+import { useCreateRecipes } from "@/features/recipes";
+import { Recipe } from "@/lib/fetch";
 
 export const ImportRecipesForm: FC = () => {
   const [value, setValue] = useInputState("");

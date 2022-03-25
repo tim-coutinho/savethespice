@@ -9,5 +9,3 @@ export * from "./components/ImportRecipesForm";
 export * from "./components/CreateRecipeForm";
 export * from "./components/RecipeDetails";
 export * from "./components/RecipeList";
-
-export * from "./types";

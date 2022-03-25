@@ -14,15 +14,10 @@ import { ClipboardEventHandler, FC, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { FlipButton } from "@/components/Elements";
-import { Category, useCategories } from "@/features/categories";
-import {
-  FormFields,
-  useCreateRecipe,
-  useRecipes,
-  useScrape,
-  useUpdateRecipe,
-} from "@/features/recipes";
+import { useCategories } from "@/features/categories";
+import { useCreateRecipe, useRecipes, useScrape, useUpdateRecipe } from "@/features/recipes";
 import { usePrevious } from "@/hooks";
+import { Category, PutRecipeRequest } from "@/lib/fetch";
 import { UNSET } from "@/utils/common";
 
 const baseForm = {
@@ -99,7 +94,10 @@ export const CreateRecipeForm: FC = () => {
     form.setValues({ ...initialValues.current });
   }, [recipes, formVisible, editMode]);
 
-  const valueChanged = (initialValue: keyof FormFields, newValue: FormFields[keyof FormFields]) =>
+  const valueChanged = (
+    initialValue: keyof PutRecipeRequest,
+    newValue: PutRecipeRequest[keyof PutRecipeRequest],
+  ) =>
     // Value is list, new value altered
     (typeof newValue === "object" && JSON.stringify(newValue) !== JSON.stringify(initialValue)) ||
     // Value initially present, new value altered
@@ -121,7 +119,7 @@ export const CreateRecipeForm: FC = () => {
       // No op if nothing to update
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      const initialValue = initialValues.current[k as keyof FormFields];
+      const initialValue = initialValues.current[k as keyof PutRecipeRequest];
       if (valueChanged(initialValue, v)) {
         editMode
           ? updateRecipeMutation
