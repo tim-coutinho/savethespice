@@ -6,4 +6,4 @@ const getRecipeWithShareId = (shareId: string) =>
   ShareService.get(shareId).then(({ data }) => data);
 
 export const useGetRecipeWithShareId = (shareId: string) =>
-  useQuery(["share", shareId], () => getRecipeWithShareId(shareId));
+  useQuery(["share", shareId], () => getRecipeWithShareId(shareId), { enabled: !!shareId });

@@ -1,21 +1,25 @@
 import { Paper, useMantineTheme } from "@mantine/core";
 import { ReactElement, useEffect } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
 import { Header, Sidebar } from "@/components/Layout";
 import { useRefreshIdToken } from "@/features/auth";
-import { CreateRecipeForm, ImportRecipesForm, RecipeList } from "@/features/recipes";
+import { CreateRecipeForm, ImportRecipesForm, RecipeList, useRecipes } from "@/features/recipes";
+import { Recipe } from "@/lib/fetch";
 import { sidebarOpenedState } from "@/stores";
-import { prefix } from "@/utils/common";
+import { prefix, UNSET } from "@/utils/common";
 
 export default function App(): ReactElement {
   const sidebarOpened = useRecoilValue(sidebarOpenedState);
   const theme = useMantineTheme();
   const location = useLocation();
   const navigate = useNavigate();
+  const selectedRecipeId = +(useParams().recipeId ?? UNSET);
 
   const refreshIdTokenMutation = useRefreshIdToken();
+
+  const { data: recipes } = useRecipes();
 
   useEffect(() => {
     localStorage.setItem(`${prefix}theme`, theme.colorScheme);
@@ -70,7 +74,8 @@ export default function App(): ReactElement {
           <Header />
           <RecipeList />
         </Paper>
-        <Outlet /> {/* RecipeDetails */}
+        {/* RecipeDetails */}
+        <Outlet context={recipes?.get(selectedRecipeId) ?? ({} as Recipe)} />
       </Paper>
       <CreateRecipeForm />
       <ImportRecipesForm />

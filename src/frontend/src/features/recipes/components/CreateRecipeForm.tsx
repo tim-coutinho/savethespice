@@ -16,6 +16,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import { FlipButton } from "@/components/Elements";
 import { useCategories } from "@/features/categories";
 import { useCreateRecipe, useRecipes, useScrape, useUpdateRecipe } from "@/features/recipes";
+import { useGetRecipeWithShareId } from "@/features/share";
 import { usePrevious } from "@/hooks";
 import { Category, PutRecipeRequest } from "@/lib/fetch";
 import { UNSET } from "@/utils/common";
@@ -40,15 +41,17 @@ export const CreateRecipeForm: FC = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const shareId = searchParams.get("shareId") ?? "";
   const selectedRecipeId = +(useParams().recipeId ?? UNSET);
-  const { pathname } = useLocation();
+  const location = useLocation();
   // Need both so as to keep text updated during animation when navigating away from /edit
-  const editMode = pathname.endsWith("edit");
+  const editMode = location.pathname.endsWith("edit");
   const prevEditMode = usePrevious(editMode);
-  const formVisible = pathname.endsWith("create") || editMode;
+  const formVisible = location.pathname.endsWith("create") || editMode;
 
   const { data: recipes } = useRecipes();
   const { data: categories } = useCategories();
+  const { data: sharedRecipe } = useGetRecipeWithShareId(shareId);
   const updateRecipeMutation = useUpdateRecipe();
   const createRecipeMutation = useCreateRecipe();
   const scrapeQuery = useScrape(form.values.urlToScrape);
@@ -88,11 +91,13 @@ export const CreateRecipeForm: FC = () => {
           instructions: "",
           urlToScrape: "",
         });
+    } else if (sharedRecipe) {
+      initialValues.current = { ...sharedRecipe };
     } else {
       initialValues.current = { ...baseForm };
     }
     form.setValues({ ...initialValues.current });
-  }, [recipes, formVisible, editMode]);
+  }, [recipes, sharedRecipe, formVisible, editMode]);
 
   const valueChanged = (
     initialValue: keyof PutRecipeRequest,
@@ -124,8 +129,8 @@ export const CreateRecipeForm: FC = () => {
         editMode
           ? updateRecipeMutation
               .mutateAsync({ recipe, recipeId: selectedRecipeId })
-              .then(() => navigate(`/?${searchParams}`))
-          : createRecipeMutation.mutateAsync(recipe).then(() => navigate(`/?${searchParams}`));
+              .then(() => navigate(`/${location.search}`))
+          : createRecipeMutation.mutateAsync(recipe).then(() => navigate(`/${location.search}`));
       }
     }
   };
@@ -144,7 +149,11 @@ export const CreateRecipeForm: FC = () => {
     <Modal
       title={`${editMode || prevEditMode ? "Edit" : "New"} Recipe`}
       opened={formVisible}
-      onClose={() => navigate(-1)}
+      onClose={() => {
+        searchParams.delete("shareId");
+        // Relative paths don't want to work sad
+        navigate(`${location.pathname.replaceAll(/\/(edit|create)/g, "") || "/"}?${searchParams}`);
+      }}
       overflow="inside"
       centered
     >

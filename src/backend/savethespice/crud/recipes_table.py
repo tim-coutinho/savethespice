@@ -40,7 +40,6 @@ def get(user_id: str, recipe_id: int) -> Optional[Recipe]:
             "adaptedFrom",
             "cookTime",
             "yields",
-            "categories",
             "instructions",
             "ingredients",
             "imgSrc",

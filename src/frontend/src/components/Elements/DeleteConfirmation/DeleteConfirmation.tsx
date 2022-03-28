@@ -1,7 +1,7 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
 import { cloneElement, FC, MouseEvent, ReactElement, useEffect, useState } from "react";
 
-interface ConfirmationProps {
+interface DeleteConfirmationProps {
   title: string;
   message?: string;
   active: boolean;
@@ -9,7 +9,7 @@ interface ConfirmationProps {
   confirmButton: ReactElement;
 }
 
-export const DeleteConfirmation: FC<ConfirmationProps> = ({
+export const DeleteConfirmation: FC<DeleteConfirmationProps> = ({
   title,
   message,
   triggerButton,

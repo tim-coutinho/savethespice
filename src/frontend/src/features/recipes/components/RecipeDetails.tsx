@@ -16,132 +16,156 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useNotifications } from "@mantine/notifications";
-import { Pencil1Icon, Share1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { Pencil1Icon, PlusCircledIcon, Share1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { FC, useEffect, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 
 import { DeleteConfirmation, FlipButton } from "@/components/Elements";
 import { useCategories } from "@/features/categories";
-import { useDeleteRecipe, useRecipes } from "@/features/recipes";
+import { useDeleteRecipe } from "@/features/recipes";
 import { useShareRecipe } from "@/features/share";
 import { Recipe } from "@/lib/fetch";
 import { sidebarOpenedState } from "@/stores";
 import { UNSET } from "@/utils/common";
 
-export const RecipeDetails: FC = () => {
-  const [recipe, setRecipe] = useState({} as Recipe);
+interface RecipeDetailsProps {
+  recipe?: Recipe;
+}
+
+export const RecipeDetails: FC<RecipeDetailsProps> = ({ recipe: propsRecipe }) => {
+  const [shareLinkExpiry, setShareLinkExpiry] = useState(0);
   const setSidebarOpened = useSetRecoilState(sidebarOpenedState);
   const theme = useMantineTheme();
   const { showNotification } = useNotifications();
 
   const navigate = useNavigate();
   const selectedRecipeId = +(useParams().recipeId ?? UNSET);
+  const shareId = useParams().shareId;
   const [searchParams, setSearchParams] = useSearchParams();
+  const outletRecipe = useOutletContext<Recipe>();
 
-  const { data: recipes } = useRecipes();
   const { data: categories } = useCategories();
   const deleteRecipeMutation = useDeleteRecipe();
   const shareRecipeMutation = useShareRecipe();
 
+  const recipe = propsRecipe ?? outletRecipe;
+
   useEffect(() => {
-    const selectedRecipe = recipes?.get(selectedRecipeId);
-    setRecipe(selectedRecipe || ({} as Recipe));
-  }, [recipes, selectedRecipeId]);
+    shareRecipeMutation.isSuccess &&
+      setShareLinkExpiry(
+        Math.ceil((`${shareRecipeMutation.data?.ttl}000` - Date.now()) / 1000 / 60 / 60 / 24),
+      );
+  }, [shareRecipeMutation.isSuccess]);
 
   return (
     <Paper radius={0} sx={{ height: "100vh", flexGrow: 1 }}>
       <Paper radius={0} p="sm" sx={{ position: "relative", height: "100%", paddingRight: 0 }}>
-        {recipe.recipeId && (
+        {recipe?.name && (
           <>
-            <Group spacing="sm" sx={{ position: "absolute", right: 10 }}>
-              <Popover
-                opened={shareRecipeMutation.isSuccess}
-                onClose={shareRecipeMutation.reset}
-                position="bottom"
-                placement="end"
-                transition="scale-y"
-                target={
-                  <FlipButton
-                    onClick={() =>
-                      !shareRecipeMutation.isSuccess && shareRecipeMutation.mutate(selectedRecipeId)
-                    }
-                    sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
-                    length={theme.other.buttonLength}
-                    disabled={shareRecipeMutation.isLoading}
-                    border
-                    square
-                  >
-                    {shareRecipeMutation.isLoading ? (
-                      <Loader size="sm" />
-                    ) : (
-                      <Share1Icon width={30} height={30} />
-                    )}
-                  </FlipButton>
-                }
-              >
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <Text mr="xs">Share URL: </Text>
-                  <TextInput
-                    value={`${window.origin}/share/${shareRecipeMutation.data?.shareId}`}
-                    readOnly
-                  />
-                </div>
-                <Text size="sm" mt="xs" color={theme.primaryColor}>
-                  Note: This link expires in{" "}
-                  {Math.ceil(
-                    (`${shareRecipeMutation.data?.ttl}000` - Date.now()) / 1000 / 60 / 60 / 24,
-                  )}{" "}
-                  day(s).
-                </Text>
-              </Popover>
+            {!shareId ? (
+              <Group spacing="sm" sx={{ position: "absolute", right: 10 }}>
+                <Popover
+                  opened={shareRecipeMutation.isSuccess}
+                  onClose={shareRecipeMutation.reset}
+                  position="bottom"
+                  placement="end"
+                  transition="scale-y"
+                  target={
+                    <FlipButton
+                      onClick={() =>
+                        !shareRecipeMutation.isSuccess &&
+                        shareRecipeMutation.mutate(selectedRecipeId)
+                      }
+                      sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
+                      length={theme.other.buttonLength}
+                      disabled={shareRecipeMutation.isLoading}
+                      border
+                      square
+                    >
+                      {shareRecipeMutation.isLoading ? (
+                        <Loader size="sm" />
+                      ) : (
+                        <Share1Icon width={30} height={30} />
+                      )}
+                    </FlipButton>
+                  }
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <Text mr="xs">Share URL: </Text>
+                    <TextInput
+                      value={`${window.origin}/share/${shareRecipeMutation.data?.shareId}`}
+                      readOnly
+                    />
+                  </div>
+                  <Text size="sm" mt="xs" color={theme.primaryColor}>
+                    Note: This link expires in {shareLinkExpiry} day(s).
+                  </Text>
+                </Popover>
+                <FlipButton
+                  component={Link}
+                  to={`edit?${searchParams}`}
+                  onClick={() => setSidebarOpened(false)}
+                  sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
+                  length={theme.other.buttonLength}
+                  border
+                  square
+                >
+                  <Pencil1Icon width={30} height={30} />
+                </FlipButton>
+                <DeleteConfirmation
+                  active={!deleteRecipeMutation.isSuccess}
+                  title="Permanently delete recipe?"
+                  message="This cannot be undone."
+                  triggerButton={
+                    <FlipButton
+                      color="red"
+                      sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
+                      length={theme.other.buttonLength}
+                      border
+                      square
+                    >
+                      <TrashIcon width={30} height={30} />
+                    </FlipButton>
+                  }
+                  confirmButton={
+                    <FlipButton
+                      color="red"
+                      onClick={() => {
+                        if (selectedRecipeId !== UNSET) {
+                          deleteRecipeMutation.mutate(selectedRecipeId, {
+                            onSuccess: () => {
+                              showNotification({ message: "Recipe deleted!" });
+                            },
+                          });
+                          navigate(`/?${searchParams}`);
+                        }
+                      }}
+                      sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
+                      border
+                    >
+                      Delete
+                    </FlipButton>
+                  }
+                />
+              </Group>
+            ) : (
               <FlipButton
                 component={Link}
-                to={`edit?${searchParams}`}
-                onClick={() => setSidebarOpened(false)}
-                sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
+                to={`/create?shareId=${shareId}`}
+                size="md"
+                sx={{
+                  position: "absolute",
+                  right: 10,
+                  transitionDuration: `${theme.other.transitionDuration}ms`,
+                }}
                 length={theme.other.buttonLength}
                 border
                 square
               >
-                <Pencil1Icon width={30} height={30} />
+                <PlusCircledIcon width={30} height={30} />
               </FlipButton>
-              <DeleteConfirmation
-                active={!deleteRecipeMutation.isSuccess}
-                title="Permanently delete recipe?"
-                message="This cannot be undone."
-                triggerButton={
-                  <FlipButton
-                    color="red"
-                    sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
-                    length={theme.other.buttonLength}
-                    border
-                    square
-                  >
-                    <TrashIcon width={30} height={30} />
-                  </FlipButton>
-                }
-                confirmButton={
-                  <FlipButton
-                    color="red"
-                    onClick={() => {
-                      if (selectedRecipeId !== UNSET) {
-                        deleteRecipeMutation.mutate(selectedRecipeId, {
-                          onSuccess: () => {
-                            showNotification({ message: "Recipe deleted!" });
-                          },
-                        });
-                        navigate(`/?${searchParams}`);
-                      }
-                    }}
-                    sx={{ transitionDuration: `${theme.other.transitionDuration}ms` }}
-                    border
-                  >
-                    Delete
-                  </FlipButton>
-                }
-              />
-            </Group>
+            )}
             <Box
               sx={{
                 display: "grid",

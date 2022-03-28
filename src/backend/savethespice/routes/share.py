@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Request, Response, status
 
-from savethespice.crud import categories_table, recipes_table, share_table
+from savethespice.crud import recipes_table, share_table
 from savethespice.lib.common import root_logger
 from savethespice.models import (
     CreateShareLinkRequest,
@@ -47,8 +47,9 @@ async def create_share_link(
         return {"message": f"User {user_id} does not have a recipe with ID {recipe_id}."}
     logging.info(f"Successfully got recipe with ID {recipe_id}")
 
-    if recipe.categories:
-        recipe.categories = categories_table.get_category_names_by_id(user_id, recipe.categories)
+    # Shouldn't copy over categories for sharing after all, probably
+    # if recipe.categories:
+    #     recipe.categories = categories_table.get_category_names_by_id(user_id, recipe.categories)
 
     share_id = str(uuid4())
     ttl = int((datetime.now(tz=timezone.utc) + timedelta(days=1)).timestamp())
