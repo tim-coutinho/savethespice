@@ -12,7 +12,7 @@ const manualRoutes = ["create", "import"];
 export const AppRoutes: FC = () =>
   useRoutes([
     {
-      path: "/",
+      path: "/app",
       element: <App />,
       children: [
         { path: "recipes/:recipeId/*", element: <RecipeDetails /> },

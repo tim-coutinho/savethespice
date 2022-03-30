@@ -1,4 +1,4 @@
-import { Autocomplete, Group, Modal, PasswordInput, Tab, Tabs } from "@mantine/core";
+import { Autocomplete, Group, Modal, PasswordInput, Stack, Tab, Tabs } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNotifications } from "@mantine/notifications";
 import {
@@ -100,7 +100,7 @@ export const AuthForm: FC = () => {
           grow
         >
           <Tab label="Sign In">
-            <Group direction="column" grow>
+            <Stack>
               <Autocomplete
                 label="Email"
                 placeholder="example@gmail.com"
@@ -121,10 +121,10 @@ export const AuthForm: FC = () => {
                 icon={<LockClosedIcon />}
                 {...form.getInputProps("password")}
               />
-            </Group>
+            </Stack>
           </Tab>
           <Tab label="Sign Up">
-            <Group direction="column" grow>
+            <Stack>
               <Autocomplete
                 label="Email"
                 placeholder="example@gmail.com"
@@ -152,7 +152,7 @@ export const AuthForm: FC = () => {
                 disabled={form.values.password.length === 0}
                 {...form.getInputProps("confirmPassword")}
               />
-            </Group>
+            </Stack>
           </Tab>
           <Tab label="Forgot Password?">
             <Autocomplete

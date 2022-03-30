@@ -1,9 +1,9 @@
 import {
   ActionIcon,
   Burger,
-  Group,
   Paper,
   Popover,
+  Stack,
   Switch,
   Text,
   TextInput,
@@ -158,7 +158,7 @@ export const Header: FC = () => {
                 >
                   <form>
                     <Text size="sm">Search across:</Text>
-                    <Group direction="column" mt="sm">
+                    <Stack mt="sm">
                       <Switch
                         label="All"
                         {...switchProps("name")}
@@ -177,7 +177,7 @@ export const Header: FC = () => {
                       <Switch label="Description" {...switchProps("desc")} />
                       <Switch label="Ingredients" {...switchProps("ingredients")} />
                       <Switch label="Instructions" {...switchProps("instructions")} />
-                    </Group>
+                    </Stack>
                   </form>
                 </Popover>
               }

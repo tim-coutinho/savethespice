@@ -5,6 +5,7 @@ import {
   LoadingOverlay,
   Modal,
   MultiSelect,
+  Stack,
   TextInput,
   Title,
 } from "@mantine/core";
@@ -162,7 +163,7 @@ export const CreateRecipeForm: FC = () => {
         onSubmit={form.onSubmit(handleSubmit)}
         sx={theme => ({ marginRight: theme.spacing.lg })}
       >
-        <Group direction="column" sx={{ position: "relative" }} grow>
+        <Stack sx={{ position: "relative" }}>
           <TextInput
             label="Recipe Name"
             placeholder="Saag Feta"
@@ -242,7 +243,7 @@ export const CreateRecipeForm: FC = () => {
             {...form.getInputProps("urlToScrape")}
           />
           <LoadingOverlay visible={scrapeQuery.isLoading} sx={({ fn }) => fn.cover(-10)} />
-        </Group>
+        </Stack>
         <Group position="right" mt="md">
           <Button
             variant="outline"

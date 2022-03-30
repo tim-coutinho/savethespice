@@ -1,4 +1,4 @@
-import { Box, Group, Image, Skeleton, Text } from "@mantine/core";
+import { Box, Image, Skeleton, Stack, Text } from "@mantine/core";
 import { FC, useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
@@ -74,8 +74,7 @@ export const RecipeList: FC = () => {
   }, [filteredRecipes]);
 
   return (
-    <Group
-      direction="column"
+    <Stack
       spacing={0}
       sx={theme => ({
         overflowX: "hidden",
@@ -85,8 +84,6 @@ export const RecipeList: FC = () => {
           color: theme.colorScheme === "light" ? theme.black : theme.colors.dark[0],
         },
       })}
-      grow
-      noWrap
     >
       {filteredRecipes.map(([recipeId, recipe]) => (
         <Box
@@ -147,6 +144,6 @@ export const RecipeList: FC = () => {
           </Box>
         </Box>
       ))}
-    </Group>
+    </Stack>
   );
 };

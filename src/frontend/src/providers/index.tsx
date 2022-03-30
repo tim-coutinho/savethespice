@@ -1,5 +1,5 @@
 import { ColorSchemeProvider, MantineProvider, TextStylesParams } from "@mantine/core";
-import { useColorScheme, useLocalStorageValue } from "@mantine/hooks";
+import { useColorScheme, useLocalStorage } from "@mantine/hooks";
 import { NotificationsProvider } from "@mantine/notifications";
 import { FC } from "react";
 import { QueryClientProvider } from "react-query";
@@ -11,7 +11,7 @@ import { queryClient } from "@/lib/react-query";
 import { prefix } from "@/utils/common";
 
 export const AppProvider: FC = ({ children }) => {
-  const [colorScheme, setColorScheme] = useLocalStorageValue({
+  const [colorScheme, setColorScheme] = useLocalStorage({
     key: `${prefix}theme`,
     defaultValue: useColorScheme(),
   });
@@ -40,11 +40,12 @@ export const AppProvider: FC = ({ children }) => {
               }),
               Text: (theme, params: TextStylesParams) => ({
                 root: {
-                  color: params.color
-                    ? theme.colors[params.color][6]
-                    : theme.colorScheme === "light"
-                    ? theme.black
-                    : theme.colors.dark[0],
+                  color:
+                    params.color in theme.colors
+                      ? theme.colors[params.color][6]
+                      : theme.colorScheme === "light"
+                      ? theme.black
+                      : theme.colors.dark[0],
                 },
               }),
             }}

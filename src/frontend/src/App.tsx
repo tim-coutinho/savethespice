@@ -64,9 +64,6 @@ export default function App(): ReactElement {
           radius={0}
           sx={theme => ({
             borderRight: `1px solid ${theme.colors.gray[7]}`,
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
             // [theme.fn.smallerThan("md")]: { width: "100vw" },
             width: 420,
           })}
